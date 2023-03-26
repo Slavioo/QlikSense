@@ -197,8 +197,8 @@ $toJSON = import-csv $inputCSVFile -Delimiter ";" | Group-Object -Property cId,q
     qSortBy = [pscustomobject]@{
       qSortByState = 0
       qSortByFrequency = 0
-      qSortByNumeric = 1
-      qSortByAscii = 1
+      qSortByNumeric = -1
+      qSortByAscii = 0
       qSortByLoadOrder = 1
       qSortByExpression = 0
       qExpression = [pscustomobject]@{
@@ -270,7 +270,7 @@ $toJSON = import-csv $inputCSVFile -Delimiter ";" | Group-Object -Property cId,q
       qNullSuppression = $true
     }
   }
-} | ConvertTo-Json -Depth 5 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) } | Out-File $outputJSONFile -Force
+} | ConvertTo-Json -Depth 6 | % { [System.Text.RegularExpressions.Regex]::Unescape($_) } | Out-File $outputJSONFile -Force
 #End
 Write-Host "You will find the Dimensions & Measures Metadata for '$App' - '$Sheet' in C:\Projects\QSTableMetadata\Output\$App\$Sheet"
 Start-Sleep -Seconds 5
