@@ -1,6 +1,6 @@
-cId;qDef;qLabelExpression;qCond
-cId1;qDef1;qLabelExpression1;qCond1
-cId2;qDef2;qLabelExpression2;qCond2
-cId3;qDef3;qLabelExpression3;qCond3
-cId4;qDef4;qLabelExpression4;qCond4
-cId5;qDef5;qLabelExpression5;qCond5
+cId;qDef;qLabelExpression;qCond;cellBackgroundColor
+cId1;qDef1;qLabelExpression1;qCond1;lightgray()
+cId2;qDef2;qLabelExpression2;qCond2;
+cId3;qDef3;qLabelExpression3;qCond3;lightgray()
+cId4;qDef4;qLabelExpression4;qCond4;
+cId5;qDef5;qLabelExpression5;qCond5;lightgray()

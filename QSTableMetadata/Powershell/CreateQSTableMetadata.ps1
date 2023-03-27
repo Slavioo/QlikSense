@@ -100,7 +100,7 @@ $toJSON = import-csv $inputCSVFile -Delimiter ";" | Group-Object -Property cId,q
 #Create Measures Metadata
 $inputCSVFile = "C:\Projects\QSTableMetadata\Input\$App\$Sheet\qMeasures.csv"
 $outputJSONFile = "C:\Projects\QSTableMetadata\Output\$App\$Sheet\qMeasures.json"
-$toJSON = import-csv $inputCSVFile -Delimiter ";" | Group-Object -Property cId,qDef,qLabelExpression,qCond | ForEach-Object { 
+$toJSON = import-csv $inputCSVFile -Delimiter ";" | Group-Object -Property cId,qDef,qLabelExpression,qCond,cellBackgroundColor | ForEach-Object { 
   [pscustomobject]@{
     qLibraryId = ""
     qDef = [pscustomobject]@{
@@ -204,11 +204,11 @@ $toJSON = import-csv $inputCSVFile -Delimiter ";" | Group-Object -Property cId,q
       qExpression = [pscustomobject]@{
         qv = ""
       }
-        qSortByGreyness = 0
+      qSortByGreyness = 0
     }
     qAttributeExpressions = @(
       [pscustomobject]@{
-        qExpression = "v_CurrentCobColor"
+        qExpression = $_.Values[4]
         qLibraryId = ""
         qAttribute = $true
         qNumFormat = $null
