@@ -1,0 +1,15 @@
+# Define the initial JSON object
+$jsonObject = @{
+    "Values" = @()
+}
+
+# Add values to the "Values" property
+for ($i = 1; $i -le 10; $i++) {
+    $jsonObject.Values += $i
+}
+
+# Convert the JSON object to a JSON string
+$jsonString = ConvertTo-Json -InputObject $jsonObject -Depth 100
+
+# Write the JSON string to a file
+Set-Content -Path ".\example.json" -Value $jsonString
