@@ -1,0 +1,14 @@
+# Load the contents of the first JSON file
+$first_json = Get-Content -Path 'first.json' -Raw | ConvertFrom-Json
+
+# Create a new PowerShell object with the properties from the first JSON file
+$second_json = [PSCustomObject]@{
+    property1 = $first_json.property1
+    property2 = $first_json.property2
+}
+
+# Convert the PowerShell object to a JSON string
+$second_json_string = $second_json | ConvertTo-Json -Depth 10
+
+# Write the JSON string to a file
+Set-Content -Path 'second.json' -Value $second_json_string
