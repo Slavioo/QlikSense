@@ -1,0 +1,17 @@
+# Set the path to the directory containing the QVD files
+$path = "C:\path\to\directory"
+
+# Get all of the QVD files in the directory
+$qvds = Get-ChildItem $path -Filter *.qvd
+
+# Loop through each QVD file
+foreach ($qvd in $qvds) {
+    # Get the contents of the QVD file
+    $contents = Get-Content $qvd.FullName
+
+    # Check if the file only contains a header row
+    if ($contents.Count -eq 1) {
+        # Delete the file
+        Remove-Item $qvd.FullName
+    }
+}
