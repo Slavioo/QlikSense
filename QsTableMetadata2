@@ -1,0 +1,41 @@
+# Get the path to the CSV file relative to the current script location
+$csvPath = Join-Path $PSScriptRoot "dimensions.csv"
+
+# Read the CSV file and select the relevant columns
+$dimensions = Import-Csv $csvPath | Select-Object -Property DimensionName, FieldName
+
+# Define the Qlik Sense table properties
+$tableProperties = @{
+    qInfo = @{
+        qType = "my-table-type"
+    }
+    qHyperCubeDef = @{
+        qDimensions = @()
+        qMeasures = @()
+        qInitialDataFetch = @(
+            @{
+                qHeight = 1000
+                qWidth = 10
+            }
+        )
+    }
+}
+
+# Add the dimensions to the Qlik Sense table properties
+foreach ($dimension in $dimensions) {
+    $qDimension = @{
+        qDef = @{
+            qFieldDefs = @($dimension.FieldName)
+        }
+        qNullSuppression = $false
+    }
+
+    $tableProperties.qHyperCubeDef.qDimensions += $qDimension
+}
+
+# Convert the table properties to Json format
+$json = ConvertTo-Json $tableProperties -Depth 4
+
+# Output the Json to a file
+$outputPath = Join-Path $PSScriptRoot "my-table.json"
+$json | Out-File $outputPath
