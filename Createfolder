@@ -1,0 +1,8 @@
+$folderPath = "C:\MyFolder" # Replace this with the path to the folder you want to create
+
+if (!(Test-Path $folderPath)) {
+  New-Item -ItemType Directory -Path $folderPath
+  Write-Host "Folder created successfully."
+} else {
+  Write-Host "Folder already exists."
+}
