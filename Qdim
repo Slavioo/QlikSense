@@ -1,0 +1,95 @@
+$Json = @{
+    qDimensions = @(
+        @{
+            qLibraryId = ""
+            qDef = @{
+                qGrouping = "N"
+                qFieldDefs = @(
+                    "=$(='['&only({<ID_DimensionsCSAAssets={101}>}DimensionsCSAAssets)&']')"
+                )
+                qFieldLabels = @("")
+                qSortCriterias = @(
+                    @{
+                        qSortByState = 0
+                        qSortByFrequency = 0
+                        qSortByNumeric = 1
+                        qSortByAscii = 1
+                        qSortByLoadOrder = 1
+                        qSortByExpression = 0
+                        qExpression = @{
+                            qv = ""
+                        }
+                        qSortByGreyness = 0
+                    }
+                )
+                qNumberPresentations = @()
+                qReverseSort = $false
+                qActiveField = 0
+                qLabelExpression = "=only({<ID_DimensionsCSAAssets={101}>}DimensionsCSAAssets)"
+                autoSort = $true
+                cId = "RBmjA"
+                othersLabel = "Others"
+                textAlign = @{
+                    auto = $true
+                    align = "left"
+                }
+                representation = @{
+                    type = "text"
+                    urlPosition = "dimension"
+                    urlLabel = ""
+                    linkUrl = ""
+                    imageSetting = "label"
+                    imageLabel = ""
+                    imageUrl = ""
+                    imageSize = "fitHeight"
+                    imagePosition = "topCenter"
+                }
+            }
+            qNullSuppression = $false
+            qIncludeElemValue = $false
+            qOtherTotalSpec = @{
+                qOtherMode = "OTHER_OFF"
+                qOtherCounted = @{
+                    qv = "10"
+                }
+                qOtherLimit = @{
+                    qv = "0"
+                }
+                qOtherLimitMode = "OTHER_GE_LIMIT"
+                qSuppressOther = $false
+                qForceBadValueKeeping = $true
+                qApplyEvenWhenPossiblyWrongResult = $true
+                qGlobalOtherGrouping = $false
+                qOtherCollapseInnerDimensions = $false
+                qOtherSortMode = "OTHER_SORT_DESCENDING"
+                qTotalMode = "TOTAL_OFF"
+                qReferencedExpression = @{
+                    qv = ""
+                }
+            }
+            qShowTotal = $false
+            qShowAll = $false
+            qOtherLabel = @{
+                qv = "Others"
+            }
+            qTotalLabel = @{
+                qv = ""
+            }
+            qCalcCond = @{
+                qv = ""
+            }
+            qAttributeExpressions = @()
+            qAttributeDimensions = @()
+            qCalcCondition = @{
+                qCond = @{
+                    qv = "SubStringCount(Concat(ID_DimensionsCSAAssets, '|'), 101)>0 and GetSelectedCount(DimensionsCSAAssets)>0"
+                }
+                qMsg = @{
+                    qv = ""
+                }
+            }
+        }
+    )
+}
+
+$Json | ConvertTo-Json -Depth 10
