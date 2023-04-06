@@ -1,0 +1,12 @@
+$csvFile = Import-Csv -Path "C:\Path\To\Your\File.csv"
+
+foreach ($record in $csvFile) {
+  $propertyName = $record.ColumnName1
+  $propertyValue = $record.ColumnName2
+
+  $object = New-Object -TypeName PSObject -Property @{
+    $propertyName = $propertyValue
+  }
+
+  $object # Output the object with the new property
+}
