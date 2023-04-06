@@ -1,0 +1,47 @@
+# Define variables
+$serverurl = "https://myserver.com"
+$username = "myusername"
+$password = "mypassword"
+$appname = "MyQlikSenseApp"
+
+# Load the Qlik Sense PowerShell module and connect to the server
+Import-Module QlikSenseConnector
+Connect-Qlik -ServerUrl $serverurl -Username $username -Password $password
+
+# Create a new app and set the script
+$app = New-QlikApp -Name $appname
+$script = @"
+Sales:
+LOAD * INLINE [
+    Region, Product, Sales
+    North, Apples, 100
+    North, Bananas, 50
+    South, Apples, 75
+    South, Bananas, 125
+];
+
+SalesFiltered:
+LOAD *
+RESIDENT Sales
+WHERE Region = 'North';
+"@
+Set-QlikScript -App $app -Script $script
+
+# Create a bar chart and a pie chart
+$chart1 = New-QlikChart -App $app -Type Bar -Dimensions "Product" -Measures "Sales"
+$chart2 = New-QlikChart -App $app -Type Pie -Dimensions "Region" -Measures "Sales"
+
+# Create a filter
+$filter = New-QlikFilter -App $app -Field "Region"
+
+# Arrange the objects on the sheet
+$sheet = Get-QlikSheet -App $app
+$chart1.SetPosition(0, 0, 6, 5)
+$chart2.SetPosition(0, 6, 6, 5)
+$filter.SetPosition(6, 0, 2, 2)
+
+# Publish the app
+Publish-QlikApp -App $app
+
+# Disconnect from the server
+Disconnect-Qlik
