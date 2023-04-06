@@ -1,0 +1,29 @@
+# Set up connection to Qlik Sense server
+Connect-Qlik -Uri "https://your-qlik-server.com" -Credential (Get-Credential)
+
+# Set the path to the Qlik Sense app and version files
+$appName = "MyQlikApp"
+$versionFile1Path = "C:\MyQlikAppVersion1.txt"
+$versionFile2Path = "C:\MyQlikAppVersion2.txt"
+
+# Get the current app info
+$currentAppInfo = Get-QlikApp -Name $appName
+
+# Get the contents of the version files
+$versionFile1 = Get-Content $versionFile1Path
+$versionFile2 = Get-Content $versionFile2Path
+
+# Compare the contents of the version files
+if ($versionFile1 -ne $versionFile2) {
+    Write-Host "New version of app $appName found. Deploying..."
+    Publish-App -FilePath "C:\MyQlikApp.qvf" -Name $appName -OverwriteExisting
+    
+    # Write the new version to the version file
+    $versionFile2 | Set-Content -Path $versionFile1Path
+    $versionFile2 | Set-Content -Path $versionFile2Path
+} else {
+    Write-Host "No new version of app $appName found. Skipping deployment."
+}
+
+# Disconnect from Qlik Sense server
+Disconnect-Qlik
