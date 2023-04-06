@@ -1,0 +1,37 @@
+# Define variables
+$appname = "MyQlikSenseApp"
+$sheetnames = @("Summary", "Ad Hoc Table 1", "Ad Hoc Table 2", "Ad Hoc Table 3", "Ad Hoc Table 4")
+
+# Start Qlik Sense Desktop
+Start-Process "C:\Program Files\Qlik\Sense\QlikSense.exe"
+
+# Wait for Qlik Sense Desktop to start
+Start-Sleep -Seconds 10
+
+# Connect to Qlik Sense Desktop
+Connect-Qlik -Server "localhost:4848"
+
+# Create app
+$app = New-QlikApp -Name $appname
+
+# Create summary sheet
+$summarySheet = New-QlikSheet -Name $sheetnames[0] -App $app
+$chart1 = New-QlikObject -Type "barchart" -Title "Sales by Region" -App $app -Sheet $summarySheet
+$chart2 = New-QlikObject -Type "linechart" -Title "Sales Trend" -App $app -Sheet $summarySheet
+$table1 = New-QlikObject -Type "table" -Title "Top Selling Products" -App $app -Sheet $summarySheet
+
+# Create ad hoc tables sheets
+for ($i = 1; $i -lt $sheetnames.Count; $i++) {
+    $adhocSheet = New-QlikSheet -Name $sheetnames[$i] -App $app
+    $adhocTable = New-QlikObject -Type "table" -Title "Ad Hoc Table $i" -App $app -Sheet $adhocSheet
+}
+
+# Save and close app
+Save-QlikApp -App $app
+Close-QlikApp -App $app
+
+# Disconnect from Qlik Sense Desktop
+Disconnect-Qlik
+
+# Close Qlik Sense Desktop
+Stop-Process -Name "QlikSense"
