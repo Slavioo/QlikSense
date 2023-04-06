@@ -1,0 +1,28 @@
+# Define variables
+$appname = "MyQlikSenseApp"
+$sheetname = "Ad Hoc Table 1"
+$tablename = "Ad Hoc Table 1"
+
+# Connect to Qlik Sense Desktop
+Connect-Qlik -Server "localhost:4848"
+
+# Get app
+$app = Get-QlikApp -Name $appname
+
+# Get sheet
+$sheet = Get-QlikSheet -Name $sheetname -App $app
+
+# Get table
+$table = Get-QlikObject -Name $tablename -App $app -Sheet $sheet
+
+# Modify table
+$table.Properties.TableProperties.Columns[1].Label = "New Column Label"
+
+# Save changes
+Set-QlikObject -Object $table
+
+# Close app
+Close-QlikApp -App $app
+
+# Disconnect from Qlik Sense Desktop
+Disconnect-Qlik
