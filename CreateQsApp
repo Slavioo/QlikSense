@@ -1,0 +1,14 @@
+# Define variables
+$serverurl = "https://myserver.com"
+$appname = "MyQlikSenseApp"
+$streamname = "MyStream"
+
+# Load the Qlik Sense PowerShell module and connect to the server
+Import-Module QlikSenseConnector
+Connect-Qlik -ServerUrl $serverurl
+
+# Create the app and publish it to the specified stream
+New-QlikApp -Name $appname | Publish-QlikApp -StreamName $streamname
+
+# Disconnect from the server
+Disconnect-Qlik
