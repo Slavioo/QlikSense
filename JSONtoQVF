@@ -1,0 +1,33 @@
+$DesktopPath = "C:\Program Files\Qlik\Sense\Desktop\QlikSense.exe"
+$AppId = "MyNewApp"
+$JsonPath = "C:\QlikViewExports\MyApp.json"
+
+# Read the JSON file into a variable
+$json = Get-Content $JsonPath | ConvertFrom-Json
+
+# Set the location of the Qlik Sense Desktop app folder
+$DesktopAppsFolder = "$env:LOCALAPPDATA\Programs\Qlik\Sense\Apps"
+
+# Copy the Qlik Sense Desktop app template to a new folder
+$AppFolder = New-Item -ItemType Directory -Path "$DesktopAppsFolder\$($AppId)"
+Copy-Item "$DesktopAppsFolder\template" -Destination $AppFolder -Recurse
+
+# Replace the template's properties with the JSON file's properties
+$templatePath = "$AppFolder\app.qvf"
+$templateJson = Get-Content $templatePath | ConvertFrom-Json
+$templateJson.data.connections[0].name = $json.data.connections[0].name
+$templateJson.data.connections[0].description = $json.data.connections[0].description
+$templateJson.data.connections[0].type = $json.data.connections[0].type
+$templateJson.modifiedDate = $json.modifiedDate
+$templateJson.publishTime = $json.publishTime
+$templateJson.stream = $json.stream
+$templateJson.thumbnail = $json.thumbnail
+$templateJson.title = $json.title
+$templateJson.description = $json.description
+$templateJson.published = $json.published
+
+# Save the updated app template to a new QVF file
+$templateJson | ConvertTo-Json | Set-Content $templatePath
+
+# Launch the new app in Qlik Sense Desktop
+& $DesktopPath "$AppFolder\app.qvf"
