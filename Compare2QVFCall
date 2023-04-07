@@ -1,0 +1,1 @@
+.\Compare-Qvf.ps1 -qvf1 "C:\Path\To\First\QVF.qvf" -qvf2 "C:\Path\To\Second\QVF.qvf" -outputFolder "C:\Path\To\Output\Folder"
