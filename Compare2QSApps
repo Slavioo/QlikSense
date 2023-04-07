@@ -1,0 +1,43 @@
+# Get the current directory where the script is running from
+$scriptDir = Split-Path $MyInvocation.MyCommand.Path
+
+# Set up variables for the file paths of the two QVF files to compare
+$qvf1 = Join-Path $scriptDir "app1.qvf"
+$qvf2 = Join-Path $scriptDir "app2.qvf"
+
+# Get the contents of the load scripts from the two QVF files
+$qvf1LoadScript = Get-Content $qvf1 -Raw | Select-String -Pattern "(?<=<loadScript>).*(?=<\/loadScript>)" -AllMatches | ForEach-Object { $_.Matches.Value }
+$qvf2LoadScript = Get-Content $qvf2 -Raw | Select-String -Pattern "(?<=<loadScript>).*(?=<\/loadScript>)" -AllMatches | ForEach-Object { $_.Matches.Value }
+
+# Get the contents of the data connections from the two QVF files
+$qvf1DataConnections = Get-Content $qvf1 -Raw | Select-String -Pattern "(?<=<connections>).*(?=<\/connections>)" -AllMatches | ForEach-Object { $_.Matches.Value }
+$qvf2DataConnections = Get-Content $qvf2 -Raw | Select-String -Pattern "(?<=<connections>).*(?=<\/connections>)" -AllMatches | ForEach-Object { $_.Matches.Value }
+
+# Get the sheet objects from the two QVF files
+$qvf1SheetObjects = (Get-Content $qvf1 -Raw) -split '<sheetObjects>' | Select-Object -Skip 1
+$qvf2SheetObjects = (Get-Content $qvf2 -Raw) -split '<sheetObjects>' | Select-Object -Skip 1
+
+# Compare the load scripts, data connections, and sheet objects from the two QVF files
+$loadScriptChanges = Compare-Object $qvf1LoadScript $qvf2LoadScript
+$dataConnectionChanges = Compare-Object $qvf1DataConnections $qvf2DataConnections
+$sheetObjectChanges = Compare-Object $qvf1SheetObjects $qvf2SheetObjects
+
+# Display any changes in the load script, data connections, or sheet objects
+if ($loadScriptChanges) {
+    Write-Host "Changes to load script:"
+    $loadScriptChanges | Format-Table
+}
+
+if ($dataConnectionChanges) {
+    Write-Host "Changes to data connections:"
+    $dataConnectionChanges | Format-Table
+}
+
+if ($sheetObjectChanges) {
+    Write-Host "Changes to sheet objects:"
+    $sheetObjectChanges | Format-Table
+}
+
+if (-not $loadScriptChanges -and -not $dataConnectionChanges -and -not $sheetObjectChanges) {
+    Write-Host "No changes found."
+}
