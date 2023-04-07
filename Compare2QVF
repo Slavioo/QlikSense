@@ -1,0 +1,67 @@
+param (
+    [Parameter(Mandatory = $true, HelpMessage = "Path to the first QVF file.")]
+    [ValidateNotNullOrEmpty()]
+    [string] $qvf1,
+
+    [Parameter(Mandatory = $true, HelpMessage = "Path to the second QVF file.")]
+    [ValidateNotNullOrEmpty()]
+    [string] $qvf2,
+
+    [Parameter(Mandatory = $true, HelpMessage = "Path to the output folder.")]
+    [ValidateNotNullOrEmpty()]
+    [string] $outputFolder
+)
+
+# Load the QVF files
+$qvf1Elements = Get-QvfElements -QvfPath $qvf1
+$qvf2Elements = Get-QvfElements -QvfPath $qvf2
+
+# Compare the QVF files
+$results = @()
+
+# Compare the load script
+if ($qvf1Elements.LoadScript -ne $qvf2Elements.LoadScript) {
+    $result = @{
+        Type = "LoadScript"
+        QVF1 = $qvf1Elements.LoadScript
+        QVF2 = $qvf2Elements.LoadScript
+    }
+    $results += $result
+}
+
+# Compare the data connections
+if ($qvf1Elements.DataConnections -ne $qvf2Elements.DataConnections) {
+    $result = @{
+        Type = "DataConnections"
+        QVF1 = $qvf1Elements.DataConnections
+        QVF2 = $qvf2Elements.DataConnections
+    }
+    $results += $result
+}
+
+# Compare the variables
+if ($qvf1Elements.Variables -ne $qvf2Elements.Variables) {
+    $result = @{
+        Type = "Variables"
+        QVF1 = $qvf1Elements.Variables
+        QVF2 = $qvf2Elements.Variables
+    }
+    $results += $result
+}
+
+# Compare the sheets
+if ($qvf1Elements.Sheets -ne $qvf2Elements.Sheets) {
+    $result = @{
+        Type = "Sheets"
+        QVF1 = $qvf1Elements.Sheets
+        QVF2 = $qvf2Elements.Sheets
+    }
+    $results += $result
+}
+
+# Write the results to JSON files
+foreach ($result in $results) {
+    $json = ConvertTo-Json $result -Depth 10
+    $filename = "{0}\{1}.json" -f $outputFolder, $result.Type
+    Set-Content -Path $filename -Value $json
+}
