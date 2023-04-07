@@ -1,0 +1,12 @@
+$QvBatchPath = "C:\Program Files\QlikView\qvbatch.exe"
+$QvfPath = "C:\QlikViewApps\MyApp.qvf"
+$ExportPath = "C:\QlikViewExports\MyApp.xml"
+$JsonPath = "C:\QlikViewExports\MyApp.json"
+
+& $QvBatchPath /r $QvfPath /v EXPORT_PATH="$ExportPath" /batch="C:\QlikViewBatchFiles\ExportToXML.qvb"
+
+$xml = New-Object XML
+$xml.Load($ExportPath)
+$json = ConvertTo-Json -InputObject $xml -Depth 4
+
+Set-Content -Path $JsonPath -Value $json
