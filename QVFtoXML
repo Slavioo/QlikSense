@@ -1,0 +1,20 @@
+# Define the path to the Qlik Sense Desktop executable
+$qsPath = "C:\Program Files\Qlik\Sense\Desktop\QlikSense.exe"
+
+# Define the path to the app to export
+$appPath = "C:\Users\USERNAME\Documents\Qlik\Sense\Apps\MyApp.qvf"
+
+# Define the output directory for the exported XML files
+$outputPath = "C:\Users\USERNAME\Documents\Qlik\Sense\ExportedApps\MyApp\Sheets"
+
+# Start Qlik Sense Desktop with the specified app
+$process = Start-Process -FilePath $qsPath -ArgumentList "-OpenApp", "`"$appPath`"" -PassThru
+
+# Wait for the app to open
+Start-Sleep -Seconds 10
+
+# Export the sheets to XML files
+$processId = $process.Id
+$command = "qlik://sheet/exportxml?outpath=`"$outputPath`""
+Invoke-Expression "taskkill /F /PID $processId"
+& "C:\Program Files\Qlik\Sense\Engine\Qlik.Sense.Engine.exe" -run -SingleUserMode -ReloadAppAtStartup -Export $command
