@@ -1,18 +1,15 @@
 $folderPath = "C:\QVDs" # Replace with your folder path
 $filePattern = "*.qvd" # Replace with your file extension
 
-# Define a regular expression pattern to extract the JSON portion of the QVD header
-$regexPattern = '\{.*\}'
-
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Read the first two lines of the file's contents to get the QvdTableHeader
-    $headerContent = Get-Content $_.FullName -TotalCount 2
-    
-    # Extract the JSON portion of the QvdTableHeader using the regular expression pattern
-    $headerJson = $headerContent[1] | Select-String -Pattern $regexPattern | ForEach-Object { $_.Matches.Value }
-    
-    # Convert the JSON string to an object and output the file name and NoOfRecords property
-    $headerObject = ConvertFrom-Json $headerJson
-    Write-Host "$($_.Name) - NoOfRecords: $($headerObject.QvdTableHeader.NoOfRecords)"
+    # Load the QVD file as an XML document
+    $xml = New-Object -TypeName System.Xml.XmlDocument
+    $xml.Load($_.FullName)
+
+    # Get the NoOfRecords value from the QvdTableHeader element
+    $noOfRecords = $xml.SelectSingleNode("//QvdTableHeader/NoOfRecords").InnerText
+
+    # Output the file name and NoOfRecords value
+    Write-Host "$($_.Name) - NoOfRecords: $noOfRecords"
 }
