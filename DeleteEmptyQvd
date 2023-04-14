@@ -4,9 +4,15 @@ $filePattern = "*.qvd" # Replace with your file extension
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
     try {
-        # Load only the QvdTableHeader element into memory
+        # Open the file and read the first few bytes to determine the offset of the QvdTableHeader element
+        $fileStream = New-Object System.IO.FileStream($_.FullName, [System.IO.FileMode]::Open)
+        $binaryReader = New-Object System.IO.BinaryReader($fileStream)
+        $qvdTableHeaderOffset = $binaryReader.ReadInt32()
+
+        # Load only the QvdTableHeader element into memory using an XmlTextReader
+        $xmlReader = New-Object System.Xml.XmlTextReader($_.FullName, $qvdTableHeaderOffset)
         $xmlDoc = New-Object System.Xml.XmlDocument
-        $xmlDoc.Load($_.FullName)
+        $xmlDoc.Load($xmlReader)
         $qvdTableHeader = $xmlDoc.SelectSingleNode("//QvdTableHeader")
 
         # Extract the NoOfRecords value from the QvdTableHeader element
@@ -16,6 +22,11 @@ Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
         if ($noOfRecords -eq "0") {
             Write-Host "$($_.Name) - NoOfRecords: $noOfRecords"
         }
+
+        # Clean up resources
+        $binaryReader.Close()
+        $fileStream.Close()
+        $xmlReader.Close()
     }
     catch {
         # Handle the error if the file cannot be loaded
