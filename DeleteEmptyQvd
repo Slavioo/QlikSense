@@ -4,12 +4,13 @@ $filePattern = "*.qvd" # Replace with your file extension
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
     try {
-        # Load the XML document into memory
+        # Load only the QvdTableHeader element into memory
         $xmlDoc = New-Object System.Xml.XmlDocument
         $xmlDoc.Load($_.FullName)
+        $qvdTableHeader = $xmlDoc.SelectSingleNode("//QvdTableHeader")
 
         # Extract the NoOfRecords value from the QvdTableHeader element
-        $noOfRecords = $xmlDoc.SelectSingleNode("//QvdTableHeader/NoOfRecords").InnerText
+        $noOfRecords = $qvdTableHeader.SelectSingleNode("NoOfRecords").InnerText
 
         # Output the file name if the NoOfRecords value is zero
         if ($noOfRecords -eq "0") {
