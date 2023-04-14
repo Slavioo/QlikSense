@@ -1,33 +1,33 @@
-# Set the path to the folder containing the qvd files
-$qvdFolder = "C:\Qlik\Data"
+$qvdFilePath = "C:\path\to\file.qvd"
+$qvdHeaderStart = "<QvdTableHeader"
+$qvdHeaderEnd = "</QvdTableHeader>"
 
-# Get all qvd files in the folder
-$qvdFiles = Get-ChildItem -Path $qvdFolder -Filter "*.qvd"
+# Open the QVD file and seek to the start of the QvdTableHeader section
+$qvdFileStream = New-Object System.IO.FileStream($qvdFilePath, [System.IO.FileMode]::Open)
+$qvdStreamReader = New-Object System.IO.StreamReader($qvdFileStream)
 
-# Define the size of the QvdTableHeader in bytes
-$qvdTableHeaderSize = 28
+while ($qvdStreamReader.ReadLine() -notmatch $qvdHeaderStart) {}
 
-# Loop through the qvd files and get the NoOfRecords property
-foreach ($qvdFile in $qvdFiles) {
-    # Open the qvd file as a memory-mapped view
-    $qvdView = [System.IO.MemoryMappedFiles.MemoryMappedFile]::CreateFromFile($qvdFile.FullName)
-    $qvdAccessor = $qvdView.CreateViewAccessor(0, $qvdTableHeaderSize)
-
-    # Read the QvdTableHeader as a string
-    $qvdTableHeader = ""
-    for ($i = 0; $i -lt $qvdTableHeaderSize; $i++) {
-        $qvdTableHeader += [char]$qvdAccessor.ReadByte($i)
+# Read the QvdTableHeader section into a string
+$qvdHeaderString = ""
+while ($line = $qvdStreamReader.ReadLine()) {
+    if ($line -match $qvdHeaderEnd) {
+        $qvdHeaderString += $line
+        break
     }
-
-    # Get the NoOfRecords property from the QvdTableHeader
-    $noOfRecords = [System.BitConverter]::ToUInt32([System.Text.Encoding]::ASCII.GetBytes($qvdTableHeader.Substring(20, 8)), 0)
-
-    # Close the memory-mapped view and accessor
-    $qvdAccessor.Dispose()
-    $qvdView.Dispose()
-
-    # Write the NoOfRecords property to the console if it's not zero
-    if ($noOfRecords -ne 0) {
-        Write-Host "The qvd file $($qvdFile.FullName) has $noOfRecords records."
-    }
+    $qvdHeaderString += $line
 }
+
+# Close the file streams
+$qvdStreamReader.Close()
+$qvdFileStream.Close()
+
+# Load the QvdTableHeader section as an XML document
+$xmlDoc = New-Object System.Xml.XmlDocument
+$xmlDoc.LoadXml($qvdHeaderString)
+
+# Extract the NoOfRecords property value
+$noOfRecords = $xmlDoc.QvdTableHeader.NoOfRecords
+
+# Output the NoOfRecords value
+Write-Host "NoOfRecords: $noOfRecords"
