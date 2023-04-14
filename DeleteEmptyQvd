@@ -1,35 +1,33 @@
-$folderPath = "C:\QVDs" # Replace with your folder path
-$filePattern = "*.qvd" # Replace with your file extension
+# Set the path to the folder containing the qvd files
+$qvdFolder = "C:\Qlik\Data"
 
-# Loop through each file in the directory
-Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    try {
-        # Open the file and read the first few bytes to determine the offset of the QvdTableHeader element
-        $fileStream = New-Object System.IO.FileStream($_.FullName, [System.IO.FileMode]::Open)
-        $binaryReader = New-Object System.IO.BinaryReader($fileStream)
-        $qvdTableHeaderOffset = $binaryReader.ReadInt32()
+# Get all qvd files in the folder
+$qvdFiles = Get-ChildItem -Path $qvdFolder -Filter "*.qvd"
 
-        # Load only the QvdTableHeader element into memory using an XmlTextReader
-        $xmlReader = New-Object System.Xml.XmlTextReader($_.FullName, $qvdTableHeaderOffset)
-        $xmlDoc = New-Object System.Xml.XmlDocument
-        $xmlDoc.Load($xmlReader)
-        $qvdTableHeader = $xmlDoc.SelectSingleNode("//QvdTableHeader")
+# Define the size of the QvdTableHeader in bytes
+$qvdTableHeaderSize = 28
 
-        # Extract the NoOfRecords value from the QvdTableHeader element
-        $noOfRecords = $qvdTableHeader.SelectSingleNode("NoOfRecords").InnerText
+# Loop through the qvd files and get the NoOfRecords property
+foreach ($qvdFile in $qvdFiles) {
+    # Open the qvd file as a memory-mapped view
+    $qvdView = [System.IO.MemoryMappedFiles.MemoryMappedFile]::CreateFromFile($qvdFile.FullName)
+    $qvdAccessor = $qvdView.CreateViewAccessor(0, $qvdTableHeaderSize)
 
-        # Output the file name if the NoOfRecords value is zero
-        if ($noOfRecords -eq "0") {
-            Write-Host "$($_.Name) - NoOfRecords: $noOfRecords"
-        }
-
-        # Clean up resources
-        $binaryReader.Close()
-        $fileStream.Close()
-        $xmlReader.Close()
+    # Read the QvdTableHeader as a string
+    $qvdTableHeader = ""
+    for ($i = 0; $i -lt $qvdTableHeaderSize; $i++) {
+        $qvdTableHeader += [char]$qvdAccessor.ReadByte($i)
     }
-    catch {
-        # Handle the error if the file cannot be loaded
-        Write-Host "Error loading file: $($_.FullName) - $($_.Exception.Message)"
+
+    # Get the NoOfRecords property from the QvdTableHeader
+    $noOfRecords = [System.BitConverter]::ToUInt32([System.Text.Encoding]::ASCII.GetBytes($qvdTableHeader.Substring(20, 8)), 0)
+
+    # Close the memory-mapped view and accessor
+    $qvdAccessor.Dispose()
+    $qvdView.Dispose()
+
+    # Write the NoOfRecords property to the console if it's not zero
+    if ($noOfRecords -ne 0) {
+        Write-Host "The qvd file $($qvdFile.FullName) has $noOfRecords records."
     }
 }
