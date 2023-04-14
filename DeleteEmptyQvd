@@ -1,0 +1,11 @@
+$Destination = "C:\QVD_Files"
+
+$QVDFiles = Get-ChildItem -Path $Destination -Filter "*.qvd" -File -Recurse
+
+foreach ($file in $QVDFiles) {
+    $header = Get-Content $file.FullName -Encoding Byte -TotalCount 50
+
+    if ($header[16] -eq 1 -and $header[40] -eq 0 -and $header[41] -eq 0 -and $header[42] -eq 0 -and $header[43] -eq 0) {
+        Remove-Item $file.FullName -Force
+    }
+}
