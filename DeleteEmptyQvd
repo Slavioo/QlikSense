@@ -3,9 +3,10 @@ $filePattern = "*.qvd" # Replace with your file extension
 
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Check if file has 0 records
-    $fileContent = Get-Content $_.FullName
-    if ($fileContent.Count -eq 1) {
+    # Check if file has 0 records in QvdTableHeader
+    $headerContent = Get-Content $_.FullName -TotalCount 2
+    $headerJson = $headerContent[1] | ConvertFrom-Json
+    if ($headerJson.QvdTableHeader.NoOfRecords -eq 0) {
         # Delete the file
         Remove-Item $_.FullName
         Write-Host "Deleted file: $($_.Name)"
