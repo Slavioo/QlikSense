@@ -1,18 +1,12 @@
-$qvdFolder = "C:\path\to\qvd\folder"
-foreach ($qvdFile in Get-ChildItem $qvdFolder -Filter "*.qvd") {
-    $xmlDoc = New-Object System.Xml.XmlDocument
-    $xmlDoc.XmlResolver = $null
-    $xmlDoc.LoadXml("<QvdTableHeader></QvdTableHeader>")
-    $reader = New-Object System.Xml.XmlTextReader($qvdFile.FullName)
-    $reader.XmlResolver = $null
-    while ($reader.Read()) {
-        if ($reader.NodeType -eq [System.Xml.XmlNodeType]::Element -and $reader.Name -eq "QvdTableHeader") {
-            $xml = $reader.ReadOuterXml()
-            $xmlDoc.LoadXml($xml)
-            break
-        }
+$directoryPath = "C:\QVDFiles"
+$files = Get-ChildItem $directoryPath -Filter *.qvd -Recurse
+
+foreach ($file in $files) {
+    $content = Get-Content $file.FullName
+    if ($content -match "NoOfRecords") {
+        $propertyValue = $content | Select-String "NoOfRecords" | ForEach-Object { $_.Line -replace '\D', '' }
+        Write-Output "File $($file.Name) has NoOfRecords value of $propertyValue"
+    } else {
+        Write-Output "File $($file.Name) does not have a NoOfRecords property."
     }
-    $reader.Close()
-    $noOfRecords = $xmlDoc.QvdTableHeader.NoOfRecords
-    Write-Host "Number of records in $($qvdFile.Name): $noOfRecords"
 }
