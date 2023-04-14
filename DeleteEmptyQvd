@@ -3,17 +3,15 @@ $filePattern = "*.qvd" # Replace with your file extension
 
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Check if file has only headers
+    # Check if first record has data
     $hasData = $false
     $fileContent = Get-Content $_.FullName
-    $header = $fileContent[0]
-    $data = $fileContent | Select-Object -Skip 1
-    if ($data -ne $null) {
-        foreach ($line in $data) {
-            if ($line -ne $header) {
-                $hasData = $true
-                break
-            }
+    $firstRecord = $fileContent[1]
+    $firstRecordData = $firstRecord -split '\t'
+    foreach ($data in $firstRecordData) {
+        if ($data -ne '') {
+            $hasData = $true
+            break
         }
     }
     if (!$hasData) {
