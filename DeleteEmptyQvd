@@ -5,8 +5,8 @@ foreach ($file in $files) {
     $content = Get-Content $file.FullName -Raw
     if ($content -match "(?<=<QvdTableHeader>).+?(?=</QvdTableHeader>)") {
         $qvdTableHeader = $Matches[0]
-        if ($qvdTableHeader -match "<NoOfRecords>(.+?)</NoOfRecords>") {
-            $propertyValue = $Matches[1]
+        if ($qvdTableHeader -match "(?<=<NoOfRecords>).+?(?=</NoOfRecords>)") {
+            $propertyValue = $Matches[0]
             Write-Output "File $($file.Name) has NoOfRecords value of $propertyValue"
         } else {
             Write-Output "File $($file.Name) does not have a NoOfRecords property."
