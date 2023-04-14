@@ -3,13 +3,8 @@ $files = Get-ChildItem $directoryPath -Filter *.qvd -Recurse
 
 foreach ($file in $files) {
     $content = Get-Content $file.FullName
-    $startIndex = $content.IndexOf("<QvdTableHeader>")
-    $endIndex = $content.IndexOf("</QvdTableHeader>") + "</QvdTableHeader>".Length
-    $headerContent = $content.Substring($startIndex, $endIndex - $startIndex)
-    $noOfRecordsStartIndex = $headerContent.IndexOf("<NoOfRecords>") + "<NoOfRecords>".Length
-    $noOfRecordsEndIndex = $headerContent.IndexOf("</NoOfRecords>")
-    if ($noOfRecordsEndIndex - $noOfRecordsStartIndex -gt 0) {
-        $propertyValue = $headerContent.Substring($noOfRecordsStartIndex, $noOfRecordsEndIndex - $noOfRecordsStartIndex)
+    if ($content -match "NoOfRecords") {
+        $propertyValue = $content | Select-String "NoOfRecords" | ForEach-Object { $_.Line -replace '\D', '' }
         Write-Output "File $($file.Name) has NoOfRecords value of $propertyValue"
     } else {
         Write-Output "File $($file.Name) does not have a NoOfRecords property."
