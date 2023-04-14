@@ -1,33 +1,29 @@
-$qvdFilePath = "C:\path\to\file.qvd"
-$qvdHeaderStart = "<QvdTableHeader"
-$qvdHeaderEnd = "</QvdTableHeader>"
+$folderPath = "C:\QVDs"
+$files = Get-ChildItem $folderPath -Filter *.qvd
 
-# Open the QVD file and seek to the start of the QvdTableHeader section
-$qvdFileStream = New-Object System.IO.FileStream($qvdFilePath, [System.IO.FileMode]::Open)
-$qvdStreamReader = New-Object System.IO.StreamReader($qvdFileStream)
+foreach ($file in $files) {
+    $xmlDoc = New-Object System.Xml.XmlDocument
+    $xmlReader = New-Object System.Xml.XmlTextReader($file.FullName)
+    $xmlReader.Namespaces = $false
 
-while ($qvdStreamReader.ReadLine() -notmatch $qvdHeaderStart) {}
-
-# Read the QvdTableHeader section into a string
-$qvdHeaderString = ""
-while ($line = $qvdStreamReader.ReadLine()) {
-    if ($line -match $qvdHeaderEnd) {
-        $qvdHeaderString += $line
-        break
+    # Move to the QvdTableHeader node
+    while ($xmlReader.Read()) {
+        if ($xmlReader.NodeType -eq "Element" -and $xmlReader.Name -eq "QvdTableHeader") {
+            break
+        }
     }
-    $qvdHeaderString += $line
+
+    # Load only the QvdTableHeader node
+    $qvdHeader = $xmlDoc.ReadNode($xmlReader)
+
+    # Get the NoOfRecords property value
+    $noOfRecords = [int]$qvdHeader.SelectSingleNode("//NoOfRecords").InnerText
+
+    # If NoOfRecords is 0, delete the file
+    if ($noOfRecords -eq 0) {
+        Remove-Item $file.FullName
+        Write-Host "Deleted $($file.Name) because it has 0 records."
+    }
 }
 
-# Close the file streams
-$qvdStreamReader.Close()
-$qvdFileStream.Close()
-
-# Load the QvdTableHeader section as an XML document
-$xmlDoc = New-Object System.Xml.XmlDocument
-$xmlDoc.LoadXml($qvdHeaderString)
-
-# Extract the NoOfRecords property value
-$noOfRecords = $xmlDoc.QvdTableHeader.NoOfRecords
-
-# Output the NoOfRecords value
-Write-Host "NoOfRecords: $noOfRecords"
+Write-Host "Done."
