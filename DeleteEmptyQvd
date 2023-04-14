@@ -3,12 +3,13 @@ $files = Get-ChildItem $directoryPath -Filter *.qvd -Recurse
 
 foreach ($file in $files) {
     $content = Get-Content $file.FullName
-    $xmlString = $content.Substring(0, $content.IndexOf("</QvdTableHeader>") + "</QvdTableHeader>".Length)
-    $xml = [xml]$xmlString
-    $xml.QVDTableHeader.Lineage | ForEach-Object { $_.ParentNode.RemoveChild($_) }
-    $noOfRecordsElement = $xml.QVDTableHeader.QVDTableMetaData.NoOfRecords
-    if ($noOfRecordsElement) {
-        $propertyValue = $noOfRecordsElement.InnerText
+    $startIndex = $content.IndexOf("<QvdTableHeader>")
+    $endIndex = $content.IndexOf("</QvdTableHeader>") + "</QvdTableHeader>".Length
+    $headerContent = $content.Substring($startIndex, $endIndex - $startIndex)
+    $noOfRecordsStartIndex = $headerContent.IndexOf("<NoOfRecords>") + "<NoOfRecords>".Length
+    $noOfRecordsEndIndex = $headerContent.IndexOf("</NoOfRecords>")
+    if ($noOfRecordsEndIndex - $noOfRecordsStartIndex -gt 0) {
+        $propertyValue = $headerContent.Substring($noOfRecordsStartIndex, $noOfRecordsEndIndex - $noOfRecordsStartIndex)
         Write-Output "File $($file.Name) has NoOfRecords value of $propertyValue"
     } else {
         Write-Output "File $($file.Name) does not have a NoOfRecords property."
