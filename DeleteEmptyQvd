@@ -1,11 +1,24 @@
-$Destination = "C:\QVD_Files"
+# Load the QlikView SDK
+Add-Type -Path "C:\Program Files (x86)\Common Files\QlikTech\Custom Data\QvData.dll"
 
-$QVDFiles = Get-ChildItem -Path $Destination -Filter "*.qvd" -File -Recurse
+# Define the path to the directory containing the QVD files
+$qvdDir = "C:\data\qvd_files"
 
-foreach ($file in $QVDFiles) {
-    $header = Get-Content $file.FullName -Encoding Byte -TotalCount 50
+# Get a list of all QVD files in the directory
+$qvdFiles = Get-ChildItem $qvdDir -Filter *.qvd
 
-    if ($header[16] -eq 1 -and $header[40] -eq 0 -and $header[41] -eq 0 -and $header[42] -eq 0 -and $header[43] -eq 0) {
-        Remove-Item $file.FullName -Force
+# Loop through each QVD file
+foreach ($qvdFile in $qvdFiles) {
+    # Create a QlikView QVD header object
+    $qvdHeader = New-Object Qvx.QvxHeader($qvdFile.FullName)
+
+    # Get the number of records from the QVD header metadata
+    $numRecords = $qvdHeader.Rows
+
+    # Check if the QVD file is empty
+    if ($numRecords -eq 0) {
+        # Delete the empty QVD file
+        Remove-Item $qvdFile.FullName
+        Write-Host "Deleted empty QVD file '$qvdFile'."
     }
 }
