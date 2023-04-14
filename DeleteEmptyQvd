@@ -2,14 +2,16 @@ $directoryPath = "C:\QVDFiles"
 $files = Get-ChildItem $directoryPath -Filter *.qvd -Recurse
 
 foreach ($file in $files) {
-    $content = Get-Content $file.FullName -Raw
-    if ($content -match "(?<=<QvdTableHeader>).+?(?=</QvdTableHeader>)") {
-        $qvdTableHeader = $Matches[0]
-        if ($qvdTableHeader -match "(?<=<NoOfRecords>).+?(?=</NoOfRecords>)") {
-            $propertyValue = $Matches[0]
-            Write-Output "File $($file.Name) has NoOfRecords value of $propertyValue"
+    $content = Get-Content $file.FullName
+    if ($content -match "<QvdTableHeader>(.*?)<\/QvdTableHeader>") {
+        $xml = [xml]$matches[0]
+        $noOfRecords = $xml.QvdTableHeader.NoOfRecords
+
+        if ($noOfRecords -eq 0) {
+            Write-Output "Deleting file $($file.Name) with NoOfRecords value of $noOfRecords"
+            Remove-Item $file.FullName
         } else {
-            Write-Output "File $($file.Name) does not have a NoOfRecords property."
+            Write-Output "File $($file.Name) has NoOfRecords value of $noOfRecords"
         }
     } else {
         Write-Output "File $($file.Name) does not have a QvdTableHeader property."
