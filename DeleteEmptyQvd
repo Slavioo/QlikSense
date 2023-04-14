@@ -1,14 +1,18 @@
 $folderPath = "C:\QVDs" # Replace with your folder path
 $filePattern = "*.qvd" # Replace with your file extension
 
+# Define a regular expression pattern to extract the JSON portion of the QVD header
+$regexPattern = '\{.*\}'
+
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Check if file has 0 records in QvdTableHeader
+    # Read the first two lines of the file's contents to get the QvdTableHeader
     $headerContent = Get-Content $_.FullName -TotalCount 2
-    $headerJson = $headerContent[1] | ConvertFrom-Json
-    if ($headerJson.QvdTableHeader.NoOfRecords -eq 0) {
-        # Delete the file
-        Remove-Item $_.FullName
-        Write-Host "Deleted file: $($_.Name)"
-    }
+    
+    # Extract the JSON portion of the QvdTableHeader using the regular expression pattern
+    $headerJson = $headerContent[1] | Select-String -Pattern $regexPattern | ForEach-Object { $_.Matches.Value }
+    
+    # Convert the JSON string to an object and output the file name and NoOfRecords property
+    $headerObject = ConvertFrom-Json $headerJson
+    Write-Host "$($_.Name) - NoOfRecords: $($headerObject.QvdTableHeader.NoOfRecords)"
 }
