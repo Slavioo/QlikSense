@@ -3,18 +3,9 @@ $filePattern = "*.qvd" # Replace with your file extension
 
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Check if first record has data
-    $hasData = $false
+    # Check if file has 0 records
     $fileContent = Get-Content $_.FullName
-    $firstRecord = $fileContent[1]
-    $firstRecordData = $firstRecord -split '\t'
-    foreach ($data in $firstRecordData) {
-        if ($data -ne '') {
-            $hasData = $true
-            break
-        }
-    }
-    if (!$hasData) {
+    if ($fileContent.Count -eq 1) {
         # Delete the file
         Remove-Item $_.FullName
         Write-Host "Deleted file: $($_.Name)"
