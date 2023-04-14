@@ -3,7 +3,8 @@ $files = Get-ChildItem $directoryPath -Filter *.qvd -Recurse
 
 foreach ($file in $files) {
     $content = Get-Content $file.FullName
-    $xml = [xml]$content
+    $xmlString = $content -replace "(?s)(.*)</QvdTableHeader>.*",'$1</QvdTableHeader>'
+    $xml = [xml]$xmlString
     $noOfRecordsElement = $xml.QVDTableHeader.QVDTableMetaData.NoOfRecords
     if ($noOfRecordsElement) {
         $propertyValue = $noOfRecordsElement.InnerText
