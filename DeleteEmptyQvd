@@ -1,24 +1,12 @@
-# Load the QlikView SDK
-Add-Type -Path "C:\Program Files (x86)\Common Files\QlikTech\Custom Data\QvData.dll"
+$folderPath = "C:\QVDs" # Replace with your folder path
+$filePattern = "*.qvd" # Replace with your file extension
 
-# Define the path to the directory containing the QVD files
-$qvdDir = "C:\data\qvd_files"
-
-# Get a list of all QVD files in the directory
-$qvdFiles = Get-ChildItem $qvdDir -Filter *.qvd
-
-# Loop through each QVD file
-foreach ($qvdFile in $qvdFiles) {
-    # Create a QlikView QVD header object
-    $qvdHeader = New-Object Qvx.QvxHeader($qvdFile.FullName)
-
-    # Get the number of records from the QVD header metadata
-    $numRecords = $qvdHeader.Rows
-
-    # Check if the QVD file is empty
-    if ($numRecords -eq 0) {
-        # Delete the empty QVD file
-        Remove-Item $qvdFile.FullName
-        Write-Host "Deleted empty QVD file '$qvdFile'."
+# Loop through each file in the directory
+Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
+    # Check if file has no data
+    if ((Get-Content $_.FullName | Measure-Object -Line).Lines -eq 0) {
+        # Delete the file
+        Remove-Item $_.FullName
+        Write-Host "Deleted file: $($_.Name)"
     }
 }
