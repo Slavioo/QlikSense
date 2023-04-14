@@ -3,10 +3,8 @@ $filePattern = "*.qvd" # Replace with your file extension
 
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Check if file has no data
-    if ((Get-Content $_.FullName | Measure-Object -Line).Lines -eq 0) {
-        # Delete the file
-        Remove-Item $_.FullName
-        Write-Host "Deleted file: $($_.Name)"
-    }
+    # Delete the file
+    Remove-Item $_.FullName
+    Write-Host "Deleted file: $($_.Name)"
 }
+
