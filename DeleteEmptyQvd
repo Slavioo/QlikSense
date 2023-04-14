@@ -3,11 +3,21 @@ $filePattern = "*.qvd" # Replace with your file extension
 
 # Loop through each file in the directory
 Get-ChildItem -Path $folderPath -Filter $filePattern | ForEach-Object {
-    # Use Select-Xml to extract the NoOfRecords value from the QvdTableHeader element
-    $noOfRecords = Select-Xml -Path $_.FullName -XPath "//QvdTableHeader/NoOfRecords" | Select-Object -ExpandProperty Node
+    try {
+        # Load the XML document into memory
+        $xmlDoc = New-Object System.Xml.XmlDocument
+        $xmlDoc.Load($_.FullName)
 
-    # Output the file name if the NoOfRecords value is zero
-    if ($noOfRecords -eq "0") {
-        Write-Host "$($_.Name) - NoOfRecords: $noOfRecords"
+        # Extract the NoOfRecords value from the QvdTableHeader element
+        $noOfRecords = $xmlDoc.SelectSingleNode("//QvdTableHeader/NoOfRecords").InnerText
+
+        # Output the file name if the NoOfRecords value is zero
+        if ($noOfRecords -eq "0") {
+            Write-Host "$($_.Name) - NoOfRecords: $noOfRecords"
+        }
+    }
+    catch {
+        # Handle the error if the file cannot be loaded
+        Write-Host "Error loading file: $($_.FullName) - $($_.Exception.Message)"
     }
 }
