@@ -1,0 +1,13 @@
+$qvdFilePath = "C:\path\to\file.qvd"
+
+# Load QlikView/Qlik Sense PowerShell snap-in
+Add-PSSnapin QlikViewManagementCli
+
+# Read the QVD header
+$qvdHeader = Read-QvdHeader $qvdFilePath
+
+# Get the NoOfRecords property value from the QVD header
+$noOfRecords = $qvdHeader.NoOfRecords
+
+# Display the NoOfRecords value
+Write-Host "NoOfRecords value in $qvdFilePath is $noOfRecords"
