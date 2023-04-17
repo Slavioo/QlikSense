@@ -1,0 +1,9 @@
+$dirPath = "C:\Path\To\Directory"
+
+if (Test-Path $dirPath) {
+    Get-ChildItem $dirPath | foreach { $_.Delete() }
+    Write-Host "All files in directory $dirPath have been deleted."
+}
+else {
+    Write-Host "Directory $dirPath does not exist."
+}
