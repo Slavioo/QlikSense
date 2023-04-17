@@ -1,0 +1,23 @@
+Sub ExportTablesToCSV()
+    Dim strDelimiter, strPath, strFileName1, strFileName2 As String
+    Dim objTable1, objTable2 As Object
+    
+    ' Set the delimiter to semicolon
+    strDelimiter = ";"
+    
+    ' Set the file path and names for the two CSV files
+    strPath = "C:\ExportedTables\"
+    strFileName1 = "Table1.csv"
+    strFileName2 = "Table2.csv"
+    
+    ' Get references to the two tables
+    Set objTable1 = ActiveDocument.GetSheetObject("CH01")
+    Set objTable2 = ActiveDocument.GetSheetObject("CH02")
+    
+    ' Export the first table to CSV format with semicolon as delimiter
+    objTable1.Export strPath & strFileName1, "CSV", False, strDelimiter
+    
+    ' Export the second table to CSV format with semicolon as delimiter
+    objTable2.Export strPath & strFileName2, "CSV", False, strDelimiter
+    
+End Sub
