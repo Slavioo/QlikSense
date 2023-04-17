@@ -1,8 +1,10 @@
 Sub CreateFolderIfNotExists()
-    Dim fso, folderPath, chartId
+    Dim fso, folderPath, chartId, documentPath
     Set fso = CreateObject("Scripting.FileSystemObject")
     chartId = ActiveDocument.Variables("vChartId").GetContent.String
-    folderPath = ActiveDocument.GetVariable("vOutputPath").GetContent.String & "\" & chartId
+    documentPath = ActiveDocument.GetProperties.DocumentPath
+    folderPath = fso.GetParentFolderName(documentPath) & "\Output\" & chartId
+    ActiveDocument.SetVariable "vOutputPath", folderPath
     If Not fso.FolderExists(folderPath) Then
         fso.CreateFolder(folderPath)
     End If
