@@ -1,0 +1,2 @@
+$noOfRecords = & "C:\Program Files\Qlik\Core\11.16.3\QlikCli.exe" qvd info "C:\Path\To\Your\File.qvd" | Select-Object -ExpandProperty NoOfRecords
+Write-Host "The number of records in the QVD file is: $noOfRecords"
