@@ -1,12 +1,6 @@
-Sub CreateFolderIfNotExists()
-    Dim fso, folderPath, chartId, documentPath
-    Set fso = CreateObject("Scripting.FileSystemObject")
-    chartId = ActiveDocument.Variables("vChartId").GetContent.String
-    documentPath = ActiveDocument.GetProperties.DocumentPath
-    folderPath = fso.GetParentFolderName(documentPath) & "\Output\" & chartId
-    ActiveDocument.SetVariable "vOutputPath", folderPath
-    If Not fso.FolderExists(folderPath) Then
-        fso.CreateFolder(folderPath)
-    End If
-    Set fso = Nothing
+Sub MyMacro()
+    Dim myVariableValue
+    myVariableValue = ActiveDocument.Variables("myVariableName").GetContent.String
+    ' Do something with the variable value here
 End Sub
+
