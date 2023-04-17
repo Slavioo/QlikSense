@@ -1,0 +1,8 @@
+Sub CreateFolderIfNotExists(ByVal folderPath)
+    Dim fso
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    If Not fso.FolderExists(folderPath) Then
+        fso.CreateFolder(folderPath)
+    End If
+    Set fso = Nothing
+End Sub
