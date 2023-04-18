@@ -1,26 +1,18 @@
-// Set the root directory
-LET RootDirectory = 'C:\Qlik\Data\';
+// Define the root directory to search for QVD files
+LET RootDirectory = 'C:\Qlik\Data';
 
-// Load the QVD Generator script
-$(Include=RootDirectory & 'QVD Generator.qvs');
-
-// Load the QVD file list
-FileList:
-LOAD 
-    FilePath() AS FilePath 
-FROM 
-    [$(RootDirectory)\**\*.qvd]
-(qvd);
-
-// Loop through the QVD files
-For i = 0 to NoOfRows('FileList')-1
-    Let FilePath = Peek('FilePath', i, 'FileList');
-    Let NoOfRecords = Peek('NoOfRecords', 0, '$(QvdNoOfRecords)($(FilePath))');
-
-    // Check if the QVD file has zero records
-    If NoOfRecords = 0 Then
-        // Write the file path to a CSV file
-        Store FilePath into [$(RootDirectory)\ZeroRecordQVDs.csv] (txt, delimiter is ',', no quotes);
-    EndIf
-Next
-
+// Load all QVD files in the root directory and its subdirectories
+FOR Each vFolder in DirList(RootDirectory & '\*', 0, 1)
+    FOR Each vFileExtension in 'qvd'
+        FOR Each vFileName in FileList(vFolder & '\*' & vFileExtension)
+            // Load the QVD file
+            $(Must_Include=$(vFileName));
+            
+            // Check if the QVD file has zero records
+            If NoOfRows('$(vFileName)') = 0 Then
+                // Write the file path to a CSV file
+                Store $(vFileName) into [$(RootDirectory)\ZeroRecordQVDs.csv] (txt, delimiter is ',', no quotes);
+            EndIf
+        NEXT vFileName
+    NEXT vFileExtension
+NEXT vFolder
