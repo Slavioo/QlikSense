@@ -3,15 +3,18 @@ $qvdFilePath = "C:\path\to\file.qvd"
 $qvdReader = [System.IO.BinaryReader]::new([System.IO.File]::OpenRead($qvdFilePath))
 
 $headerSize = $qvdReader.ReadInt32()
-$headerText = [System.Text.Encoding]::ASCII.GetString($qvdReader.ReadBytes($headerSize))
+$headerBytes = $qvdReader.ReadBytes($headerSize)
+$headerText = [System.Text.Encoding]::ASCII.GetString($headerBytes)
+$headerTextClean = $headerText -replace ".*?<QvdTableHeader>", "<QvdTableHeader>"
+$headerTextClean = $headerTextClean -replace "</QvdTableHeader>.*", "</QvdTableHeader>"
 
 $qvdReader.Close()
 
-$pattern = "(?s)<QvdTableHeader>.*</QvdTableHeader>"
-$headerTextClean = [regex]::Match($headerText, $pattern).Value
+[xml]$headerXml = $headerTextClean
 
-if ($headerTextClean -ne "") {
-    Write-Output "Header: $headerTextClean"
+if ($headerXml.QvdTableHeader.NoOfRecords) {
+    $noOfRecords = $headerXml.QvdTableHeader.NoOfRecords
+    Write-Output "Number of Records: $noOfRecords"
 } else {
     Write-Output "No header found in the QVD file."
 }
