@@ -1,18 +1,13 @@
-// Define the root directory to search for QVD files
-LET RootDirectory = 'C:\Qlik\Data';
+# Set the directory to search for QVD files
+$searchPath = "C:\QVDs"
 
-// Load all QVD files in the root directory and its subdirectories
-FOR Each vFolder in DirList(RootDirectory & '\*', 0, 1)
-    FOR Each vFileExtension in 'qvd'
-        FOR Each vFileName in FileList(vFolder & '\*' & vFileExtension)
-            // Load the QVD file
-            $(Must_Include=$(vFileName));
-            
-            // Check if the QVD file has zero records
-            If NoOfRows('$(vFileName)') = 0 Then
-                // Write the file path to a CSV file
-                Store $(vFileName) into [$(RootDirectory)\ZeroRecordQVDs.csv] (txt, delimiter is ',', no quotes);
-            EndIf
-        NEXT vFileName
-    NEXT vFileExtension
-NEXT vFolder
+# Get all QVD files in the search directory
+$qvdFiles = Get-ChildItem -Path $searchPath -Recurse -Include *.qvd
+
+# Loop through each QVD file and check if it has only column headers
+foreach ($qvdFile in $qvdFiles) {
+    $fileContent = Get-Content $qvdFile.FullName -TotalCount 3
+    if ($fileContent[2] -eq "NoOfRecords=0") {
+        Write-Host "QVD file $($qvdFile.Name) has only column headers and no data."
+    }
+}
