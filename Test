@@ -1,3 +1,12 @@
-$property = '<NoOfRecords>1234</NoOfRecords>'
-$value = [regex]::Match($property, '<NoOfRecords>(.*?)</NoOfRecords>').Groups[1].Value
-Write-Output $value
+$file = "C:\path\to\file.txt"
+
+# Find the process that is using the file
+$process = Get-Process | Where-Object { $_.Modules.FileName -eq $file }
+
+if ($process) {
+    # Stop the process
+    $process | Stop-Process -Force
+}
+
+# Delete the file
+Remove-Item $file -Force
