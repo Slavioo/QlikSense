@@ -1,13 +1,14 @@
-# Set the directory to search for QVD files
+# Set the remote server name and directory to search
+$server = "remoteServerName"
 $searchPath = "C:\QVDs"
 
-# Get all QVD files in the search directory
-$qvdFiles = Get-ChildItem -Path $searchPath -Recurse -Include *.qvd
+# Create a session to the remote server
+$session = New-PSSession -ComputerName $server
 
-# Loop through each QVD file and check if it has only column headers
-foreach ($qvdFile in $qvdFiles) {
-    $fileContent = Get-Content $qvdFile.FullName -TotalCount 3
-    if ($fileContent[2] -eq "NoOfRecords=0") {
-        Write-Host "QVD file $($qvdFile.Name) has only column headers and no data."
-    }
-}
+# Delete QVD files with NoOfRecords property equal to 0
+Invoke-Command -Session $session -ScriptBlock {
+    Get-ChildItem $args[0] -Recurse -Include *.qvd | Where-Object { (Get-Content $_.FullName -TotalCount 3)[2] -eq "NoOfRecords=0" } | Remove-Item -Force -Verbose
+} -ArgumentList $searchPath
+
+# Close the session
+Remove-PSSession $session
