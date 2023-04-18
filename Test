@@ -1,20 +1,3 @@
-$qvdFilePath = "C:\path\to\file.qvd"
-
-$qvdReader = [System.IO.BinaryReader]::new([System.IO.File]::OpenRead($qvdFilePath))
-
-$headerSize = $qvdReader.ReadInt32()
-$headerText = [System.Text.Encoding]::ASCII.GetString($qvdReader.ReadBytes($headerSize))
-
-$openingTagIndex = $headerText.IndexOf("<QvdTableHeader>")
-$closingTagIndex = $headerText.IndexOf("</QvdTableHeader>")
-$headerTextClean = $headerText.Substring($openingTagIndex, $closingTagIndex - $openingTagIndex + 16)
-
-$noOfRecords = [xml]$headerTextClean | Select-Object -ExpandProperty QvdTableHeader | Select-Object -ExpandProperty NoOfRecords
-
-$qvdReader.Close()
-
-if ($noOfRecords -ne "") {
-    Write-Output "Number of Records: $noOfRecords"
-} else {
-    Write-Output "No header found in the QVD file."
-}
+$property = '<NoOfRecords>1234</NoOfRecords>'
+$value = [regex]::Match($property, '<NoOfRecords>(.*?)</NoOfRecords>').Groups[1].Value
+Write-Output $value
