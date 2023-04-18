@@ -1,23 +1,9 @@
-$qvdFilePath = "C:\path\to\file.qvd"
-
-$qvdFileStream = [System.IO.FileStream]::new($qvdFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
-$qvdReader = [System.IO.BinaryReader]::new($qvdFileStream)
-
-$headerSize = $qvdReader.ReadInt32()
-$headerText = [System.Text.Encoding]::ASCII.GetString($qvdReader.ReadBytes($headerSize))
-
-$openingTagIndex = $headerText.IndexOf("<QvdTableHeader>")
-$closingTagIndex = $headerText.IndexOf("</QvdTableHeader>")
-$headerTextClean = $headerText.Substring($openingTagIndex, $closingTagIndex - $openingTagIndex + 16)
-
-# Get the length of the NoOfRecords property
-$xml = [xml]$headerTextClean
-$noOfRecordsLength = $xml.QvdTableHeader.NoOfRecords.InnerText.Length
-Write-Output "Length of NoOfRecords property: $noOfRecordsLength"
-
-# Extract the NoOfRecords value
-$noOfRecords = $xml.QvdTableHeader.NoOfRecords
-Write-Output "Number of Records: $noOfRecords"
-
-$qvdReader.Close()
-$qvdFileStream.Close()
+$files = Get-ChildItem -Path "C:\myfolder" -Recurse -Include "*.qvd" | Where-Object { $_.Length -gt 0 }
+foreach ($file in $files) {
+    $headerText = qlik-cli.exe qvd header --file $file.FullName
+    $xml = [xml]$headerText
+    $noOfRecords = $xml.QvdTableHeader.NoOfRecords
+    if ($noOfRecords -eq 0) {
+        Remove-Item $file.FullName
+    }
+}
