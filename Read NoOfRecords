@@ -2,28 +2,14 @@ $qvdFilePath = "C:\path\to\file.qvd"
 
 $qvdReader = [System.IO.BinaryReader]::new([System.IO.File]::OpenRead($qvdFilePath))
 
-$headerEndTag = "</QvdTableHeader>"
-$bufferSize = 1024 * 1024  # 1 MB buffer size
-$buffer = New-Object byte[] $bufferSize
-$headerEndIndex = -1
-$noOfRecords = $null
-
-while (($bytesRead = $qvdReader.Read($buffer, 0, $bufferSize)) -ne 0 -and $headerEndIndex -eq -1) {
-    $bufferText = [System.Text.Encoding]::ASCII.GetString($buffer, 0, $bytesRead)
-    $headerEndIndex = $bufferText.IndexOf($headerEndTag)
-
-    if ($headerEndIndex -ne -1) {
-        $headerEndIndex += $headerEndTag.Length + 4  # skip the header end tag and the 4 bytes of the NoOfRecords property length
-        $qvdReader.BaseStream.Seek($headerEndIndex, [System.IO.SeekOrigin]::Begin)
-        $noOfRecords = $qvdReader.ReadInt64()
-    }
-}
+$headerSize = $qvdReader.ReadInt32()
+$headerText = [System.Text.Encoding]::ASCII.GetString($qvdReader.ReadBytes($headerSize))
+$noOfRecords = [regex]::Match($headerText, "NoOfRecords=""(\d+)""").Groups[1].Value
 
 $qvdReader.Close()
 
-if ($noOfRecords -ne $null) {
+if ($noOfRecords -ne "") {
     Write-Output "Number of Records: $noOfRecords"
 } else {
     Write-Output "No header found in the QVD file."
 }
-
