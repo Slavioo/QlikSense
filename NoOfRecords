@@ -1,0 +1,17 @@
+$qvdFilePath = "C:\path\to\file.qvd"
+
+$stream = New-Object System.IO.FileStream($qvdFilePath, [System.IO.FileMode]::Open)
+$reader = New-Object System.IO.StreamReader($stream)
+
+$xmlHeader = ""
+while (($line = $reader.ReadLine()) -ne "</QvdTableHeader>") {
+    $xmlHeader += $line
+}
+
+$xml = [xml]$xmlHeader
+$noOfRecords = $xml.QvdTableHeader.NoOfRecords
+
+$reader.Close()
+$stream.Close()
+
+Write-Output "Number of Records: $noOfRecords"
