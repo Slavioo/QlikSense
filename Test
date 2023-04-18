@@ -1,12 +1,23 @@
-$file = "C:\path\to\file.txt"
+$qvdFilePath = "C:\path\to\file.qvd"
 
-# Find the process that is using the file
-$process = Get-Process | Where-Object { $_.Modules.FileName -eq $file }
+$qvdFileStream = [System.IO.FileStream]::new($qvdFilePath, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::ReadWrite)
+$qvdReader = [System.IO.BinaryReader]::new($qvdFileStream)
 
-if ($process) {
-    # Stop the process
-    $process | Stop-Process -Force
-}
+$headerSize = $qvdReader.ReadInt32()
+$headerText = [System.Text.Encoding]::ASCII.GetString($qvdReader.ReadBytes($headerSize))
 
-# Delete the file
-Remove-Item $file -Force
+$openingTagIndex = $headerText.IndexOf("<QvdTableHeader>")
+$closingTagIndex = $headerText.IndexOf("</QvdTableHeader>")
+$headerTextClean = $headerText.Substring($openingTagIndex, $closingTagIndex - $openingTagIndex + 16)
+
+# Get the length of the NoOfRecords property
+$xml = [xml]$headerTextClean
+$noOfRecordsLength = $xml.QvdTableHeader.NoOfRecords.InnerText.Length
+Write-Output "Length of NoOfRecords property: $noOfRecordsLength"
+
+# Extract the NoOfRecords value
+$noOfRecords = $xml.QvdTableHeader.NoOfRecords
+Write-Output "Number of Records: $noOfRecords"
+
+$qvdReader.Close()
+$qvdFileStream.Close()
