@@ -1,0 +1,12 @@
+$qvdFilePath = "C:\path\to\file.qvd"
+
+$qvdReader = [System.IO.BinaryReader]::new([System.IO.File]::OpenRead($qvdFilePath))
+
+$endHeaderTag = [System.Text.Encoding]::ASCII.GetBytes("</QvdTableHeader>")
+$headerEndIndex = $qvdReader.BaseStream.IndexOf($endHeaderTag, 0)
+$qvdReader.BaseStream.Seek($headerEndIndex + $endHeaderTag.Length + 4, [System.IO.SeekOrigin]::Begin)
+$noOfRecords = $qvdReader.ReadInt64()
+
+$qvdReader.Close()
+
+Write-Output "Number of Records: $noOfRecords"
