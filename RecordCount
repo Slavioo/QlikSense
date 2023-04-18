@@ -1,0 +1,8 @@
+Import-Module .\Qlik-Cli\Qlik-Cli.psm1
+
+$qvdFilePath = "C:\path\to\file.qvd"
+
+$qvdMetadata = Get-QvdMetadata -Path $qvdFilePath
+$noOfRecords = $qvdMetadata.RecordCount
+
+Write-Output "Number of Records: $noOfRecords"
