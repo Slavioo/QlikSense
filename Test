@@ -1,2 +1,27 @@
 $filename = "myfile.delete"
 New-Item -ItemType File -Path $filename
+########################################
+# Set the directory path
+$directory = "C:\MyDirectory"
+
+# Get all the .delete files in the directory
+$deleteFiles = Get-ChildItem -Path $directory -Filter *.delete
+
+# Loop through the .delete files
+foreach ($deleteFile in $deleteFiles) {
+    # Get the corresponding .qvd file
+    $qvdFile = Get-ChildItem -Path $directory -Filter ($deleteFile.BaseName + ".qvd")
+
+    # If the .qvd file exists, delete both files
+    if ($qvdFile) {
+        Write-Host "Deleting $($deleteFile.Name) and $($qvdFile.Name)"
+        Remove-Item $deleteFile.FullName
+        Remove-Item $qvdFile.FullName
+    }
+    # If the .qvd file does not exist, delete only the .delete file
+    else {
+        Write-Host "Deleting $($deleteFile.Name)"
+        Remove-Item $deleteFile.FullName
+    }
+}
+
