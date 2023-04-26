@@ -1,0 +1,8 @@
+sub RunPowerShellScript
+  dim wshell, script_path, doc_path
+  doc_path = ActiveDocument.GetProperties.Get("DocumentPath")
+  script_path = Left(doc_path, InStrRev(doc_path, "\")) & "MyScript.ps1"
+  set wshell = CreateObject("WScript.Shell")
+  wshell.Run "powershell.exe -executionpolicy bypass -file " & Chr(34) & script_path & Chr(34), 1, True
+  set wshell = nothing
+end sub
