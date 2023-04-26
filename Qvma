@@ -1,0 +1,16 @@
+sub ExportToJSON
+  dim FilePath, FileNumber, i
+  FilePath = ActiveDocument.GetProperties.Get("DocumentPath") & ".json"
+  FileNumber = FreeFile()
+  Open FilePath For Output As #FileNumber
+  print #FileNumber, "{"
+  print #FileNumber, """" & "param1" & """" & ":" & """" & ActiveDocument.Variables("vParam1").GetContent.String & ""","
+  print #FileNumber, """" & "param2" & """" & ":" & """" & ActiveDocument.Variables("vParam2").GetContent.String & ""","
+  print #FileNumber, """" & "param3" & """" & ":" & """" & ActiveDocument.Variables("vParam3").GetContent.String & ""","
+  print #FileNumber, """" & "param4" & """" & ":" & """" & ActiveDocument.Variables("vParam4").GetContent.String & ""","
+  print #FileNumber, """" & "param5" & """" & ":" & """" & ActiveDocument.Variables("vParam5").GetContent.String & ""","
+  print #FileNumber, """" & "param6" & """" & ":" & """" & ActiveDocument.Variables("vParam6").GetContent.String & ""","
+  print #FileNumber, """" & "param7" & """" & ":" & """" & ActiveDocument.Variables("vParam7").GetContent.String & """"
+  print #FileNumber, "}"
+  Close #FileNumber
+end sub
