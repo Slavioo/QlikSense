@@ -1,0 +1,36 @@
+Sub ExportTableToCSV
+
+    ' Define variables
+    Dim objTable, objFSO, objFile, objField, objRecord
+    Dim strFilePath: strFilePath = "C:\Output.csv"
+
+    ' Set the table to export
+    Set objTable = ActiveDocument.GetSheetObject("CH01")
+
+    ' Create a new file object
+    Set objFSO = CreateObject("Scripting.FileSystemObject")
+    Set objFile = objFSO.CreateTextFile(strFilePath, True)
+
+    ' Write the header row
+    For Each objField in objTable.GetColumnHeaders
+        objFile.Write objField.GetText & ","
+    Next
+
+    ' Add a new line after the header row
+    objFile.Write vbNewLine
+
+    ' Write the data
+    For Each objRecord in objTable.GetRows
+        For Each objField in objRecord
+            objFile.Write objField.GetText & ","
+        Next
+        objFile.Write vbNewLine
+    Next
+
+    ' Close the file object
+    objFile.Close
+
+    ' Notify the user that the export has completed
+    MsgBox "Export complete."
+
+End Sub
