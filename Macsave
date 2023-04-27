@@ -1,21 +1,6 @@
-Sub ExportTablesToCSV
-    For Each obj In ActiveDocument.GetSheetObjectArray
-        If obj.Type = "ChartObject" Then ' Changed to ChartObject to exclude non-table objects
-            If obj.GetObjectId = "CH01" Then
-                Set table = obj.GetTableObject
-                table.SelectAll
-                ActiveDocument.GetApplication.WaitForIdle
-                ActiveDocument.Export "CSV", False, , "Output\dimensions.csv"
-                ActiveDocument.GetApplication.WaitForIdle
-                table.ClearAll
-            ElseIf obj.GetObjectId = "CH3" Then
-                Set table = obj.GetTableObject
-                table.SelectAll
-                ActiveDocument.GetApplication.WaitForIdle
-                ActiveDocument.Export "CSV", False, , "Output\measures.csv"
-                ActiveDocument.GetApplication.WaitForIdle
-                table.ClearAll
-            End If
-        End If
-    Next
-End Sub
+Set obj = ActiveDocument.GetSheetObject("CH01").GetTable
+obj.SelectAll
+ActiveDocument.GetApplication.WaitForIdle
+ActiveDocument.Export "CSV", false, , "Output\dimensions.csv"
+ActiveDocument.GetApplication.WaitForIdle
+obj.ClearAll
