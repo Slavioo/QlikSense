@@ -1,7 +1,7 @@
 Sub ExportTableToCSV
 
     ' Define variables
-    Dim objTable, objFSO, objFile, objField, objRecord
+    Dim objTable, objFSO, objFile, objRecord
     Dim strFilePath: strFilePath = "C:\Output.csv"
 
     ' Set the table to export
@@ -12,18 +12,14 @@ Sub ExportTableToCSV
     Set objFile = objFSO.CreateTextFile(strFilePath, True)
 
     ' Write the header row
-    For Each objField in objTable.GetColumnHeaders
-        objFile.Write objField.GetText & ","
-    Next
+    objFile.Write objTable.GetColumnHeaders(0).GetText
 
     ' Add a new line after the header row
     objFile.Write vbNewLine
 
     ' Write the data
     For Each objRecord in objTable.GetRows
-        For Each objField in objRecord
-            objFile.Write objField.GetText & ","
-        Next
+        objFile.Write objRecord(0).GetText
         objFile.Write vbNewLine
     Next
 
