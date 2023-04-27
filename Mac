@@ -12,7 +12,7 @@ Sub ExportTableToCSV
     Set objFile = objFSO.CreateTextFile(strFilePath, True)
 
     ' Write the header row
-    objFile.Write objTable.GetColumnHeaders(0).GetText
+    objFile.Write objTable.GetCell(0, 0).GetText
 
     ' Add a new line after the header row
     objFile.Write vbNewLine
