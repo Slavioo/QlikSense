@@ -1,0 +1,19 @@
+Sub CopyTablesAndSaveToCSV
+    ' Define the table object IDs
+    tableIDs = Array("CH01", "CH02") ' Replace with your table object IDs
+    
+    ' Loop through the table IDs
+    For Each tableID In tableIDs
+        Set obj = ActiveDocument.GetSheetObject(tableID)
+        obj.CopyTableToClipboard True
+        
+        Set objStream = CreateObject("ADODB.Stream")
+        objStream.Open
+        objStream.Type = 2 ' Specify that we're writing text data
+        objStream.Charset = "UTF-8" ' Specify the character encoding
+        objStream.WriteText obj.GetClipboardText ' Write the clipboard contents to the stream
+        objStream.SaveToFile "C:\temp\" & tableID & ".csv", 2 ' Save the stream to a file (use the table ID as the file name)
+        objStream.Close
+        Set objStream = Nothing
+    Next
+End Sub
