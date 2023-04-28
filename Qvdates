@@ -1,0 +1,6 @@
+// Tag all fields whose name ends with "Date" with the "$date" tag
+For Each vField in FieldName('Table')
+  If WildMatch('$(vField)','*Date') Then
+    Tag Field '$(vField)' With $date;
+  End If
+Next
