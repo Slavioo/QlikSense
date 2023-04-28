@@ -1,0 +1,9 @@
+// Change the format/type of all fields in the table whose name ends in "Date"
+FOR each field in FieldName('myTable')
+  LET vField = Trim('$(field)');
+  IF WildMatch(vField, '*Date') THEN
+    ALTER FIELD $(vField)
+      TYPE Date
+      FORMAT 'YYYY-MM-DD';
+  ENDIF
+NEXT
