@@ -1,0 +1,7 @@
+// Set date format for all fields whose name ends in "Date"
+FOR each field in $(Fields)
+  LET vField = Trim('$(field)');
+  IF WildMatch(vField, '*Date') THEN
+    $(vField) = Date($(vField), 'YYYY-MM-DD');
+  ENDIF
+NEXT
