@@ -1,17 +1,15 @@
-DECLARE @table NVARCHAR(100) = 'abc'
+DECLARE @tableName NVARCHAR(100) = 'YourTable'
 
-DECLARE @cols NVARCHAR(MAX) = (SELECT STRING_AGG(
-    CASE WHEN RIGHT(COLUMN_NAME, 4) = 'Date' THEN 'CONVERT(DATE, [' + COLUMN_NAME + '], 23) AS [' + COLUMN_NAME + ']'
-        ELSE '[' + COLUMN_NAME + ']' END, ',') FROM information_schema.columns
-    WHERE table_schema = 'def' AND table_name = @table)
+DECLARE @cols NVARCHAR(MAX) = STUFF((
+        SELECT ',' + 
+        CASE WHEN RIGHT(COLUMN_NAME, 4) = 'Date' AND TRY_CAST('[' + COLUMN_NAME + '] AS DATE) IS NULL 
+            THEN 'TRY_CAST([' + COLUMN_NAME + '] AS DATE) AS [' + COLUMN_NAME + ']'
+            ELSE '[' + COLUMN_NAME + ']' END
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_SCHEMA = 'dbo' 
+        AND TABLE_NAME = @tableName 
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 1, '')
 
-DECLARE @sql NVARCHAR(MAX) = 'SELECT ' + @cols + ' FROM ' + @table
+DECLARE @sql NVARCHAR(MAX) = 'SELECT ' + @cols + ' FROM ' + @tableName
 
-EXEC(@sql)
-
-SELECT STUFF(
-    (SELECT ', ' + column_name 
-     FROM information_schema.columns 
-     WHERE table_name = 'my_table' 
-     ORDER BY ordinal_position 
-     FOR XML PATH('')), 1, 2, '') AS column_list
+EXEC sp_executesql @sql
