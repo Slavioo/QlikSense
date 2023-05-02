@@ -1,12 +1,10 @@
+DECLARE @table NVARCHAR(100) = 'abc'
+
 DECLARE @cols NVARCHAR(MAX) = (SELECT STRING_AGG(
-    CASE WHEN RIGHT(name, 4) = 'Date' AND TRY_CAST('[' + name + ']' AS DATE) IS NULL 
-        THEN 'TRY_CAST([' + name + '] AS DATE) AS [' + name + ']'
-        ELSE '[' + name + ']' END, ',') FROM sys.columns WHERE object_id = OBJECT_ID('YourTable'))
+    CASE WHEN RIGHT(COLUMN_NAME, 4) = 'Date' THEN 'CONVERT(DATE, [' + COLUMN_NAME + '], 23) AS [' + COLUMN_NAME + ']'
+        ELSE '[' + COLUMN_NAME + ']' END, ',') FROM information_schema.columns
+    WHERE table_schema = 'def' AND table_name = @table)
 
-DECLARE @sql NVARCHAR(MAX) = 'SELECT ' + @cols + ' INTO #tempTable FROM YourTable'
+DECLARE @sql NVARCHAR(MAX) = 'SELECT ' + @cols + ' FROM ' + @table
 
-EXEC (@sql)
-
-SELECT * FROM #tempTable
-
-DROP TABLE #tempTable
+EXEC(@sql)
