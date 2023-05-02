@@ -8,3 +8,10 @@ DECLARE @cols NVARCHAR(MAX) = (SELECT STRING_AGG(
 DECLARE @sql NVARCHAR(MAX) = 'SELECT ' + @cols + ' FROM ' + @table
 
 EXEC(@sql)
+
+SELECT STUFF(
+    (SELECT ', ' + column_name 
+     FROM information_schema.columns 
+     WHERE table_name = 'my_table' 
+     ORDER BY ordinal_position 
+     FOR XML PATH('')), 1, 2, '') AS column_list
