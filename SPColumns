@@ -1,30 +1,16 @@
--- Declare variables for storing column names and data types
-DECLARE @ColumnNames NVARCHAR(MAX)
-DECLARE @DataTypes NVARCHAR(MAX)
+DECLARE @ProcedureName NVARCHAR(128) = 'YourStoredProcedureName'; -- Replace with the name of your stored procedure
 
--- Create a temporary table to hold the result set metadata
-CREATE TABLE #TempColumns (
-    ColumnName NVARCHAR(128),
-    DataType NVARCHAR(128)
-)
-
--- Generate dynamic SQL to execute the stored procedure and retrieve the result set metadata
-DECLARE @SQL NVARCHAR(MAX)
-SET @SQL = N'
-INSERT INTO #TempColumns
-EXEC sp_describe_first_result_set @tsql = N''EXEC YourStoredProcedure @Parameter1 = ''''Value1'''', @Parameter2 = ''''Value2''''''';
-
--- Query the column names and data types
-SELECT @ColumnNames = STRING_AGG(ColumnName, '',''),
-       @DataTypes = STRING_AGG(DataType, '','')
-FROM #TempColumns
-
--- Output the column names and data types
-SELECT @ColumnNames AS ColumnNames, @DataTypes AS DataTypes
-
--- Clean up the temporary table
-DROP TABLE #TempColumns
-'
-
--- Execute the dynamic SQL
-EXEC(@SQL)
+SELECT 
+    column_ordinal AS [ColumnOrdinal],
+    name AS [ColumnName],
+    system_type_name AS [DataType]
+FROM 
+    sys.dm_exec_describe_first_result_set (
+        OBJECT_DEFINITION(OBJECT_ID(@ProcedureName)),
+        NULL,
+        0
+    )
+WHERE 
+    parameter_ordinal IS NULL
+ORDER BY 
+    column_ordinal;
