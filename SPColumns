@@ -1,16 +1,15 @@
 DECLARE @ProcedureName NVARCHAR(128) = 'YourStoredProcedureName'; -- Replace with the name of your stored procedure
 
-SELECT 
-    column_ordinal AS [ColumnOrdinal],
-    name AS [ColumnName],
-    system_type_name AS [DataType]
-FROM 
-    sys.dm_exec_describe_first_result_set (
-        OBJECT_DEFINITION(OBJECT_ID(@ProcedureName)),
-        NULL,
-        0
-    )
-WHERE 
-    parameter_ordinal IS NULL
-ORDER BY 
-    column_ordinal;
+-- Create a temporary table to hold the result set
+CREATE TABLE #ColumnNames (
+    ColumnName NVARCHAR(128)
+);
+
+-- Insert the result set columns into the temporary table
+INSERT INTO #ColumnNames
+EXEC sp_executesql N'EXEC ' + QUOTENAME(@ProcedureName);
+
+-- Display the contents of the temporary table
+SELECT ColumnName
+FROM #ColumnNames;
+
