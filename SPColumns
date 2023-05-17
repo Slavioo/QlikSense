@@ -1,15 +1,13 @@
-DECLARE @ProcedureName NVARCHAR(128) = 'YourStoredProcedureName'; -- Replace with the name of your stored procedure
+// Replace 'YourStoredProcedureName' with the name of your stored procedure
+let vProcedureName = 'YourStoredProcedureName';
 
--- Create a temporary table to hold the result set
-CREATE TABLE #ColumnNames (
-    ColumnName NVARCHAR(128)
+// Retrieve the column names and data types of the stored procedure result set
+ResultColumns:
+SQL SELECT COLUMN_NAME as ColumnName, DATA_TYPE as DataType
+FROM sys.dm_exec_describe_first_result_set_for_object(
+    OBJECT_ID(''' & vProcedureName & '''),
+    NULL
 );
 
--- Insert the result set columns into the temporary table
-INSERT INTO #ColumnNames
-EXEC sp_executesql N'EXEC ' + QUOTENAME(@ProcedureName);
-
--- Display the contents of the temporary table
-SELECT ColumnName
-FROM #ColumnNames;
-
+// Display the result columns
+SELECT * FROM ResultColumns;
