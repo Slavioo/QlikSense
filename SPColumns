@@ -1,14 +1,12 @@
+-- Declare a variable to store the column names
+DECLARE @ColumnNames VARCHAR(MAX)
 
--- Execute the stored procedure with @RequestId = 0 and store the result in a temp table
-SELECT *
-INTO #TempResult
-FROM YourStoredProcedure
-WHERE RequestId = 0
+-- Execute the stored procedure to retrieve the result set
+EXEC YourStoredProcedure @Parameter1 = 'Value1', @Parameter2 = 'Value2';
 
--- Query the column names from the temp table
-SELECT COLUMN_NAME
-FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME LIKE '#TempResult%'
+-- Query the metadata of the result set and store column names in the variable
+SELECT @ColumnNames = STRING_AGG(name, ', ')
+FROM sys.dm_exec_describe_first_result_set_for_object(OBJECT_ID(N'YourStoredProcedure'), 1)
 
--- Clean up the temp table
-DROP TABLE #TempResult
+-- Output the column names
+SELECT @ColumnNames AS ColumnNames
