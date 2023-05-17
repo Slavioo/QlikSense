@@ -1,13 +1,15 @@
-// Replace 'YourStoredProcedureName' with the name of your stored procedure
-let vProcedureName = 'YourStoredProcedureName';
+-- Replace 'YourStoredProcedureName' with the name of your stored procedure
+DECLARE @ProcedureName NVARCHAR(128) = 'YourStoredProcedureName';
 
-// Retrieve the column names and data types of the stored procedure result set
-ResultColumns:
-SQL SELECT COLUMN_NAME as ColumnName, DATA_TYPE as DataType
-FROM sys.dm_exec_describe_first_result_set_for_object(
-    OBJECT_ID(''' & vProcedureName & '''),
-    NULL
-);
-
-// Display the result columns
-SELECT * FROM ResultColumns;
+-- Retrieve the column data types from the result set
+SELECT
+    COLUMN_NAME AS ColumnName,
+    DATA_TYPE AS DataType
+FROM
+    INFORMATION_SCHEMA.COLUMNS
+WHERE
+    TABLE_NAME = (
+        SELECT TOP 1 name
+        FROM sys.objects
+        WHERE type = 'P' AND name = @ProcedureName
+    );
