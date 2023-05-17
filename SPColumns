@@ -1,19 +1,14 @@
--- Create a temporary table to store the column names
-CREATE TABLE #TempColumns
-(
-    ColumnNames VARCHAR(255)
-)
 
--- Execute the stored procedure with @RequestId = 0
-EXEC YourStoredProcedure @RequestId = 0
+-- Execute the stored procedure with @RequestId = 0 and store the result in a temp table
+SELECT *
+INTO #TempResult
+FROM YourStoredProcedure
+WHERE RequestId = 0
 
--- Insert the column names into the temporary table
-INSERT INTO #TempColumns (ColumnNames)
-EXEC sp_describe_first_result_set N'EXEC YourStoredProcedure @RequestId = 0', NULL, 1
+-- Query the column names from the temp table
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME LIKE '#TempResult%'
 
--- Query the temporary table to retrieve the column names
-SELECT ColumnNames
-FROM #TempColumns
-
--- Clean up the temporary table
-DROP TABLE #TempColumns
+-- Clean up the temp table
+DROP TABLE #TempResult
