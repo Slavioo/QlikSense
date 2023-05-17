@@ -1,12 +1,30 @@
--- Declare a variable to store the column names
-DECLARE @ColumnNames VARCHAR(MAX)
+-- Declare variables for storing column names and data types
+DECLARE @ColumnNames NVARCHAR(MAX)
+DECLARE @DataTypes NVARCHAR(MAX)
 
--- Execute the stored procedure to retrieve the result set
-EXEC YourStoredProcedure @Parameter1 = 'Value1', @Parameter2 = 'Value2';
+-- Create a temporary table to hold the result set metadata
+CREATE TABLE #TempColumns (
+    ColumnName NVARCHAR(128),
+    DataType NVARCHAR(128)
+)
 
--- Query the metadata of the result set and store column names in the variable
-SELECT @ColumnNames = STRING_AGG(name, ', ')
-FROM sys.dm_exec_describe_first_result_set_for_object(OBJECT_ID(N'YourStoredProcedure'), 1)
+-- Generate dynamic SQL to execute the stored procedure and retrieve the result set metadata
+DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'
+INSERT INTO #TempColumns
+EXEC sp_describe_first_result_set @tsql = N''EXEC YourStoredProcedure @Parameter1 = ''''Value1'''', @Parameter2 = ''''Value2''''''';
 
--- Output the column names
-SELECT @ColumnNames AS ColumnNames
+-- Query the column names and data types
+SELECT @ColumnNames = STRING_AGG(ColumnName, '',''),
+       @DataTypes = STRING_AGG(DataType, '','')
+FROM #TempColumns
+
+-- Output the column names and data types
+SELECT @ColumnNames AS ColumnNames, @DataTypes AS DataTypes
+
+-- Clean up the temporary table
+DROP TABLE #TempColumns
+'
+
+-- Execute the dynamic SQL
+EXEC(@SQL)
