@@ -1,13 +1,19 @@
-DECLARE @ColumnsCSV NVARCHAR(MAX)
+-- Create a temporary table to store the column names
+CREATE TABLE #TempColumns
+(
+    ColumnNames VARCHAR(255)
+)
 
--- Execute the stored procedure with the RequestId parameter
+-- Execute the stored procedure with @RequestId = 0
 EXEC YourStoredProcedure @RequestId = 0
 
--- Retrieve the column metadata using sys.dm_exec_describe_first_result_set
-SELECT @ColumnsCSV = COALESCE(@ColumnsCSV + ',', '') + name
-FROM sys.dm_exec_describe_first_result_set(N'EXEC YourStoredProcedure @RequestId = 0', NULL, 0)
-WHERE is_hidden = 0
+-- Insert the column names into the temporary table
+INSERT INTO #TempColumns (ColumnNames)
+EXEC sp_describe_first_result_set N'EXEC YourStoredProcedure @RequestId = 0', NULL, 1
 
--- Store the CSV string in a single column of another table
-INSERT INTO YourResultTable (ColumnNameCSV)
-VALUES (@ColumnsCSV)
+-- Query the temporary table to retrieve the column names
+SELECT ColumnNames
+FROM #TempColumns
+
+-- Clean up the temporary table
+DROP TABLE #TempColumns
