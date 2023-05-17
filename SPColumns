@@ -1,0 +1,25 @@
+-- Declare variables
+DECLARE @ProcedureName NVARCHAR(128) = 'YourStoredProcedureName';
+DECLARE @CsvFilePath NVARCHAR(256) = 'C:\Path\To\Output.csv';
+
+-- Create a temporary table to hold the result
+CREATE TABLE #TempResult (
+    ColumnName NVARCHAR(128),
+    DataType NVARCHAR(128),
+    MaxLength INT
+);
+
+-- Insert the result of sp_describe_first_result_set into the temporary table
+INSERT INTO #TempResult
+EXEC sp_describe_first_result_set N'EXEC ' + @ProcedureName;
+
+-- Export the result to a CSV file
+DECLARE @CsvCommand NVARCHAR(4000) =
+    N'SELECT * FROM #TempResult
+     ORDER BY ColumnName
+     FOR CSV AUTO, HEADER, QUOTE NAME, NOCOUNT';
+
+EXEC xp_cmdshell 'echo ' + @CsvCommand + ' > ' + @CsvFilePath;
+
+-- Clean up
+DROP TABLE #TempResult;
