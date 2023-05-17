@@ -1,11 +1,28 @@
-DECLARE @ProcedureName NVARCHAR(128) = 'YourStoredProcedureName';
-DECLARE @CsvFilePath NVARCHAR(256) = 'C:\Path\To\Output.csv';
+DECLARE @ColumnsCSV NVARCHAR(MAX)
 
-CREATE TABLE #TempResult (ColumnName NVARCHAR(128));
+-- Create a temporary table to store the column names
+CREATE TABLE #ColumnNames
+(
+    ColumnName NVARCHAR(255)
+)
 
-INSERT INTO #TempResult
-EXEC sp_describe_first_result_set CONCAT('EXEC ', @ProcedureName);
+-- Execute the stored procedure with the RequestId parameter
+EXEC YourStoredProcedure @RequestId = 0
 
-EXEC xp_cmdshell CONCAT('bcp "SELECT ColumnName FROM #TempResult ORDER BY ColumnName" queryout "', @CsvFilePath, '" -c -t, -T -S');
+-- Retrieve the column names and store them in the temporary table
+INSERT INTO #ColumnNames
+SELECT COLUMN_NAME
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_NAME = 'YourTableName' -- Replace with the actual table name
 
-DROP TABLE #TempResult;
+-- Concatenate the column names into a CSV string
+SELECT @ColumnsCSV = COALESCE(@ColumnsCSV + ',', '') + ColumnName
+FROM #ColumnNames
+
+-- Store the CSV string in a single column of another table
+INSERT INTO YourResultTable (ColumnNameCSV)
+VALUES (@ColumnsCSV)
+
+-- Clean up the temporary table
+DROP TABLE #ColumnNames
+
