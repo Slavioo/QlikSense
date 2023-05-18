@@ -1,9 +1,19 @@
-// Assuming you have executed the stored procedure and have the ResultSet object
+-- Assuming you have executed the stored procedure and have the ResultSet
 
-ResultSetMetaData metaData = resultSet.getMetaData();
-int columnCount = metaData.getColumnCount();
+DECLARE @columnCount INT
+DECLARE @i INT = 1
+DECLARE @columnName NVARCHAR(128)
 
-for (int i = 1; i <= columnCount; i++) {
-    String columnName = metaData.getColumnName(i);
-    System.out.println("Column Name: " + columnName);
-}
+SELECT @columnCount = COUNT(*)
+FROM sys.dm_exec_describe_first_result_set(N'EXEC YourStoredProcedureName', NULL, NULL)
+
+WHILE @i <= @columnCount
+BEGIN
+    SELECT @columnName = name
+    FROM sys.dm_exec_describe_first_result_set(N'EXEC YourStoredProcedureName', NULL, NULL)
+    WHERE column_ordinal = @i
+
+    PRINT 'Column Name: ' + @columnName
+
+    SET @i = @i + 1
+END
