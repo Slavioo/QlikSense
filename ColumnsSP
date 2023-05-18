@@ -1,19 +1,25 @@
--- Assuming you have executed the stored procedure and have the ResultSet
+// Load the existing table
+ExistingTable:
+LOAD *
+FROM [path\to\existing_table.qvd]
+(qvd);
 
-DECLARE @columnCount INT
-DECLARE @i INT = 1
-DECLARE @columnName NVARCHAR(128)
+// Create a new table with a single column for storing column names
+NewTable:
+LOAD
+    ColumnName() as ColumnNames
+AUTOGENERATE 1
+WHERE 1 = 0;
 
-SELECT @columnCount = COUNT(*)
-FROM sys.dm_exec_describe_first_result_set(N'EXEC YourStoredProcedureName', NULL, NULL)
+// Load the column names from the existing table and insert them into the new table
+FOR i = 0 TO NoOfFields('ExistingTable') - 1
+    LET vFieldName = FieldName($(i), 'ExistingTable');
+    NewTable:
+    LOAD
+        '$(vFieldName)' as ColumnNames
+    AUTOGENERATE 1;
+NEXT i;
 
-WHILE @i <= @columnCount
-BEGIN
-    SELECT @columnName = name
-    FROM sys.dm_exec_describe_first_result_set(N'EXEC YourStoredProcedureName', NULL, NULL)
-    WHERE column_ordinal = @i
-
-    PRINT 'Column Name: ' + @columnName
-
-    SET @i = @i + 1
-END
+// Store the new table as a QVD file
+STORE NewTable INTO [path\to\new_table.qvd]
+(qvd);
