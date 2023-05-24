@@ -1,0 +1,15 @@
+SET SeparatorChar = '|'; // Define the custom separator character
+
+LOAD
+    expName,
+    expDef
+FROM [path\to\your\file.csv]
+(txt, codepage is 1252, embedded labels, delimiter is '$(SeparatorChar)')
+;
+
+FOR Each Row IN [$(TableName)] // Replace $(TableName) with the actual table name created by the previous LOAD statement
+    LET varName = Row.expName;
+    LET varValue = Row.expDef;
+
+    SET $(varName) = '$(varValue)';
+NEXT
