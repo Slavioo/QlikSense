@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Email Template with Borders</title>
+    <title>NPrinting Table Report</title>
     <style>
-        /* Set border styles */
-        .bordered-table {
-            border-collapse: collapse;
+        /* Set table styles */
+        .report-table {
             width: 100%;
+            border-collapse: collapse;
         }
 
-        .bordered-table th,
-        .bordered-table td {
+        .report-table th,
+        .report-table td {
             border: 1px solid #e0e0e0;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
+        }
+
+        .report-table thead th {
+            background-color: #f5f5f5;
         }
 
         /* Add some styling */
@@ -31,8 +35,8 @@
     </style>
 </head>
 <body>
-    <h1>Report Title</h1>
-    <table class="bordered-table">
+    <h1>NPrinting Table Report</h1>
+    <table class="report-table">
         <thead>
             <tr>
                 <th>Column 1</th>
@@ -41,13 +45,13 @@
             </tr>
         </thead>
         <tbody>
-            <% for each record in records %>
-                <tr>
-                    <td><%= record.Column1 %></td>
-                    <td><%= record.Column2 %></td>
-                    <td><%= record.Column3 %></td>
-                </tr>
-            <% next %>
+            {#TableData}
+            <tr>
+                <td>{Field1}</td>
+                <td>{Field2}</td>
+                <td>{Field3}</td>
+            </tr>
+            {/TableData}
         </tbody>
     </table>
 </body>
