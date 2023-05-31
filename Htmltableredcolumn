@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .red-background {
+            background-color: red;
+        }
+    </style>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const table = document.querySelector('table');
+            const dateCells = table.querySelectorAll('td:first-child');
+
+            dateCells.forEach(cell => {
+                const cellDate = new Date(cell.innerText);
+                const today = new Date();
+
+                // Calculate the difference in days
+                const daysDifference = Math.floor((today - cellDate) / (1000 * 60 * 60 * 24));
+
+                if (daysDifference > 30) {
+                    cell.classList.add('red-background');
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Data</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>2023-05-01</td>
+                <td>Data 1</td>
+            </tr>
+            <tr>
+                <td>2023-05-15</td>
+                <td>Data 2</td>
+            </tr>
+            <tr>
+                <td>2023-04-30</td>
+                <td>Data 3</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
