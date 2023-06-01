@@ -1,0 +1,65 @@
+<style>
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+    }
+
+    td {
+        padding: 8px;
+        text-align: left;
+    }
+
+    .red {
+        background-color: red;
+    }
+
+    .green {
+        background-color: green;
+    }
+</style>
+
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Data</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="date">01/05/2023</td>
+            <td>Data 1</td>
+        </tr>
+        <tr>
+            <td class="date">02/05/2023</td>
+            <td>Data 2</td>
+        </tr>
+        <tr>
+            <td class="date">03/05/2023</td>
+            <td>Data 3</td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    function applyDateColor() {
+        var today = new Date();
+        var dateCells = document.getElementsByClassName('date');
+
+        for (var i = 0; i < dateCells.length; i++) {
+            var dateCell = dateCells[i];
+            var dateValue = new Date(dateCell.textContent);
+            var diffDays = Math.ceil((dateValue - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays <= 0) {
+                dateCell.classList.add('red');
+            } else if (diffDays <= 2) {
+                dateCell.classList.add('green');
+            }
+        }
+    }
+
+    applyDateColor();
+</script>
