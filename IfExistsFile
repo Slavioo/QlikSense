@@ -1,0 +1,8 @@
+SET vFolderPath = 'C:\Path\To\Folder';
+
+FOR EACH vFile IN FileList('$(vFolderPath)\*.qvd')
+    LET vFilePath = '$(vFolderPath)\$(vFile)';
+    IF FileSize('$(vFilePath)') > 0 THEN
+        LOAD * FROM [$(vFilePath)] (qvd);
+    ENDIF
+NEXT
