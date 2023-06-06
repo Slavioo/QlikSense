@@ -1,0 +1,23 @@
+Sub ExportAllVariables
+    Dim varTable As Table
+    Set varTable = ActiveDocument.Variables
+
+    Dim filePath
+    filePath = "C:\Path\to\export\variables.csv"
+
+    Dim file
+    Set file = Fso.CreateTextFile(filePath, True)
+
+    ' Write header row
+    file.WriteLine "VariableName, VariableValue"
+
+    ' Loop through each variable and write its name and value
+    For Each v In varTable
+        file.WriteLine v.Name & "," & v.GetContent.String
+    Next
+
+    file.Close
+    Set file = Nothing
+
+    MsgBox "All variables exported successfully to " & filePath
+End Sub
