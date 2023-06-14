@@ -1,0 +1,16 @@
+<table style="width: 100%; border-collapse: collapse;">
+    <tr>
+        <th style="background-color: #ffcccc; text-align: center; padding: 8px; width: 20%;">POTENTIAL BLOCKERS</th>
+        <th style="background-color: #cccccc; text-align: center; padding: 8px; width: 20%;">OPEN</th>
+        <th style="background-color: #ffcc99; text-align: center; padding: 8px; width: 20%;">IN DEV</th>
+        <th style="background-color: #ffcc99; text-align: center; padding: 8px; width: 20%;">IN UAT</th>
+        <th style="background-color: #ccffcc; text-align: center; padding: 8px; width: 20%;">DONE</th>
+    </tr>
+    <tr>
+        <td style="background-color: #ffcccc; text-align: center; padding: 8px;">5</td>
+        <td style="background-color: #cccccc; text-align: center; padding: 8px;">10%</td>
+        <td style="background-color: #ffcc99; text-align: center; padding: 8px;">20%</td>
+        <td style="background-color: #ffcc99; text-align: center; padding: 8px;">15%</td>
+        <td style="background-color: #ccffcc; text-align: center; padding: 8px;">50%</td>
+    </tr>
+</table>
