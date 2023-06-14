@@ -1,0 +1,31 @@
+<table style="width: 100%; border-collapse: collapse; table-layout: fixed; border-radius: 8px; overflow: hidden;">
+    <tr>
+        <th style="padding: 10px; text-align: center; color: #ffffff; background-color: #e06666; width: 20%; border: 1px solid #ffffff;">POTENTIAL BLOCKERS</th>
+        <th style="padding: 10px; text-align: center; color: #ffffff; background-color: #bfbfbf; width: 20%; border: 1px solid #ffffff;">OPEN</th>
+        <th style="padding: 10px; text-align: center; color: #ffffff; background-color: #e6956e; width: 20%; border: 1px solid #ffffff;">IN DEV</th>
+        <th style="padding: 10px; text-align: center; color: #ffffff; background-color: #e6956e; width: 20%; border: 1px solid #ffffff;">IN UAT</th>
+        <th style="padding: 10px; text-align: center; color: #ffffff; background-color: #90c695; width: 20%; border: 1px solid #ffffff;">DONE</th>
+    </tr>
+    <tr>
+        <td style="padding: 10px; text-align: center; color: #ffffff; background-color: #e06666; width: 20%; border: 1px solid #ffffff;">
+            <h3>5</h3>
+            <p>10%</p>
+        </td>
+        <td style="padding: 10px; text-align: center; color: #ffffff; background-color: #bfbfbf; width: 20%; border: 1px solid #ffffff;">
+            <h3>10</h3>
+            <p>20%</p>
+        </td>
+        <td style="padding: 10px; text-align: center; color: #ffffff; background-color: #e6956e; width: 20%; border: 1px solid #ffffff;">
+            <h3>15</h3>
+            <p>25%</p>
+        </td>
+        <td style="padding: 10px; text-align: center; color: #ffffff; background-color: #e6956e; width: 20%; border: 1px solid #ffffff;">
+            <h3>20</h3>
+            <p>30%</p>
+        </td>
+        <td style="padding: 10px; text-align: center; color: #ffffff; background-color: #90c695; width: 20%; border: 1px solid #ffffff;">
+            <h3>25</h3>
+            <p>40%</p>
+        </td>
+    </tr>
+</table>
