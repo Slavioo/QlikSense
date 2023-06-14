@@ -1,16 +1,69 @@
-<table style="width: 100%; border-collapse: collapse;">
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    th,
+    td {
+        padding: 10px;
+        text-align: center;
+        color: #ffffff;
+    }
+
+    .red-column {
+        background-color: #e06666;
+    }
+
+    .gray-column {
+        background-color: #bfbfbf;
+    }
+
+    .orange-column {
+        background-color: #e6956e;
+    }
+
+    .green-column {
+        background-color: #90c695;
+    }
+
+    .table-cell {
+        width: 20%;
+        border: 1px solid #ffffff;
+    }
+</style>
+
+<table>
     <tr>
-        <th style="background-color: #ffcccc; text-align: center; padding: 8px; width: 20%;">POTENTIAL BLOCKERS</th>
-        <th style="background-color: #cccccc; text-align: center; padding: 8px; width: 20%;">OPEN</th>
-        <th style="background-color: #ffcc99; text-align: center; padding: 8px; width: 20%;">IN DEV</th>
-        <th style="background-color: #ffcc99; text-align: center; padding: 8px; width: 20%;">IN UAT</th>
-        <th style="background-color: #ccffcc; text-align: center; padding: 8px; width: 20%;">DONE</th>
+        <th class="red-column table-cell">POTENTIAL BLOCKERS</th>
+        <th class="gray-column table-cell">OPEN</th>
+        <th class="orange-column table-cell">IN DEV</th>
+        <th class="orange-column table-cell">IN UAT</th>
+        <th class="green-column table-cell">DONE</th>
     </tr>
     <tr>
-        <td style="background-color: #ffcccc; text-align: center; padding: 8px;">5</td>
-        <td style="background-color: #cccccc; text-align: center; padding: 8px;">10%</td>
-        <td style="background-color: #ffcc99; text-align: center; padding: 8px;">20%</td>
-        <td style="background-color: #ffcc99; text-align: center; padding: 8px;">15%</td>
-        <td style="background-color: #ccffcc; text-align: center; padding: 8px;">50%</td>
+        <td class="red-column table-cell">
+            <h3>5</h3>
+            <p>10%</p>
+        </td>
+        <td class="gray-column table-cell">
+            <h3>10</h3>
+            <p>20%</p>
+        </td>
+        <td class="orange-column table-cell">
+            <h3>15</h3>
+            <p>25%</p>
+        </td>
+        <td class="orange-column table-cell">
+            <h3>20</h3>
+            <p>30%</p>
+        </td>
+        <td class="green-column table-cell">
+            <h3>25</h3>
+            <p>40%</p>
+        </td>
     </tr>
 </table>
