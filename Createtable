@@ -1,0 +1,26 @@
+-- Create the temporary table
+CREATE TABLE #TempTable (
+    Column1 INT,
+    Column2 VARCHAR(50),
+    Column3 DECIMAL(10, 2),
+    Column4 DATE,
+    Column5 VARCHAR(100),
+    Column6 INT,
+    Column7 FLOAT
+)
+
+-- Insert data into the temporary table
+INSERT INTO #TempTable (Column1, Column2, Column3, Column4, Column5, Column6, Column7)
+VALUES
+    (1, 'Record 1', 10.5, '2023-06-01', 'Data 1', 100, 1.23),
+    (2, 'Record 2', 20.5, '2023-06-02', 'Data 2', 200, 2.34),
+    (3, 'Record 3', 30.5, '2023-06-03', 'Data 3', 300, 3.45),
+    (4, 'Record 4', 40.5, '2023-06-04', 'Data 4', 400, 4.56),
+    (5, 'Record 5', 50.5, '2023-06-05', 'Data 5', 500, 5.67)
+
+-- Query the temporary table
+SELECT *
+FROM #TempTable
+
+-- Drop the temporary table when no longer needed
+DROP TABLE #TempTable
