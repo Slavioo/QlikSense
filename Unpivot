@@ -1,0 +1,10 @@
+SELECT ID, Name, Attribute, Value,
+       CASE WHEN Attribute IN ('Value1', 'Value2', 'Value3') THEN Value ELSE NULL END AS NewColumn1,
+       CASE WHEN Attribute IN ('Value4', 'Value5', 'Value6') THEN Value ELSE NULL END AS NewColumn2
+FROM (
+    SELECT ID, Name, Value1, Value2, Value3, Value4, Value5, Value6
+    FROM WideTable
+) p
+UNPIVOT (
+    Value FOR Attribute IN (Value1, Value2, Value3, Value4, Value5, Value6)
+) AS unpvt;
