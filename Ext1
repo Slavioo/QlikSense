@@ -1,0 +1,88 @@
+# Set the extension name and folder path
+$extensionName = "EditableTableExtension"
+$extensionFolderPath = "C:\Extensions\$extensionName"
+
+# Set the selected editable columns (replace with your desired column names)
+$editableColumns = @()
+
+# Step 1: Create the extension folder structure
+New-Item -ItemType Directory -Force -Path $extensionFolderPath
+Set-Location -Path $extensionFolderPath
+
+# Step 2: Create the HTML file
+$htmlCode = @"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Editable Table Extension</title>
+    <style>
+        /* CSS styles for the table */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #f5f5f5;
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+            font-weight: bold;
+        }
+        
+        td {
+            border-bottom: 1px solid #ccc;
+            padding: 10px;
+        }
+        
+        /* CSS styles for editable cells */
+        td.editable {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            cursor: text;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <!-- Generate table headers -->
+                #foreach($column in $editableColumns)
+                <th>$column</th>
+                #end
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <!-- Generate editable cells for selected columns -->
+                #foreach($column in $editableColumns)
+                <td class="editable" contenteditable="true">Data</td>
+                #end
+            </tr>
+            <tr>
+                <!-- Generate non-editable cells for non-selected columns -->
+                #foreach($column in $allColumns)
+                #if(!$editableColumns.Contains($column))
+                <td>$column</td>
+                #end
+                #end
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
+"@
+$htmlCode | Out-File -Encoding UTF8 -FilePath "$extensionFolderPath\extension.html"
+
+# Step 3: Create the ZIP file
+$zipFilePath = "$extensionFolderPath\$extensionName.zip"
+Add-Type -A 'System.IO.Compression.FileSystem'
+[System.IO.Compression.ZipFile]::CreateFromDirectory($extensionFolderPath, $zipFilePath)
+
+Write-Host "Extension created successfully as a ZIP file: $zipFilePath"
