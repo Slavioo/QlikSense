@@ -1,21 +1,61 @@
-$extensionName = "MyTableExtension"
+$extensionName = "ProfessionalTableExtension"
 
 # Create the extension directory
 New-Item -ItemType Directory -Force -Path $extensionName
 
-# Create the QEXT file
-$qextContent = @{
-    "name" = "Table Extension"
-    "description" = "A Qlik Sense extension with a static HTML table"
-    "type" = "visualization"
-    "version" = "1.0.0"
-    "author" = "Your Name"
-    "homepage" = ""
-    "icon" = ""
-    "dependencies" = @()
-} | ConvertTo-Json -Depth 4
+# Create the HTML file
+$htmlContent = @'
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <div id="table-container"></div>
 
-Set-Content -Path "$extensionName\$extensionName.qext" -Value $qextContent
+    <script src="script.js"></script>
+    <script>
+      define(['jquery'], function($) {
+        var $element = $('#table-container');
+        return paint($element);
+      });
+    </script>
+  </body>
+</html>
+'@
+
+Set-Content -Path "$extensionName\index.html" -Value $htmlContent
+
+# Create the CSS file
+$cssContent = @'
+/* Reset default table styles */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Table header styles */
+table th {
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-weight: bold;
+  text-align: left;
+}
+
+/* Table cell styles */
+table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+/* Alternating row colors */
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+'@
+
+Set-Content -Path "$extensionName\style.css" -Value $cssContent
 
 # Create the JavaScript file
 $jsContent = @'
@@ -25,48 +65,48 @@ define([], function () {
       var html = `<table>
                     <thead>
                       <tr>
-                        <th>Column 1</th>
-                        <th>Column 2</th>
-                        <th>Column 3</th>
-                        <th>Column 4</th>
-                        <th>Column 5</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Country</th>
+                        <th>Salary</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td>Row 1, Cell 1</td>
-                        <td>Row 1, Cell 2</td>
-                        <td>Row 1, Cell 3</td>
-                        <td>Row 1, Cell 4</td>
-                        <td>Row 1, Cell 5</td>
+                        <td>John Doe</td>
+                        <td>25</td>
+                        <td>john.doe@example.com</td>
+                        <td>USA</td>
+                        <td>$50,000</td>
                       </tr>
                       <tr>
-                        <td>Row 2, Cell 1</td>
-                        <td>Row 2, Cell 2</td>
-                        <td>Row 2, Cell 3</td>
-                        <td>Row 2, Cell 4</td>
-                        <td>Row 2, Cell 5</td>
+                        <td>Jane Smith</td>
+                        <td>32</td>
+                        <td>jane.smith@example.com</td>
+                        <td>Canada</td>
+                        <td>$65,000</td>
                       </tr>
                       <tr>
-                        <td>Row 3, Cell 1</td>
-                        <td>Row 3, Cell 2</td>
-                        <td>Row 3, Cell 3</td>
-                        <td>Row 3, Cell 4</td>
-                        <td>Row 3, Cell 5</td>
+                        <td>David Johnson</td>
+                        <td>41</td>
+                        <td>david.johnson@example.com</td>
+                        <td>Australia</td>
+                        <td>$80,000</td>
                       </tr>
                       <tr>
-                        <td>Row 4, Cell 1</td>
-                        <td>Row 4, Cell 2</td>
-                        <td>Row 4, Cell 3</td>
-                        <td>Row 4, Cell 4</td>
-                        <td>Row 4, Cell 5</td>
+                        <td>Sarah Williams</td>
+                        <td>28</td>
+                        <td>sarah.williams@example.com</td>
+                        <td>UK</td>
+                        <td>$60,000</td>
                       </tr>
                       <tr>
-                        <td>Row 5, Cell 1</td>
-                        <td>Row 5, Cell 2</td>
-                        <td>Row 5, Cell 3</td>
-                        <td>Row 5, Cell 4</td>
-                        <td>Row 5, Cell 5</td>
+                        <td>Michael Brown</td>
+                        <td>37</td>
+                        <td>michael.brown@example.com</td>
+                        <td>Germany</td>
+                        <td>$70,000</td>
                       </tr>
                     </tbody>
                   </table>`;
@@ -76,28 +116,7 @@ define([], function () {
 });
 '@
 
-Set-Content -Path "$extensionName\$extensionName.js" -Value $jsContent
-
-# Create the CSS file
-$cssContent = @'
-/* Styles for the extension */
-.example-extension {
-  font-size: 18px;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px;
-  background-color: #f0f0f0;
-}
-'@
-
-Set-Content -Path "$extensionName\$extensionName.css" -Value $cssContent
-
-# Create the HTML file
-$htmlContent = @'
-<div class="example-extension"></div>
-'@
-
-Set-Content -Path "$extensionName\$extensionName.html" -Value $htmlContent
+Set-Content -Path "$extensionName\script.js" -Value $jsContent
 
 # Compress the extension directory into a ZIP file
 $zipPath = "$extensionName.zip"
