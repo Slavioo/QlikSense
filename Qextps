@@ -1,124 +1,64 @@
-# Extension metadata (Slavomír Haladej)
-$qextContent = @"
-{
-  "name": "SimpleTableExtension",
-  "description": "A simple Qlik Sense table extension",
-  "author": "Slavomír Haladej",
-  "version": "1.0.0",
-  "homepage": "",
-  "repository": {
-    "url": ""
-  },
-  "dependencies": [],
-  "type": "visualization",
-  "icon": "",
-  "preview": "",
-  "keywords": [],
-  "license": "",
-  "tags": []
-}
-"@
+# Set the extension name and author
+$extensionName = "SimpleTableExtension"
+$extensionAuthor = "Slavomír Haladej"
 
 # Create the extension directory
-$extensionDirectory = "SimpleTableExtension"
-New-Item -ItemType Directory -Force -Path $extensionDirectory
+$extensionPath = "$extensionName\"
+New-Item -ItemType Directory -Force -Path $extensionPath
 
 # Create the QEXT file
-$qextFilePath = "$extensionDirectory\SimpleTableExtension.qext"
-Set-Content -Path $qextFilePath -Value $qextContent
-
-# Create the HTML file
-$htmlContent = @"
-<!DOCTYPE html>
-<html>
-<head>
-  <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
-  <div id="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Column 1</th>
-          <th>Column 2</th>
-          <th>Column 3</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Data 1</td>
-          <td>Data 2</td>
-          <td>Data 3</td>
-        </tr>
-        <tr>
-          <td>Data 4</td>
-          <td>Data 5</td>
-          <td>Data 6</td>
-        </tr>
-        <tr>
-          <td>Data 7</td>
-          <td>Data 8</td>
-          <td>Data 9</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <script src="script.js"></script>
-  <script>
-    define(["jquery"], function ($) {
-      return {
-        paint: function ($element) {
-          // Call the paint function from the script.js file
-          paint($element);
-        }
-      };
-    });
-  </script>
-</body>
-</html>
-"@
-
-$htmlFilePath = "$extensionDirectory\index.html"
-Set-Content -Path $htmlFilePath -Value $htmlContent
-
-# Create the CSS file
-$cssContent = @"
-/* Add your custom CSS styles here */
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-table th, table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-table th {
-  background-color: #f2f2f2;
-  font-weight: bold;
-  text-align: left;
+$qextContent = @"
+{
+  "name": "$extensionName",
+  "description": "Simple table extension",
+  "author": "$extensionAuthor",
+  "type": "visualization",
+  "version": "1.0.0",
+  "icon": "extension-icon.png",
+  "preview": "preview.png"
 }
 "@
+Set-Content -Path "$extensionPath$extensionName.qext" -Value $qextContent
 
-$cssFilePath = "$extensionDirectory\style.css"
-Set-Content -Path $cssFilePath -Value $cssContent
-
-# Create the JavaScript file
+# Create the JS file
 $jsContent = @"
-function paint($element) {
-  // Add your JavaScript logic here
-  // For example, modifying the table dynamically
-}
+define([], function() {
+  'use strict';
+
+  return {
+    paint: function ($element) {
+      var html = '<table>' +
+        '<thead>' +
+        '<tr>' +
+        '<th>Name</th>' +
+        '<th>Age</th>' +
+        '<th>Country</th>' +
+        '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+        '<tr>' +
+        '<td>John Doe</td>' +
+        '<td>25</td>' +
+        '<td>USA</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>Jane Smith</td>' +
+        '<td>32</td>' +
+        '<td>Canada</td>' +
+        '</tr>' +
+        '<tr>' +
+        '<td>David Johnson</td>' +
+        '<td>41</td>' +
+        '<td>Australia</td>' +
+        '</tr>' +
+        '</tbody>' +
+        '</table>';
+
+      $element.html(html);
+    }
+  };
+});
 "@
+Set-Content -Path "$extensionPath$extensionName.js" -Value $jsContent
 
-$jsFilePath = "$extensionDirectory\script.js"
-Set-Content -Path $jsFilePath -Value $jsContent
-
-# Compress the extension directory into a ZIP file
-$zipPath = "$extensionDirectory.zip"
-Compress-Archive -Path $extensionDirectory -DestinationPath $zipPath
-
-# Clean up the temporary directory
-Remove-Item -Path $extensionDirectory
+Write-Host "Qlik Sense extension created successfully."
