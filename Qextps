@@ -12,6 +12,19 @@ define([], function() {
   'use strict';
 
   var myTableExtension = {
+    initialProperties: {
+      version: 1.0,
+      qHyperCubeDef: {
+        qDimensions: [],
+        qMeasures: [],
+        qInitialDataFetch: [
+          {
+            qWidth: 10,
+            qHeight: 1000
+          }
+        ]
+      }
+    },
     definition: {
       type: 'items',
       component: 'accordion',
@@ -68,40 +81,97 @@ define([], function() {
 "@
 $scriptContent | Out-File -FilePath $scriptFilePath -Encoding UTF8
 
+# Create the style file
+$styleFilePath = "$extensionPath\style.css"
+$styleContent = @"
+table {
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid black;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+"@
+$styleContent | Out-File -FilePath $styleFilePath -Encoding UTF8
+
 # Create the definition file
-$definitionFilePath = "$extensionPath\definition.xml"
+$definitionFilePath = "$extensionPath\definition.qext"
 $definitionContent = @"
-<?xml version="1.0" encoding="utf-8"?>
-<ExtensionObject Label="$extensionName" Type="visualization">
-  <Script src="script.js"/>
-  <Properties/>
-  <InitialDataFetch>0</InitialDataFetch>
-  <Appearance>
-    <Dimensions>
-      <DimensionGroup Label="Dimensions">
-        <Type>StringExpression</Type>
-        <Expression>false</Expression>
-      </DimensionGroup>
-    </Dimensions>
-    <Measures>
-      <MeasureGroup Label="Measures">
-        <Type>Number</Type>
-        <Expression>false</Expression>
-      </MeasureGroup>
-    </Measures>
-    <Sorting>
-      <Array/>
-    </Sorting>
-  </Appearance>
-  <Layout>
-    <Settings/>
-  </Layout>
-  <Meta>
-    <Fields/>
-  </Meta>
-</ExtensionObject>
+{
+  "name": "$extensionName",
+  "type": "visualization",
+  "description": "Table-like extension",
+  "author": "Your Name",
+  "version": "1.0.0",
+  "icon": "",
+  "preview": "",
+  "keywords": [],
+  "homepage": "",
+  "dependencies": [],
+  "license": "",
+  "repository": "",
+  "thumbnail": "",
+  "repositoryType": "git",
+  "downloadUrl": ""
+}
 "@
 $definitionContent | Out-File -FilePath $definitionFilePath -Encoding UTF8
+
+# Create the HTML file
+$htmlFilePath = "$extensionPath\template.html"
+$htmlContent = @"
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>$extensionName</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div id="container">
+    <div id="table-container"></div>
+  </div>
+
+  <script src="lib/require.js"></script>
+  <script>
+    require.config({
+      baseUrl: '/resources',
+      paths: {
+        "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min"
+      }
+    });
+
+    require(["jquery", "js/qlik"], function($, qlik) {
+      $(function() {
+        qlik.setOnError(function(error) {
+          console.log(error);
+        });
+
+        qlik.setOnAbort(function() {
+          console.log("Extension aborted.");
+        });
+
+        qlik.getGlobal().getAuthenticatedUser(function(reply) {
+          console.log("Authenticated user: " + reply.qReturn);
+        });
+
+        qlik.getApp(function(app) {
+          app.visualization.create("myTableExtension", [], {}).then(function(vis) {
+            vis.show("table-container");
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+"@
+$htmlContent | Out-File -FilePath $htmlFilePath -Encoding UTF8
 
 # Inform the user about the extension creation
 Write-Host "Qlik Sense extension '$extensionName' has been created successfully at: $extensionPath"
