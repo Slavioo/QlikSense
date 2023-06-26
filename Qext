@@ -26,4 +26,29 @@ define([], function () {
   background-color: #f0f0f0;
 }
 
-<div class="example-extension">This is a simple Qlik Sense extension.</div>
+<div class="example-extension">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Age</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>John</td>
+        <td>25</td>
+      </tr>
+      <tr>
+        <td>Amy</td>
+        <td>32</td>
+      </tr>
+      <tr>
+        <td>Michael</td>
+        <td>41</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
