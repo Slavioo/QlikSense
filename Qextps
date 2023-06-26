@@ -140,7 +140,7 @@ $htmlContent = @"
   <script src="/resources/assets/external/requirejs/require.js"></script>
   <script>
     require.config({
-      baseUrl: '/resources',
+      baseUrl: "/resources",
       paths: {
         "jquery": "/resources/assets/external/jquery/jquery",
         "qlik": "/resources/js/qlik"
@@ -158,10 +158,10 @@ $htmlContent = @"
         });
 
         qlik.getGlobal().getAuthenticatedUser(function(reply) {
-          console.log("Authenticated user: " + reply.qMessage);
+          console.log("Authenticated user: " + reply.qMsg);
         });
 
-        qlik.getApp(function(app) {
+        qlik.currApp(function(app) {
           app.visualization.create("myTableExtension", [], {}).then(function(vis) {
             vis.show("table-container");
           });
