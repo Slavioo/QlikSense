@@ -5,14 +5,38 @@ $extensionPath = "C:\QlikSense\Extensions\$extensionName"
 # Create the extension folder
 New-Item -ItemType Directory -Path $extensionPath | Out-Null
 
-# Create the extension script file
+# Create the script file
 $scriptFilePath = "$extensionPath\script.js"
 $scriptContent = @"
 define([], function() {
-  return {
+  'use strict';
+
+  var myTableExtension = {
+    definition: {
+      type: 'items',
+      component: 'accordion',
+      items: {
+        dimensions: {
+          uses: 'dimensions',
+          min: 1,
+          max: 5
+        },
+        measures: {
+          uses: 'measures',
+          min: 1,
+          max: 5
+        },
+        sorting: {
+          uses: 'sorting'
+        },
+        appearance: {
+          uses: 'settings'
+        }
+      }
+    },
     paint: function($element, layout) {
       var html = "<table style='width:100%'>";
-      
+
       // Add table header
       html += "<thead><tr>";
       layout.qHyperCube.qDimensionInfo.forEach(function(dimInfo) {
@@ -22,7 +46,7 @@ define([], function() {
         html += "<th>" + measureInfo.qFallbackTitle + "</th>";
       });
       html += "</tr></thead>";
-      
+
       // Add table rows
       html += "<tbody>";
       layout.qHyperCube.qDataPages[0].qMatrix.forEach(function(row) {
@@ -33,16 +57,18 @@ define([], function() {
         html += "</tr>";
       });
       html += "</tbody></table>";
-      
+
       // Set the extension's HTML content
       $element.html(html);
     }
   };
+
+  return myTableExtension;
 });
 "@
 $scriptContent | Out-File -FilePath $scriptFilePath -Encoding UTF8
 
-# Create the extension definition file
+# Create the definition file
 $definitionFilePath = "$extensionPath\definition.xml"
 $definitionContent = @"
 <?xml version="1.0" encoding="utf-8"?>
@@ -50,16 +76,29 @@ $definitionContent = @"
   <Script src="script.js"/>
   <Properties/>
   <InitialDataFetch>0</InitialDataFetch>
-  <Connections>
-    <UsesConnections/>
-  </Connections>
   <Appearance>
-    <CustomSize>
-      <CustomHeight>10</CustomHeight>
-      <CustomWidth>10</CustomWidth>
-    </CustomSize>
-    <CustomProperties/>
+    <Dimensions>
+      <DimensionGroup Label="Dimensions">
+        <Type>StringExpression</Type>
+        <Expression>false</Expression>
+      </DimensionGroup>
+    </Dimensions>
+    <Measures>
+      <MeasureGroup Label="Measures">
+        <Type>Number</Type>
+        <Expression>false</Expression>
+      </MeasureGroup>
+    </Measures>
+    <Sorting>
+      <Array/>
+    </Sorting>
   </Appearance>
+  <Layout>
+    <Settings/>
+  </Layout>
+  <Meta>
+    <Fields/>
+  </Meta>
 </ExtensionObject>
 "@
 $definitionContent | Out-File -FilePath $definitionFilePath -Encoding UTF8
