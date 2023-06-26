@@ -1,47 +1,47 @@
-.qv-object-ProfessionalTable table {
+.qv-object-ProfiTable table {
   width: 100%;
   border-collapse: collapse;
   font-family: Arial, sans-serif;
 }
 
-.qv-object-ProfessionalTable th,
-.qv-object-ProfessionalTable td {
+.qv-object-ProfiTable th,
+.qv-object-ProfiTable td {
   padding: 10px;
   border: 1px solid #ddd;
   text-align: left;
 }
 
-.qv-object-ProfessionalTable th {
+.qv-object-ProfiTable th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
 
-.qv-object-ProfessionalTable tr:nth-child(even) {
+.qv-object-ProfiTable tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.qv-object-ProfessionalTable tr:hover {
+.qv-object-ProfiTable tr:hover {
   background-color: #f5f5f5;
 }
 
-.qv-object-ProfessionalTable .container {
+.qv-object-ProfiTable .container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
 
-.qv-object-ProfessionalTable .title {
+.qv-object-ProfiTable .title {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 20px;
 }
 
-.qv-object-ProfessionalTable .subtitle {
+.qv-object-ProfiTable .subtitle {
   font-size: 18px;
   margin-bottom: 10px;
 }
 
-.qv-object-ProfessionalTable .footer {
+.qv-object-ProfiTable .footer {
   margin-top: 20px;
   text-align: right;
   font-size: 14px;
