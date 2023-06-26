@@ -1,0 +1,65 @@
+/* Custom CSS styles for the table */
+.my-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.my-table thead {
+  background-color: #f2f2f2;
+}
+
+.my-table th {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.my-table tbody td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.my-table tfoot td {
+  padding: 8px;
+  text-align: right;
+  border-top: 1px solid #ddd;
+}
+
+.table-search {
+  margin-bottom: 10px;
+}
+
+.table-pagination {
+  margin-top: 10px;
+}
+
+.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.prev-btn,
+.next-btn,
+.page-btn {
+  background-color: #f2f2f2;
+  border: none;
+  color: black;
+  padding: 8px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.prev-btn:hover,
+.next-btn:hover,
+.page-btn:hover {
+  background-color: #ddd;
+}
+
+.prev-btn:disabled,
+.next-btn:disabled,
+.page-btn:disabled {
+  background-color: #f2f2f2;
+  color: #bbb;
+  cursor: not-allowed;
+}
