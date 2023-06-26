@@ -1,6 +1,6 @@
 # Set the extension name and author
-$extensionName = "SimpleTableExtension"
-$extensionAuthor = "Slavomír Haladej"
+$extensionName = "TableLikeExtension"
+$extensionAuthor = "Your Name"
 
 # Create the extension directory
 $extensionPath = "$extensionName\"
@@ -10,7 +10,7 @@ New-Item -ItemType Directory -Force -Path $extensionPath
 $qextContent = @"
 {
   "name": "$extensionName",
-  "description": "Simple table extension",
+  "description": "Table-like Qlik Sense extension",
   "author": "$extensionAuthor",
   "type": "visualization",
   "version": "1.0.0",
@@ -20,39 +20,78 @@ $qextContent = @"
 "@
 Set-Content -Path "$extensionPath$extensionName.qext" -Value $qextContent
 
+# Create the HTML file
+$htmlContent = @"
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="$extensionName.css">
+  </head>
+  <body>
+    <div class="qlik-table" id="table-container"></div>
+    <script src="$extensionName.js"></script>
+  </body>
+</html>
+"@
+Set-Content -Path "$extensionPath$extensionName.html" -Value $htmlContent
+
+# Create the CSS file
+$cssContent = @"
+.qlik-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.qlik-table th,
+.qlik-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+.qlik-table th {
+  background-color: #f2f2f2;
+}
+"@
+Set-Content -Path "$extensionPath$extensionName.css" -Value $cssContent
+
 # Create the JS file
 $jsContent = @"
-define([], function() {
+define(['jquery'], function($) {
   'use strict';
 
   return {
-    paint: function ($element) {
-      var html = '<table>' +
-        '<thead>' +
-        '<tr>' +
-        '<th>Name</th>' +
-        '<th>Age</th>' +
-        '<th>Country</th>' +
-        '</tr>' +
-        '</thead>' +
-        '<tbody>' +
-        '<tr>' +
-        '<td>John Doe</td>' +
-        '<td>25</td>' +
-        '<td>USA</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>Jane Smith</td>' +
-        '<td>32</td>' +
-        '<td>Canada</td>' +
-        '</tr>' +
-        '<tr>' +
-        '<td>David Johnson</td>' +
-        '<td>41</td>' +
-        '<td>Australia</td>' +
-        '</tr>' +
-        '</tbody>' +
-        '</table>';
+    paint: function ($element, layout) {
+      var tableData = layout.qHyperCube.qDataPages[0].qMatrix;
+
+      var html = '<table class="qlik-table">';
+      html += '<thead>';
+      html += '<tr>';
+      
+      layout.qHyperCube.qDimensionInfo.forEach(function(dimension) {
+        html += '<th>' + dimension.qFallbackTitle + '</th>';
+      });
+      
+      layout.qHyperCube.qMeasureInfo.forEach(function(measure) {
+        html += '<th>' + measure.qFallbackTitle + '</th>';
+      });
+      
+      html += '</tr>';
+      html += '</thead>';
+      html += '<tbody>';
+
+      tableData.forEach(function(row) {
+        html += '<tr>';
+
+        row.forEach(function(cell) {
+          html += '<td>' + cell.qText + '</td>';
+        });
+        
+        html += '</tr>';
+      });
+
+      html += '</tbody>';
+      html += '</table>';
 
       $element.html(html);
     }
