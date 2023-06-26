@@ -1,0 +1,35 @@
+/* CSS for Qlik Sense HTMLTable object */
+#qv-object-HTMLTable {
+  font-family: Arial, sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#qv-object-HTMLTable th {
+  background-color: #f2f2f2;
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+#qv-object-HTMLTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#qv-object-HTMLTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#qv-object-HTMLTable tr:hover {
+  background-color: #e8f5ff;
+}
+
+#qv-object-HTMLTable thead th {
+  font-weight: bold;
+}
+
+#qv-object-HTMLTable tfoot td {
+  font-weight: bold;
+  border-top: 1px solid #ddd;
+}
