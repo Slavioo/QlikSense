@@ -1,128 +1,124 @@
-$extensionName = "ProfessionalTableExtension"
+# Extension metadata (Slavomír Haladej)
+$qextContent = @"
+{
+  "name": "SimpleTableExtension",
+  "description": "A simple Qlik Sense table extension",
+  "author": "Slavomír Haladej",
+  "version": "1.0.0",
+  "homepage": "",
+  "repository": {
+    "url": ""
+  },
+  "dependencies": [],
+  "type": "visualization",
+  "icon": "",
+  "preview": "",
+  "keywords": [],
+  "license": "",
+  "tags": []
+}
+"@
 
 # Create the extension directory
-New-Item -ItemType Directory -Force -Path $extensionName
+$extensionDirectory = "SimpleTableExtension"
+New-Item -ItemType Directory -Force -Path $extensionDirectory
+
+# Create the QEXT file
+$qextFilePath = "$extensionDirectory\SimpleTableExtension.qext"
+Set-Content -Path $qextFilePath -Value $qextContent
 
 # Create the HTML file
-$htmlContent = @'
+$htmlContent = @"
 <!DOCTYPE html>
 <html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="style.css">
-  </head>
-  <body>
-    <div id="table-container"></div>
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <div id="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Column 1</th>
+          <th>Column 2</th>
+          <th>Column 3</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Data 1</td>
+          <td>Data 2</td>
+          <td>Data 3</td>
+        </tr>
+        <tr>
+          <td>Data 4</td>
+          <td>Data 5</td>
+          <td>Data 6</td>
+        </tr>
+        <tr>
+          <td>Data 7</td>
+          <td>Data 8</td>
+          <td>Data 9</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-    <script src="script.js"></script>
-    <script>
-      define(['jquery'], function($) {
-        var $element = $('#table-container');
-        return paint($element);
-      });
-    </script>
-  </body>
+  <script src="script.js"></script>
+  <script>
+    define(["jquery"], function ($) {
+      return {
+        paint: function ($element) {
+          // Call the paint function from the script.js file
+          paint($element);
+        }
+      };
+    });
+  </script>
+</body>
 </html>
-'@
+"@
 
-Set-Content -Path "$extensionName\index.html" -Value $htmlContent
+$htmlFilePath = "$extensionDirectory\index.html"
+Set-Content -Path $htmlFilePath -Value $htmlContent
 
 # Create the CSS file
-$cssContent = @'
-/* Reset default table styles */
+$cssContent = @"
+/* Add your custom CSS styles here */
 table {
   border-collapse: collapse;
   width: 100%;
 }
 
-/* Table header styles */
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
 table th {
   background-color: #f2f2f2;
-  border: 1px solid #ccc;
-  padding: 8px;
   font-weight: bold;
   text-align: left;
 }
+"@
 
-/* Table cell styles */
-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-}
-
-/* Alternating row colors */
-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-'@
-
-Set-Content -Path "$extensionName\style.css" -Value $cssContent
+$cssFilePath = "$extensionDirectory\style.css"
+Set-Content -Path $cssFilePath -Value $cssContent
 
 # Create the JavaScript file
-$jsContent = @'
-define([], function () {
-  return {
-    paint: function ($element) {
-      var html = `<table>
-                    <thead>
-                      <tr>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Email</th>
-                        <th>Country</th>
-                        <th>Salary</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>John Doe</td>
-                        <td>25</td>
-                        <td>john.doe@example.com</td>
-                        <td>USA</td>
-                        <td>$50,000</td>
-                      </tr>
-                      <tr>
-                        <td>Jane Smith</td>
-                        <td>32</td>
-                        <td>jane.smith@example.com</td>
-                        <td>Canada</td>
-                        <td>$65,000</td>
-                      </tr>
-                      <tr>
-                        <td>David Johnson</td>
-                        <td>41</td>
-                        <td>david.johnson@example.com</td>
-                        <td>Australia</td>
-                        <td>$80,000</td>
-                      </tr>
-                      <tr>
-                        <td>Sarah Williams</td>
-                        <td>28</td>
-                        <td>sarah.williams@example.com</td>
-                        <td>UK</td>
-                        <td>$60,000</td>
-                      </tr>
-                      <tr>
-                        <td>Michael Brown</td>
-                        <td>37</td>
-                        <td>michael.brown@example.com</td>
-                        <td>Germany</td>
-                        <td>$70,000</td>
-                      </tr>
-                    </tbody>
-                  </table>`;
-      $element.html(html);
-    }
-  };
-});
-'@
+$jsContent = @"
+function paint($element) {
+  // Add your JavaScript logic here
+  // For example, modifying the table dynamically
+}
+"@
 
-Set-Content -Path "$extensionName\script.js" -Value $jsContent
+$jsFilePath = "$extensionDirectory\script.js"
+Set-Content -Path $jsFilePath -Value $jsContent
 
 # Compress the extension directory into a ZIP file
-$zipPath = "$extensionName.zip"
-Compress-Archive -Path $extensionName -DestinationPath $zipPath
+$zipPath = "$extensionDirectory.zip"
+Compress-Archive -Path $extensionDirectory -DestinationPath $zipPath
 
 # Clean up the temporary directory
-Remove-Item -Path $extensionName -Recurse
-
-Write-Host "Extension created successfully. ZIP file path: $zipPath"
+Remove-Item -Path $extensionDirectory
