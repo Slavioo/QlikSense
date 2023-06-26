@@ -1,0 +1,99 @@
+/* Reset default table styles */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Table header styles */
+table th {
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-weight: bold;
+  text-align: left;
+}
+
+/* Table cell styles */
+table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+}
+
+/* Alternating row colors */
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+define([], function () {
+  return {
+    paint: function ($element) {
+      var html = `<table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Country</th>
+                        <th>Salary</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>John Doe</td>
+                        <td>25</td>
+                        <td>john.doe@example.com</td>
+                        <td>USA</td>
+                        <td>$50,000</td>
+                      </tr>
+                      <tr>
+                        <td>Jane Smith</td>
+                        <td>32</td>
+                        <td>jane.smith@example.com</td>
+                        <td>Canada</td>
+                        <td>$65,000</td>
+                      </tr>
+                      <tr>
+                        <td>David Johnson</td>
+                        <td>41</td>
+                        <td>david.johnson@example.com</td>
+                        <td>Australia</td>
+                        <td>$80,000</td>
+                      </tr>
+                      <tr>
+                        <td>Sarah Williams</td>
+                        <td>28</td>
+                        <td>sarah.williams@example.com</td>
+                        <td>UK</td>
+                        <td>$60,000</td>
+                      </tr>
+                      <tr>
+                        <td>Michael Brown</td>
+                        <td>37</td>
+                        <td>michael.brown@example.com</td>
+                        <td>Germany</td>
+                        <td>$70,000</td>
+                      </tr>
+                    </tbody>
+                  </table>`;
+      $element.html(html);
+    }
+  };
+});
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+  </head>
+  <body>
+    <div id="table-container"></div>
+
+    <script src="script.js"></script>
+    <script>
+      define(['jquery'], function($) {
+        var $element = $('#table-container');
+        return paint($element);
+      });
+    </script>
+  </body>
+</html>
