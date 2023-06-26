@@ -1,0 +1,104 @@
+define(["qlik", "text!./style.css", "text!./template.html"], function (qlik, cssContent, templateContent) {
+  'use strict';
+
+  // Inject the CSS styles
+  $("<style>").html(cssContent).appendTo("head");
+
+  // Return the extension object
+  return {
+    definition: {},
+    initialProperties: {},
+    paint: function ($element, layout) {
+      var app = qlik.currApp();
+
+      // Fetch the data from the layout
+      var tableData = layout.qHyperCube.qDataPages[0].qMatrix;
+
+      // Create the HTML template
+      var template = _.template(templateContent);
+
+      // Render the table using the template and data
+      $element.html(template({ tableData: tableData }));
+
+      // Add click event listener to table headers for sorting
+      $element.find(".table-header").click(function () {
+        var field = $(this).data("field");
+        var direction = $(this).hasClass("asc") ? "desc" : "asc";
+
+        app.field(field).sort(direction);
+      });
+
+      // Add click event listener to table cells for selection
+      $element.find(".table-cell").click(function () {
+        var row = $(this).data("row");
+        var col = $(this).data("col");
+
+        app.selectValues(col, [tableData[row][col].qElemNumber], true);
+      });
+
+      // Column resizing
+      $element.colResizable();
+
+      // Search functionality
+      var $searchInput = $element.find(".table-search");
+      $searchInput.keyup(function () {
+        var value = $(this).val().toLowerCase();
+        $element.find(".table-cell").filter(function () {
+          $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+        });
+      });
+
+      // Pagination
+      var $tableBody = $element.find("tbody");
+      var pageSize = 10;
+      var pageCount = Math.ceil(tableData.length / pageSize);
+      var currentPage = 1;
+
+      function showPage(page) {
+        currentPage = page;
+        var start = (page - 1) * pageSize;
+        var end = start + pageSize;
+
+        $tableBody.find("tr").hide().slice(start, end).show();
+      }
+
+      function renderPagination() {
+        var $pagination = $element.find(".table-pagination");
+        $pagination.empty();
+
+        var prevButton = '<button class="prev-btn">Prev</button>';
+        var nextButton = '<button class="next-btn">Next</button>';
+
+        $pagination.append(prevButton);
+
+        for (var i = 1; i <= pageCount; i++) {
+          var activeClass = i === currentPage ? "active" : "";
+          var pageButton = '<button class="page-btn ' + activeClass + '">' + i + '</button>';
+          $pagination.append(pageButton);
+        }
+
+        $pagination.append(nextButton);
+      }
+
+      renderPagination();
+      showPage(1);
+
+      $element.find(".prev-btn").click(function () {
+        if (currentPage > 1) {
+          showPage(currentPage - 1);
+        }
+      });
+
+      $element.find(".next-btn").click(function () {
+        if (currentPage < pageCount) {
+          showPage(currentPage + 1);
+        }
+      });
+
+      $element.find(".page-btn").click(function () {
+        var page = $(this).text();
+        showPage(parseInt(page));
+      });
+    }
+  };
+});
