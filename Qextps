@@ -1,0 +1,109 @@
+$extensionName = "MyTableExtension"
+
+# Create the extension directory
+New-Item -ItemType Directory -Force -Path $extensionName
+
+# Create the QEXT file
+$qextContent = @{
+    "name" = "Table Extension"
+    "description" = "A Qlik Sense extension with a static HTML table"
+    "type" = "visualization"
+    "version" = "1.0.0"
+    "author" = "Your Name"
+    "homepage" = ""
+    "icon" = ""
+    "dependencies" = @()
+} | ConvertTo-Json -Depth 4
+
+Set-Content -Path "$extensionName\$extensionName.qext" -Value $qextContent
+
+# Create the JavaScript file
+$jsContent = @'
+define([], function () {
+  return {
+    paint: function ($element) {
+      var html = `<table>
+                    <thead>
+                      <tr>
+                        <th>Column 1</th>
+                        <th>Column 2</th>
+                        <th>Column 3</th>
+                        <th>Column 4</th>
+                        <th>Column 5</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Row 1, Cell 1</td>
+                        <td>Row 1, Cell 2</td>
+                        <td>Row 1, Cell 3</td>
+                        <td>Row 1, Cell 4</td>
+                        <td>Row 1, Cell 5</td>
+                      </tr>
+                      <tr>
+                        <td>Row 2, Cell 1</td>
+                        <td>Row 2, Cell 2</td>
+                        <td>Row 2, Cell 3</td>
+                        <td>Row 2, Cell 4</td>
+                        <td>Row 2, Cell 5</td>
+                      </tr>
+                      <tr>
+                        <td>Row 3, Cell 1</td>
+                        <td>Row 3, Cell 2</td>
+                        <td>Row 3, Cell 3</td>
+                        <td>Row 3, Cell 4</td>
+                        <td>Row 3, Cell 5</td>
+                      </tr>
+                      <tr>
+                        <td>Row 4, Cell 1</td>
+                        <td>Row 4, Cell 2</td>
+                        <td>Row 4, Cell 3</td>
+                        <td>Row 4, Cell 4</td>
+                        <td>Row 4, Cell 5</td>
+                      </tr>
+                      <tr>
+                        <td>Row 5, Cell 1</td>
+                        <td>Row 5, Cell 2</td>
+                        <td>Row 5, Cell 3</td>
+                        <td>Row 5, Cell 4</td>
+                        <td>Row 5, Cell 5</td>
+                      </tr>
+                    </tbody>
+                  </table>`;
+      $element.html(html);
+    }
+  };
+});
+'@
+
+Set-Content -Path "$extensionName\$extensionName.js" -Value $jsContent
+
+# Create the CSS file
+$cssContent = @'
+/* Styles for the extension */
+.example-extension {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+'@
+
+Set-Content -Path "$extensionName\$extensionName.css" -Value $cssContent
+
+# Create the HTML file
+$htmlContent = @'
+<div class="example-extension"></div>
+'@
+
+Set-Content -Path "$extensionName\$extensionName.html" -Value $htmlContent
+
+# Compress the extension directory into a ZIP file
+$zipPath = "$extensionName.zip"
+Compress-Archive -Path $extensionName -DestinationPath $zipPath
+
+# Clean up the temporary directory
+Remove-Item -Path $extensionName -Recurse
+
+Write-Host "Extension created successfully. ZIP file path: $zipPath"
