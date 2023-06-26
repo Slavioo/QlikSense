@@ -8,7 +8,7 @@ New-Item -ItemType Directory -Path $extensionPath | Out-Null
 # Create the script file
 $scriptFilePath = "$extensionPath\script.js"
 $scriptContent = @"
-define([], function() {
+define(["jquery", "qlik"], function($, qlik) {
   'use strict';
 
   var myTableExtension = {
@@ -137,16 +137,17 @@ $htmlContent = @"
     <div id="table-container"></div>
   </div>
 
-  <script src="lib/require.js"></script>
+  <script src="/resources/assets/external/requirejs/require.js"></script>
   <script>
     require.config({
       baseUrl: '/resources',
       paths: {
-        "jquery": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min"
+        "jquery": "/resources/assets/external/jquery/jquery",
+        "qlik": "/resources/js/qlik"
       }
     });
 
-    require(["jquery", "js/qlik"], function($, qlik) {
+    require(["jquery", "qlik"], function($, qlik) {
       $(function() {
         qlik.setOnError(function(error) {
           console.log(error);
@@ -157,7 +158,7 @@ $htmlContent = @"
         });
 
         qlik.getGlobal().getAuthenticatedUser(function(reply) {
-          console.log("Authenticated user: " + reply.qReturn);
+          console.log("Authenticated user: " + reply.qMessage);
         });
 
         qlik.getApp(function(app) {
