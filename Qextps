@@ -12,8 +12,24 @@ define([], function() {
   'use strict';
 
   return {
+    definition: {
+      type: "items",
+      component: "accordion",
+      items: {
+        dimensions: {
+          uses: "dimensions",
+          min: 1,
+          max: 3
+        },
+        measures: {
+          uses: "measures",
+          min: 1,
+          max: 5
+        }
+      }
+    },
     paint: function($element, layout) {
-      var html = "<table style='width:100%'>";
+      var html = "<table class=\"qlik-table\">";
 
       // Add table header
       html += "<thead><tr>";
@@ -44,6 +60,46 @@ define([], function() {
 '@
 $scriptContent | Out-File -FilePath $scriptFilePath -Encoding UTF8
 
+# Create the CSS file
+$cssFilePath = "$extensionPath\style.css"
+$cssContent = @'
+.qlik-table {
+  font-family: Arial, sans-serif;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.qlik-table th {
+  background-color: #f2f2f2;
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.qlik-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.qlik-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.qlik-table tr:hover {
+  background-color: #e8f5ff;
+}
+
+.qlik-table thead th {
+  font-weight: bold;
+}
+
+.qlik-table tfoot td {
+  font-weight: bold;
+  border-top: 1px solid #ddd;
+}
+'@
+$cssContent | Out-File -FilePath $cssFilePath -Encoding UTF8
+
 # Create the definition file
 $definitionFilePath = "$extensionPath\definition.qext"
 $definitionContent = @'
@@ -52,10 +108,10 @@ $definitionContent = @'
   "type": "visualization",
   "description": "Straight Table Extension",
   "author": "Your Name",
-  "version": "1.0.0"
-}
-'@
-$definitionContent | Out-File -FilePath $definitionFilePath -Encoding UTF8
-
-# Inform the user about the extension creation
-Write-Host "Qlik Sense extension '$extensionName' has been created successfully at: $extensionPath"
+  "version": "1.0.0",
+  "icon": "extension-icon.png",
+  "preview": "extension-preview.png",
+  "keywords": [],
+  "dependencies": { "qlik-sense": ">=1.0.0" },
+  "template": "template.html",
+  "authoringMeta": {
