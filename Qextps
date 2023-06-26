@@ -1,103 +1,68 @@
-# Set the extension name and author
-$extensionName = "TableLikeExtension"
-$extensionAuthor = "Your Name"
+# Define the extension name and file path
+$extensionName = "MyTableExtension"
+$extensionPath = "C:\QlikSense\Extensions\$extensionName"
 
-# Create the extension directory
-$extensionPath = "$extensionName\"
-New-Item -ItemType Directory -Force -Path $extensionPath
+# Create the extension folder
+New-Item -ItemType Directory -Path $extensionPath | Out-Null
 
-# Create the QEXT file
-$qextContent = @"
-{
-  "name": "$extensionName",
-  "description": "Table-like Qlik Sense extension",
-  "author": "$extensionAuthor",
-  "type": "visualization",
-  "version": "1.0.0",
-  "icon": "extension-icon.png",
-  "preview": "preview.png"
-}
-"@
-Set-Content -Path "$extensionPath$extensionName.qext" -Value $qextContent
-
-# Create the HTML file
-$htmlContent = @"
-<!DOCTYPE html>
-<html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="$extensionName.css">
-  </head>
-  <body>
-    <div class="qlik-table" id="table-container"></div>
-    <script src="$extensionName.js"></script>
-  </body>
-</html>
-"@
-Set-Content -Path "$extensionPath$extensionName.html" -Value $htmlContent
-
-# Create the CSS file
-$cssContent = @"
-.qlik-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.qlik-table th,
-.qlik-table td {
-  border: 1px solid #ccc;
-  padding: 8px;
-  text-align: left;
-}
-
-.qlik-table th {
-  background-color: #f2f2f2;
-}
-"@
-Set-Content -Path "$extensionPath$extensionName.css" -Value $cssContent
-
-# Create the JS file
-$jsContent = @"
-define(['jquery'], function($) {
-  'use strict';
-
+# Create the extension script file
+$scriptFilePath = "$extensionPath\script.js"
+$scriptContent = @"
+define([], function() {
   return {
-    paint: function ($element, layout) {
-      var tableData = layout.qHyperCube.qDataPages[0].qMatrix;
-
-      var html = '<table class="qlik-table">';
-      html += '<thead>';
-      html += '<tr>';
+    paint: function($element, layout) {
+      var html = "<table style='width:100%'>";
       
-      layout.qHyperCube.qDimensionInfo.forEach(function(dimension) {
-        html += '<th>' + dimension.qFallbackTitle + '</th>';
+      // Add table header
+      html += "<thead><tr>";
+      layout.qHyperCube.qDimensionInfo.forEach(function(dimInfo) {
+        html += "<th>" + dimInfo.qFallbackTitle + "</th>";
       });
-      
-      layout.qHyperCube.qMeasureInfo.forEach(function(measure) {
-        html += '<th>' + measure.qFallbackTitle + '</th>';
+      layout.qHyperCube.qMeasureInfo.forEach(function(measureInfo) {
+        html += "<th>" + measureInfo.qFallbackTitle + "</th>";
       });
+      html += "</tr></thead>";
       
-      html += '</tr>';
-      html += '</thead>';
-      html += '<tbody>';
-
-      tableData.forEach(function(row) {
-        html += '<tr>';
-
+      // Add table rows
+      html += "<tbody>";
+      layout.qHyperCube.qDataPages[0].qMatrix.forEach(function(row) {
+        html += "<tr>";
         row.forEach(function(cell) {
-          html += '<td>' + cell.qText + '</td>';
+          html += "<td>" + cell.qText + "</td>";
         });
-        
-        html += '</tr>';
+        html += "</tr>";
       });
-
-      html += '</tbody>';
-      html += '</table>';
-
+      html += "</tbody></table>";
+      
+      // Set the extension's HTML content
       $element.html(html);
     }
   };
 });
 "@
-Set-Content -Path "$extensionPath$extensionName.js" -Value $jsContent
+$scriptContent | Out-File -FilePath $scriptFilePath -Encoding UTF8
 
-Write-Host "Qlik Sense extension created successfully."
+# Create the extension definition file
+$definitionFilePath = "$extensionPath\definition.xml"
+$definitionContent = @"
+<?xml version="1.0" encoding="utf-8"?>
+<ExtensionObject Label="$extensionName" Type="visualization">
+  <Script src="script.js"/>
+  <Properties/>
+  <InitialDataFetch>0</InitialDataFetch>
+  <Connections>
+    <UsesConnections/>
+  </Connections>
+  <Appearance>
+    <CustomSize>
+      <CustomHeight>10</CustomHeight>
+      <CustomWidth>10</CustomWidth>
+    </CustomSize>
+    <CustomProperties/>
+  </Appearance>
+</ExtensionObject>
+"@
+$definitionContent | Out-File -FilePath $definitionFilePath -Encoding UTF8
+
+# Inform the user about the extension creation
+Write-Host "Qlik Sense extension '$extensionName' has been created successfully at: $extensionPath"
