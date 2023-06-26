@@ -1,0 +1,36 @@
+define(["qlik"], function (qlik) {
+  'use strict';
+
+  return {
+    template: '<table class="table table-bordered table-hover">' +
+      '<thead>' +
+      '<tr>' +
+      '<th ng-repeat="dimension in layout.qHyperCube.qDimensionInfo" ng-click="applyFilter(dimension.field)" ng-class="{\'active\': isFilterApplied(dimension.field)}">' +
+      '{{dimension.qFallbackTitle}}' +
+      '<span ng-show="isFilterApplied(dimension.field)" class="filter-icon">&#10003;</span>' +
+      '</th>' +
+      '<th ng-repeat="measure in layout.qHyperCube.qMeasureInfo">{{measure.qFallbackTitle}}</th>' +
+      '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+      '<tr ng-repeat="row in layout.qHyperCube.qDataPages[0].qMatrix">' +
+      '<td ng-repeat="cell in row" ng-bind="cell.qText"></td>' +
+      '</tr>' +
+      '</tbody>' +
+      '</table>',
+    controller: ['$scope', function ($scope) {
+      $scope.applyFilter = function (field) {
+        var app = qlik.currApp();
+        app.field(field).toggleSelect();
+      };
+
+      $scope.isFilterApplied = function (field) {
+        var app = qlik.currApp();
+        var fieldValues = app.field(field).getData().fieldData;
+        return fieldValues.some(function (value) {
+          return value.qState === 'S';
+        });
+      };
+    }],
+  };
+});
