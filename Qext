@@ -1,0 +1,29 @@
+{
+  "name": "Simple Extension",
+  "description": "A simple Qlik Sense extension",
+  "type": "visualization",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "homepage": "",
+  "icon": "",
+  "dependencies": []
+}
+
+define([], function () {
+  return {
+    paint: function ($element) {
+      $element.html("Hello, Qlik Sense Extension!");
+    }
+  };
+});
+
+/* Styles for the extension */
+.example-extension {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+
+<div class="example-extension">This is a simple Qlik Sense extension.</div>
