@@ -1,0 +1,30 @@
+<!-- HTML template for the table -->
+<div>
+  <input type="text" class="table-search" placeholder="Search...">
+
+  <table class="my-table">
+    <thead>
+      <tr>
+        <% _.each(tableData[0], function (header, index) { %>
+          <th class="table-header" data-field="<%= index %>"><%= header.qText %></th>
+        <% }); %>
+      </tr>
+    </thead>
+    <tbody>
+      <% _.each(tableData, function (row, rowIndex) { %>
+        <tr>
+          <% _.each(row, function (cell, colIndex) { %>
+            <td class="table-cell" data-row="<%= rowIndex %>" data-col="<%= colIndex %>"><%= cell.qText %></td>
+          <% }); %>
+        </tr>
+      <% }); %>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="<%= tableData[0].length %>">
+          <div class="table-pagination"></div>
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+</div>
