@@ -1,130 +1,94 @@
-# Define the extension name and file path
-$extensionName = "MyStraightTableExtension"
+# Define the extension name and file paths
+$extensionName = "MyTableExtension"
 $extensionPath = "C:\QlikSense\Extensions\$extensionName"
 
 # Create the extension folder
 New-Item -ItemType Directory -Path $extensionPath | Out-Null
 
-# Create the script file
-$scriptFilePath = "$extensionPath\script.js"
-$scriptContent = @'
-define([], function() {
+# Create the script.js file
+$scriptFilePath = Join-Path $extensionPath "script.js"
+$scriptContent = @"
+define(["qlik"], function(qlik) {
   'use strict';
 
   return {
-    definition: {
-      type: "items",
-      component: "accordion",
-      items: {
-        dimensions: {
-          uses: "dimensions",
-          min: 1,
-          max: 3
-        },
-        measures: {
-          uses: "measures",
-          min: 1,
-          max: 5
-        }
-      }
-    },
+    template: '<table class="table table-bordered table-hover">' +
+                '<thead>' +
+                  '<tr>' +
+                    '<th ng-repeat="dimension in layout.qHyperCube.qDimensionInfo">{{dimension.qFallbackTitle}}</th>' +
+                    '<th ng-repeat="measure in layout.qHyperCube.qMeasureInfo">{{measure.qFallbackTitle}}</th>' +
+                  '</tr>' +
+                '</thead>' +
+                '<tbody>' +
+                  '<tr ng-repeat="row in layout.qHyperCube.qDataPages[0].qMatrix">' +
+                    '<td ng-repeat="cell in row" ng-bind="cell.qText"></td>' +
+                  '</tr>' +
+                '</tbody>' +
+              '</table>',
+    controller: ['$scope', function($scope) {
+      // No additional logic required for this example
+    }],
     paint: function($element, layout) {
-      var html = "<table class=\"qlik-table\">";
-
-      // Add table header
-      html += "<thead><tr>";
-      layout.qHyperCube.qDimensionInfo.forEach(function(dimInfo) {
-        html += "<th>" + dimInfo.qFallbackTitle + "</th>";
-      });
-      layout.qHyperCube.qMeasureInfo.forEach(function(measureInfo) {
-        html += "<th>" + measureInfo.qFallbackTitle + "</th>";
-      });
-      html += "</tr></thead>";
-
-      // Add table rows
-      html += "<tbody>";
-      layout.qHyperCube.qDataPages[0].qMatrix.forEach(function(row) {
-        html += "<tr>";
-        row.forEach(function(cell) {
-          html += "<td>" + cell.qText + "</td>";
-        });
-        html += "</tr>";
-      });
-      html += "</tbody></table>";
-
-      // Set the extension's HTML content
-      $element.html(html);
+      // No additional logic required for this example
     }
   };
 });
-'@
+"@
 $scriptContent | Out-File -FilePath $scriptFilePath -Encoding UTF8
 
-# Create the CSS file
-$cssFilePath = "$extensionPath\style.css"
-$cssContent = @'
-.qlik-table {
-  font-family: Arial, sans-serif;
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.qlik-table th {
-  background-color: #f2f2f2;
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-}
-
-.qlik-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.qlik-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.qlik-table tr:hover {
-  background-color: #e8f5ff;
-}
-
-.qlik-table thead th {
-  font-weight: bold;
-}
-
-.qlik-table tfoot td {
-  font-weight: bold;
-  border-top: 1px solid #ddd;
-}
-'@
-$cssContent | Out-File -FilePath $cssFilePath -Encoding UTF8
-
-# Create the HTML template file
-$templateFilePath = "$extensionPath\template.html"
-$templateContent = @'
+# Create the template.html file
+$templateFilePath = Join-Path $extensionPath "template.html"
+$templateContent = @"
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <title>Qlik Sense Extension</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <script type="text/javascript" src="script.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="container" class="qv-object-MyStraightTableExtension"></div>
+  <div id="container" class="qv-object-MyTableExtension"></div>
 </body>
 </html>
-'@
+"@
 $templateContent | Out-File -FilePath $templateFilePath -Encoding UTF8
 
-# Create the definition file
-$definitionFilePath = "$extensionPath\definition.qext"
-$definitionContent = @'
+# Create the style.css file
+$cssFilePath = Join-Path $extensionPath "style.css"
+$cssContent = @"
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  border: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  text-align: center;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+"@
+$cssContent | Out-File -FilePath $cssFilePath -Encoding UTF8
+
+# Create the definition.qext file
+$definitionFilePath = Join-Path $extensionPath "definition.qext"
+$definitionContent = @"
 {
-  "name": "' + $extensionName + '",
+  "name": "MyTableExtension",
   "type": "visualization",
-  "description": "Straight Table Extension",
+  "description": "AngularJS Table Extension",
   "author": "Your Name",
   "version": "1.0.0",
   "icon": "extension-icon.png",
@@ -138,8 +102,15 @@ $definitionContent = @'
     "suppressInternal": false
   }
 }
-'@
+"@
 $definitionContent | Out-File -FilePath $definitionFilePath -Encoding UTF8
 
-# Inform the user about the extension creation
-Write-Host "Qlik Sense extension '$extensionName' has been created successfully at: $extensionPath"
+# Copy the extension icon and preview images to the extension folder
+Copy-Item -Path "C:\Path\To\extension-icon.png" -Destination $extensionPath
+Copy-Item -Path "C:\Path\To\extension-preview.png" -Destination $extensionPath
+
+# Zip all the files and folders in the extension folder
+$zipFilePath = Join-Path $extensionPath "$extensionName.zip"
+Compress-Archive -Path $extensionPath\* -DestinationPath $zipFilePath -Force
+
+Write-Host "AngularJS extension created successfully!"
