@@ -115,3 +115,13 @@ $definitionContent = @'
   "dependencies": { "qlik-sense": ">=1.0.0" },
   "template": "template.html",
   "authoringMeta": {
+    "offCanvas": true,
+    "noSelections": true,
+    "suppressInternal": false
+  }
+}
+'@
+$definitionContent | Out-File -FilePath $definitionFilePath -Encoding UTF8
+
+# Inform the user about the extension creation
+Write-Host "Qlik Sense extension '$extensionName' has been created successfully at: $extensionPath"
