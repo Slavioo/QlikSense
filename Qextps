@@ -100,6 +100,24 @@ $cssContent = @'
 '@
 $cssContent | Out-File -FilePath $cssFilePath -Encoding UTF8
 
+# Create the HTML template file
+$templateFilePath = "$extensionPath\template.html"
+$templateContent = @'
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Qlik Sense Extension</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script type="text/javascript" src="script.js"></script>
+</head>
+<body>
+  <div id="container" class="qv-object-MyStraightTableExtension"></div>
+</body>
+</html>
+'@
+$templateContent | Out-File -FilePath $templateFilePath -Encoding UTF8
+
 # Create the definition file
 $definitionFilePath = "$extensionPath\definition.qext"
 $definitionContent = @'
