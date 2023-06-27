@@ -1,0 +1,22 @@
+<div class="qv-object-TablePRO">
+    <table>
+        <thead>
+            <tr>
+                <th ng-repeat="head in table.headers track by $index" ng-class="{'filtered': table.filters[$index]}">
+                    {{head.qFallbackTitle}}
+                    <input type="text" ng-model="table.filters[$index]" placeholder="Filter" />
+                    <button ng-click="clearFilter($index)">Clear</button>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in table.rows track by $index">
+                <td ng-repeat="cell in row.cells track by $index" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}">
+                    <span ng-if="$index !== table.headers.length - 1">{{cell.qText}}</span>
+                    <input ng-if="$index === table.headers.length - 1" type="text" ng-model="cell.qText" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <button ng-if="table.rowCount > table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
+</div>
