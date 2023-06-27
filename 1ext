@@ -1,0 +1,144 @@
+define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (qlik, $, cssContent, template) {
+    'use strict';
+    $("<style>").html(cssContent).appendTo("head");
+    return {
+        template: template,
+        initialProperties: {
+            qHyperCubeDef: {
+                qDimensions: [],
+                qMeasures: [],
+                qInitialDataFetch: [{
+                    qWidth: 10,
+                    qHeight: 50
+                }]
+            }
+        },
+        definition: {
+            type: "items",
+            component: "accordion",
+            items: {
+                dimensions: {
+                    uses: "dimensions",
+                    min: 1
+                },
+                measures: {
+                    uses: "measures",
+                    min: 0
+                },
+                sorting: {
+                    uses: "sorting"
+                },
+                settings: {
+                    uses: "settings",
+                    items: {
+                        initFetchRows: {
+                            ref: "qHyperCubeDef.qInitialDataFetch.0.qHeight",
+                            label: "Initial fetch rows",
+                            type: "number",
+                            defaultValue: 50
+                        }
+                    }
+                }
+            }
+        },
+        support: {
+            snapshot: true,
+            export: true,
+            exportData: true
+        },
+        paint: function () {
+            //setup scope.table
+            if (!this.$scope.table) {
+                this.$scope.table = qlik.table(this);
+            }
+            return qlik.Promise.resolve();
+        },
+        controller: ['$scope', function ($scope) {
+            $scope.table.headers = [];
+
+            $scope.headerFilter = [];
+
+            $scope.applyFilter = function (columnIndex, filterValue) {
+                $scope.headerFilter[columnIndex] = filterValue;
+            };
+
+            $scope.clearFilter = function (columnIndex) {
+                $scope.headerFilter[columnIndex] = '';
+            };
+
+            $scope.getHeaderClass = function (columnIndex) {
+                return $scope.headerFilter[columnIndex] ? 'filtered' : '';
+            };
+        }]
+    };
+});
+
+.qv-object-TablePRO div.qv-object-content-container {
+    overflow: auto;
+}
+
+.qv-object-TablePRO {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.qv-object-TablePRO th,
+.qv-object-TablePRO td {
+    border: 1px solid #ccc;
+    padding: 4px;
+    text-align: left;
+}
+
+.qv-object-TablePRO th {
+    background-color: #21618C;
+    color: #ffffff;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+.qv-object-TablePRO tr:nth-child(even) {
+    background-color: #F4F6F6;
+}
+
+.qv-object-TablePRO tr:hover {
+    background-color: #85C1E9;
+}
+
+.qv-object-TablePRO caption {
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-bottom: 4px;
+}
+
+.qv-object-TablePRO .filtered {
+    background-color: #FFD700;
+}
+
+.qv-object-TablePRO button {
+    width: 100%;
+}
+
+<div qv-extension style="height: 100%; position: relative; overflow: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th ng-repeat="head in table.headers track by $index" qva-activate="head.orderBy()" ng-class="getHeaderClass($index)">
+                    {{head.qFallbackTitle}}
+                    <div class="filter-dropdown" ng-show="headerFilter[$index]">
+                        <input type="text" ng-model="headerFilter[$index]" placeholder="Filter" />
+                        <button ng-click="clearFilter($index)">Clear</button>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in table.rows track by $index">
+                <td ng-repeat="cell in row.cells track by $index" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" qva-activate="cell.select($event)">{{cell.qText}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <button ng-if="table.rowCount > table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
+</div>
+
