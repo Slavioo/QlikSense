@@ -1,0 +1,10 @@
+/* Hide empty headers */
+.qv-object-TablePRO th:empty {
+  display: none;
+}
+
+/* Hide headers with whitespace */
+.qv-object-TablePRO th:empty::before {
+  content: '\00a0'; /* Insert a non-breaking space */
+  display: none;
+}
