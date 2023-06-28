@@ -1,0 +1,22 @@
+.qv-object-TablePRO {
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.qv-object-TablePRO:hover {
+  background-color: #0056b3;
+}
+
+.qv-object-TablePRO:focus,
+.qv-object-TablePRO:active {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
+}
