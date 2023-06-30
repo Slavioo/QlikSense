@@ -1,0 +1,38 @@
+definition: {
+    type: "items",
+    component: "accordion",
+    items: {
+        dimensions: {
+            uses: "dimensions",
+            min: 1,
+            items: {
+                hideDimensions: {
+                    ref: "customProperties.hideDimensions",
+                    label: "Hide Dimensions from Left",
+                    type: "integer",
+                    component: "dropdown",
+                    defaultValue: 0,
+                    options: (function() {
+                        var options = [{ value: 0, label: "0 (Show all dimensions)" }];
+                        for (var i = 1; i <= 10; i++) {
+                            options.push({ value: i, label: i.toString() });
+                        }
+                        return options;
+                    })()
+                }
+            }
+        },
+        // ...rest of the code
+    }
+}
+
+<tr>
+    <th ng-repeat="head in table.headers track by $index" ng-if="$index >= customProperties.hideDimensions" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
+</tr>
+
+
+<tr ng-repeat="row in table.rows track by $index">
+    <td ng-repeat="cell in row.cells track by $index" ng-if="$index >= customProperties.hideDimensions" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" qva-activate="cell.select($event)">{{cell.qText}}</td>
+</tr>
+
+
