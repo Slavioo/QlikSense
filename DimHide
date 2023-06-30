@@ -108,15 +108,14 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
     <table>
         <thead>
             <tr>
-                <th ng-repeat="head in table.headers track by $index" ng-if="!head.qCustomProperties.isHidden" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
+                <th ng-repeat="head in table.headers track by $index" ng-if="!head.qCustomProperties || !head.qCustomProperties.isHidden" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="row in table.rows track by $index">
-                <td ng-repeat="cell in row.cells track by $index" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" ng-if="!cell.qCustomProperties.isHidden" qva-activate="cell.select($event)">{{cell.qText}}</td>
+                <td ng-repeat="cell in row.cells track by $index" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" ng-if="!cell.qCustomProperties || !cell.qCustomProperties.isHidden" qva-activate="cell.select($event)">{{cell.qText}}</td>
             </tr>
         </tbody>
     </table>
     <button ng-if="table.rowCount > table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
 </div>
-
