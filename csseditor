@@ -1,95 +1,111 @@
-# Define the extension folder and file names
-$extensionFolder = "custom-css-extension"
-$qextFileName = "custom-css-extension.qext"
-$jsFileName = "custom-css-extension.js"
-$cssFileName = "custom-css-extension.css"
-$propertiesFileName = "custom-css-extension-properties.js"
+define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (qlik, $, cssContent, template) {
+    'use strict';
 
-# Create the extension folder
-New-Item -ItemType Directory -Force -Path $extensionFolder | Out-Null
+    $("<style>").html(cssContent).appendTo("head");
 
-# Create the qext file
-$qextContent = @"
-{
-  "name": "Custom CSS Extension",
-  "description": "Extension to modify CSS of objects on the sheet",
-  "version": "1.0.0",
-  "icon": "icon.png",
-  "type": "visualization",
-  "author": "Your Name",
-  "homepage": "",
-  "keywords": [],
-  "dependencies": {
-    "qlik-sense": ">=3.0.x"
-  },
-  "preview": "preview.png",
-  "iconPath": "icon.png",
-  "previewPath": "preview.png",
-  "repository": {
-    "url": ""
-  },
-  "resources": {
-    "key": "custom-css-extension",
-    "type": "css",
-    "resource": "custom-css-extension.css"
-  }
-}
-"@
-$qextFilePath = Join-Path -Path $extensionFolder -ChildPath $qextFileName
-Set-Content -Path $qextFilePath -Value $qextContent
+    return {
+        template: template,
+        initialProperties: {
+            qHyperCubeDef: {
+                qDimensions: [],
+                qMeasures: [],
+                qInitialDataFetch: [{
+                    qWidth: 50,
+                    qHeight: 50
+                }]
+            }
+        },
+        definition: {
+            type: "items",
+            component: "accordion",
+            items: {
+                dimensions: {
+                    uses: "dimensions",
+                    min: 1,
+                    items: {
+                        qCalcConditionDimension: {
+                            type: "items",
+                            items: {
+                                calculation: {
+                                    ref: "qCalcCondition.qCond.qv",
+                                    type: "string",
+                                    expression: "optional",
+                                    label: "Condition",
+                                }
+                            }
+                        },
+                        customPropertiesDimension: {
+                            ref: "qCustomProperties.isHidden",
+                            type: "boolean",
+                            label: "Hide Column",
+                            defaultValue: false
+                        }
+                    }
+                },
+                measures: {
+                    uses: "measures",
+                    min: 0,
+                    items: {
+                        qCalcConditionMeasure: {
+                            type: "items",
+                            items: {
+                                calculation: {
+                                    ref: "qCalcCondition.qCond.qv",
+                                    type: "string",
+                                    expression: "optional",
+                                    label: "Condition",
+                                }
+                            }
+                        },
+                        customPropertiesMeasure: {
+                            ref: "qCustomProperties.isHidden",
+                            type: "boolean",
+                            label: "Hide Column",
+                            defaultValue: false
+                        }
+                    }
+                },
+                sorting: {
+                    uses: "sorting"
+                },
+                settings: {
+                    uses: "settings",
+                    items: {
+                        cssSection: {
+                            label: "CSS Settings",
+                            items: {
+                                customCss: {
+                                    ref: "customCss",
+                                    type: "string",
+                                    label: "Custom CSS",
+                                    defaultValue: "",
+                                    expression: "optional"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        support: {
+            snapshot: true,
+            export: true,
+            exportData: true
+        },
+        paint: function ($element, layout) {
+            var customCss = layout.customCss || "";
 
-# Create the JavaScript file
-$jsContent = @"
-define(['qlik'], function(qlik) {
-  'use strict';
+            // Apply custom CSS
+            $("<style>").text(customCss).appendTo($element);
 
-  return {
-    paint: function($element) {
-      var layout = this.options.layout;
-
-      // Apply CSS
-      $element.html('<style>' + layout.cssContent + '</style>');
-    }
-  };
+            // Setup scope.table
+            if (!this.$scope.table) {
+                this.$scope.table = qlik.table(this);
+            }
+            
+            return qlik.Promise.resolve();
+        },
+        controller: ['$scope', function () {
+        }]
+    };
 });
-"@
-$jsFilePath = Join-Path -Path $extensionFolder -ChildPath $jsFileName
-Set-Content -Path $jsFilePath -Value $jsContent
-
-# Create the CSS file
-$cssContent = @"
-/* Add your initial CSS styles here */
-"@
-$cssFilePath = Join-Path -Path $extensionFolder -ChildPath $cssFileName
-Set-Content -Path $cssFilePath -Value $cssContent
-
-# Create the properties file
-$propertiesContent = @"
-define([], function() {
-  'use strict';
-
-  return {
-    type: 'items',
-    component: 'accordion',
-    items: {
-      cssSettings: {
-        uses: 'settings',
-        items: {
-          cssEditor: {
-            ref: 'cssContent',
-            type: 'string',
-            label: 'CSS',
-            expression: 'optional',
-            defaultValue: ''
-          }
-        }
-      }
-    }
-  };
-});
-"@
-$propertiesFilePath = Join-Path -Path $extensionFolder -ChildPath $propertiesFileName
-Set-Content -Path $propertiesFilePath -Value $propertiesContent
-
-Write-Host "Extension files created successfully."
-  
