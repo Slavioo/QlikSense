@@ -1,147 +1,166 @@
-define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (qlik, $, cssContent, template) {
-    'use strict';
+define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (
+  qlik,
+  $,
+  cssContent,
+  template
+) {
+  "use strict";
+  $("<style>").html(cssContent).appendTo("head");
+  
+  function updateColumnVisibility(isHidden) {
+    if (isHidden) {
+      $(".qv-object-tabletest th").addClass("isHidden");
+      $(".qv-object-tabletest td").addClass("isHidden");
+    } else {
+      $(".qv-object-tabletest th").removeClass("isHidden");
+      $(".qv-object-tabletest td").removeClass("isHidden");
+    }
+  }
 
-    $("<style>").html(cssContent).appendTo("head");
-
-    return {
-        template: template,
-        initialProperties: {
-            qHyperCubeDef: {
-                qDimensions: [],
-                qMeasures: [],
-                qInitialDataFetch: [{
-                    qWidth: 50,
-                    qHeight: 50
-                }]
-            }
-        },
-        definition: {
-            type: "items",
-            component: "accordion",
-            items: {
-                dimensions: {
-                    uses: "dimensions",
-                    min: 1,
-                    items: {
-                        qCalcConditionDimension: {
-                            type: "items",
-                            items: {
-                                calculation: {
-                                    ref: "qCalcCondition.qCond.qv",
-                                    type: "string",
-                                    expression: "optional",
-                                    label: "Condition",
-                                }
-                            }
-                        },
-                        customPropertiesDimension: {
-                            ref: "qCustomProperties.isHidden",
-                            type: "boolean",
-                            label: "Hide Column",
-                            defaultValue: false
-                        }
-                    }
+  return {
+    template: template,
+    initialProperties: {
+      qHyperCubeDef: {
+        qDimensions: [],
+        qMeasures: [],
+        qInitialDataFetch: [
+          {
+            qWidth: 50,
+            qHeight: 50,
+          },
+        ],
+      },
+    },
+    definition: {
+      type: "items",
+      component: "accordion",
+      items: {
+        dimensions: {
+          uses: "dimensions",
+          min: 1,
+          items: {
+            qCalcConditionDimension: {
+              type: "items",
+              items: {
+                calculation: {
+                  ref: "qCalcCondition.qCond.qv",
+                  type: "string",
+                  expression: "optional",
+                  label: "Condition",
                 },
-                measures: {
-                    uses: "measures",
-                    min: 0,
-                    items: {
-                        qCalcConditionMeasure: {
-                            type: "items",
-                            items: {
-                                calculation: {
-                                    ref: "qCalcCondition.qCond.qv",
-                                    type: "string",
-                                    expression: "optional",
-                                    label: "Condition",
-                                }
-                            }
-                        },
-                        customPropertiesMeasure: {
-                            ref: "qCustomProperties.isHidden",
-                            type: "boolean",
-                            label: "Hide Column",
-                            defaultValue: false
-                        }
-                    }
+              },
+            },
+            customPropertiesDimension: {
+              ref: "qCustomProperties.isHidden",
+              type: "boolean",
+              label: "Hide Column",
+              defaultValue: false,
+              change: function () {
+                updateColumnVisibility(this.layout.qCustomProperties.isHidden);
+              },
+            },
+          },
+        },
+        measures: {
+          uses: "measures",
+          min: 0,
+          items: {
+            qCalcConditionMeasure: {
+              type: "items",
+              items: {
+                calculation: {
+                  ref: "qCalcCondition.qCond.qv",
+                  type: "string",
+                  expression: "optional",
+                  label: "Condition",
                 },
-                sorting: {
-                    uses: "sorting"
-                },
-                settings: {
-                    uses: "settings",
-                    items: {
-                        initFetchRows: {
-                            ref: "qHyperCubeDef.qInitialDataFetch.0.qHeight",
-                            label: "Initial fetch rows",
-                            type: "number",
-                            defaultValue: 50
-                        },
-                        initFetchColumns: {
-                            ref: "qHyperCubeDef.qInitialDataFetch.0.qWidth",
-                            label: "Initial fetch columns",
-                            type: "number",
-                            defaultValue: 50
-                        }
-                    }
-                }
-            }
+              },
+            },
+            customPropertiesMeasure: {
+              ref: "qCustomProperties.isHidden",
+              type: "boolean",
+              label: "Hide Column",
+              defaultValue: false,
+              change: function () {
+                updateColumnVisibility(this.layout.qCustomProperties.isHidden);
+              },
+            },
+          },
         },
-        support: {
-            snapshot: true,
-            export: true,
-            exportData: true
+        sorting: {
+          uses: "sorting",
         },
-        paint: function ($element) {
-            var self = this;
-            var layout = self.layout;
-            var data = layout.qHyperCube.qDataPages[0].qMatrix;
-
-            // Hide columns based on isHidden property
-            var hiddenColumns = layout.qHyperCube.qDimensionInfo.concat(layout.qHyperCube.qMeasureInfo)
-                .filter(function (column) {
-                    return column.qCustomProperties && column.qCustomProperties.isHidden;
-                });
-
-            var visibleColumns = layout.qHyperCube.qDimensionInfo.concat(layout.qHyperCube.qMeasureInfo)
-                .filter(function (column) {
-                    return !column.qCustomProperties || !column.qCustomProperties.isHidden;
-                });
-
-            // Update table headers
-            var $table = $element.find("table");
-            $table.find("thead th").remove();
-
-            visibleColumns.forEach(function (column) {
-                $table.find("thead tr").append('<th>' + column.qFallbackTitle + '</th>');
-            });
-
-            // Update table rows
-            $table.find("tbody tr").each(function () {
-                var $row = $(this);
-                $row.find("td").remove();
-
-                visibleColumns.forEach(function (column) {
-                    var columnValue = data[$row.index()][column.qCol];
-
-                    // Handle formatting or customization of the column value if needed
-                    var formattedValue = columnValue.qText;
-
-                    $row.append('<td>' + formattedValue + '</td>');
-                });
-            });
-
-            // Hide hidden columns
-            hiddenColumns.forEach(function (column) {
-                var columnIndex = column.qCol;
-                $table.find("th:nth-child(" + (columnIndex + 1) + ")").hide();
-                $table.find("td:nth-child(" + (columnIndex + 1) + ")").hide();
-            });
-
-            return qlik.Promise.resolve();
+        settings: {
+          uses: "settings",
+          items: {
+            initFetchRows: {
+              ref: "qHyperCubeDef.qInitialDataFetch.0.qHeight",
+              label: "Initial fetch rows",
+              type: "number",
+              defaultValue: 50,
+            },
+            initFetchColumns: {
+              ref: "qHyperCubeDef.qInitialDataFetch.0.qWidth",
+              label: "Initial fetch columns",
+              type: "number",
+              defaultValue: 50,
+            },
+          },
         },
-        controller: ['$scope', function ($scope) {
-            // Controller logic if needed
-        }]
-    };
+      },
+    },
+    support: {
+      snapshot: true,
+      export: true,
+      exportData: true,
+    },
+    paint: function () {
+      //setup scope.table
+      if (!this.$scope.table) {
+        this.$scope.table = qlik.table(this);
+      }
+      updateColumnVisibility(this.layout.qCustomProperties.isHidden);
+      return qlik.Promise.resolve();
+    },
+    controller: ["$scope", function () {}],
+  };
 });
+
+.qv-object-tabletest th,
+.qv-object-tabletest td {
+  border-top: 0px solid #fff;
+  border-bottom: 1px solid #ddd;
+  border-right: 1px solid #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  cursor: default;
+  font-size: 12px;
+}
+
+.qv-object-tabletest button {
+  width: 100%;
+}
+
+/* Hide columns */
+.qv-object-tabletest th.isHidden,
+.qv-object-tabletest td.isHidden {
+  display: none;
+}
+
+<div qv-extension style="height: 100%; position: relative; overflow: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th ng-repeat="head in table.headers track by $index" ng-if="!head.isHidden" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in table.rows track by $index">
+                <td ng-repeat="cell in row.cells track by $index" ng-if="!cell.isHidden" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" qva-activate="cell.select($event)">{{cell.qText}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <button ng-if="table.rowCount > table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
+</div>
