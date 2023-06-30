@@ -1,54 +1,15 @@
-define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (qlik, $, cssContent, template) {
-    'use strict';
-
-    $("<style>").html(cssContent).appendTo("head");
-
-    return {
-        template: template,
-        definition: {
-            type: "items",
-            component: "accordion",
-            items: {
-                dimensions: {
-                    uses: "dimensions",
-                    min: 1
-                },
-                measures: {
-                    uses: "measures",
-                    min: 0
-                },
-                sorting: {
-                    uses: "sorting"
-                },
-                settings: {
-                    uses: "settings",
-                    items: {
-                        hideDimensions: {
-                            ref: "hideDimensions",
-                            label: "Hide Dimensions",
-                            type: "number",
-                            defaultValue: 0
-                        }
-                    }
-                }
-            }
-        },
-        support: {
-            snapshot: true,
-            export: true,
-            exportData: true
-        },
-        paint: function ($element, layout) {
-            var hideDimensions = layout.hideDimensions;
-
-            $element.find(".qv-object-tabletest th, .qv-object-tabletest td").show(); // Show all columns
-
-            $element.find(".qv-object-tabletest th:lt(" + hideDimensions + "), .qv-object-tabletest td:lt(" + hideDimensions + ")").hide();
-
-            return qlik.Promise.resolve();
-        },
-        controller: ["$scope", function ($scope) {
-            // Controller logic here
-        }]
-    };
-});
+<div qv-extension style="height: 100%; position: relative; overflow: auto;">
+    <table>
+        <thead>
+            <tr>
+                <th ng-repeat="head in table.headers track by $index" ng-if="!head.qFallbackTitle.startsWith('$hidden')" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="row in table.rows track by $index">
+                <td ng-repeat="cell in row.cells track by $index" class="selectable" ng-if="!table.headers[$index].qFallbackTitle.startsWith('$hidden')" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" qva-activate="cell.select($event)">{{cell.qText}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <button ng-if="table.rowCount>table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
+</div>
