@@ -34,15 +34,12 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                                 }
                             }
                         },
-                        customPropertiesDimension: {
+                        qCustomProperties: {
                             ref: "qCustomProperties.isHidden",
                             type: "boolean",
-                            label: "Hide Column",
+                            label: "Hide Dimension",
                             defaultValue: false
                         }
-                    },
-                    show: function (data) {
-                        return !data.qCustomProperties.isHidden;
                     }
                 },
                 measures: {
@@ -60,15 +57,12 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                                 }
                             }
                         },
-                        customPropertiesMeasure: {
+                        qCustomProperties: {
                             ref: "qCustomProperties.isHidden",
                             type: "boolean",
-                            label: "Hide Column",
+                            label: "Hide Measure",
                             defaultValue: false
                         }
-                    },
-                    show: function (data) {
-                        return !data.qCustomProperties.isHidden;
                     }
                 },
                 sorting: {
@@ -125,3 +119,4 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
     </table>
     <button ng-if="table.rowCount > table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
 </div>
+
