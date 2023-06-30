@@ -37,7 +37,7 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                         customPropertiesDimension: {
                             ref: "qCustomProperties.isHidden",
                             type: "boolean",
-                            label: "Hide Dimension",
+                            label: "Hide Column",
                             defaultValue: false
                         }
                     }
@@ -60,7 +60,7 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                         customPropertiesMeasure: {
                             ref: "qCustomProperties.isHidden",
                             type: "boolean",
-                            label: "Hide Measure",
+                            label: "Hide Column",
                             defaultValue: false
                         }
                     }
@@ -93,103 +93,55 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
             exportData: true
         },
         paint: function ($element) {
-            // Check if dimensions are hidden
-            var hiddenDimensions = this.backendApi.getDimensionInfos().filter(function (dimInfo) {
-                return dimInfo.qCustomProperties && dimInfo.qCustomProperties.isHidden === true;
+            var self = this;
+            var layout = self.layout;
+            var data = layout.qHyperCube.qDataPages[0].qMatrix;
+
+            // Hide columns based on isHidden property
+            var hiddenColumns = layout.qHyperCube.qDimensionInfo.concat(layout.qHyperCube.qMeasureInfo)
+                .filter(function (column) {
+                    return column.qCustomProperties && column.qCustomProperties.isHidden;
+                });
+
+            var visibleColumns = layout.qHyperCube.qDimensionInfo.concat(layout.qHyperCube.qMeasureInfo)
+                .filter(function (column) {
+                    return !column.qCustomProperties || !column.qCustomProperties.isHidden;
+                });
+
+            // Update table headers
+            var $table = $element.find("table");
+            $table.find("thead th").remove();
+
+            visibleColumns.forEach(function (column) {
+                $table.find("thead tr").append('<th>' + column.qFallbackTitle + '</th>');
             });
-            
-            // Check if measures are hidden
-            var hiddenMeasures = this.backendApi.getMeasureInfos().filter(function (measureInfo) {
-                return measureInfo.qCustomProperties && measureInfo.qCustomProperties.isHidden === true;
-            });
-            
-            // Get the index of hidden dimensions and measures
-            var hiddenDimensionIndexes = hiddenDimensions.map(function (dim) {
-                return dim.qIndex;
-            });
-            
-            var hiddenMeasureIndexes = hiddenMeasures.map(function (measure) {
-                return measure.qIndex;
-            });
-            
-            // Get the data for the hypercube
-            var hypercube = this.backendApi.cacheCube;
-            var dataMatrix = hypercube.qDataPages[0].qMatrix;
-            
-            // Remove hidden dimensions from the data matrix
-            dataMatrix = dataMatrix.map(function (row) {
-                return row.filter(function (cell, index) {
-                    return hiddenDimensionIndexes.indexOf(index) === -1;
+
+            // Update table rows
+            $table.find("tbody tr").each(function () {
+                var $row = $(this);
+                $row.find("td").remove();
+
+                visibleColumns.forEach(function (column) {
+                    var columnValue = data[$row.index()][column.qCol];
+
+                    // Handle formatting or customization of the column value if needed
+                    var formattedValue = columnValue.qText;
+
+                    $row.append('<td>' + formattedValue + '</td>');
                 });
             });
-            
-            // Remove hidden measures from the data matrix
-            dataMatrix = dataMatrix.filter(function (row) {
-                return row.filter(function (cell, index) {
-                    return hiddenMeasureIndexes.indexOf(index) === -1;
-                });
+
+            // Hide hidden columns
+            hiddenColumns.forEach(function (column) {
+                var columnIndex = column.qCol;
+                $table.find("th:nth-child(" + (columnIndex + 1) + ")").hide();
+                $table.find("td:nth-child(" + (columnIndex + 1) + ")").hide();
             });
-            
-            // Render the table with the updated data matrix
-            var html = "";
-            html += '<div qv-extension style="height: 100%; position: relative; overflow: auto;">';
-            html += '<table>';
-            html += '<thead>';
-            html += '<tr>';
-            
-            // Render table headers
-            hypercube.qDimensionInfo.forEach(function (dimInfo, index) {
-                if (!dimInfo.qCustomProperties || !dimInfo.qCustomProperties.isHidden) {
-                    html += '<th>' + dimInfo.qFallbackTitle + '</th>';
-                }
-            });
-            
-            hypercube.qMeasureInfo.forEach(function (measureInfo, index) {
-                if (!measureInfo.qCustomProperties || !measureInfo.qCustomProperties.isHidden) {
-                    html += '<th>' + measureInfo.qFallbackTitle + '</th>';
-                }
-            });
-            
-            html += '</tr>';
-            html += '</thead>';
-            html += '<tbody>';
-            
-            // Render table rows
-            dataMatrix.forEach(function (row) {
-                html += '<tr>';
-                
-                row.forEach(function (cell) {
-                    html += '<td>' + cell.qText + '</td>';
-                });
-                
-                html += '</tr>';
-            });
-            
-            html += '</tbody>';
-            html += '</table>';
-            html += '</div>';
-            
-            $element.html(html);
-            
+
             return qlik.Promise.resolve();
         },
-        controller: ['$scope', function (/*$scope*/) {
+        controller: ['$scope', function ($scope) {
+            // Controller logic if needed
         }]
     };
 });
-
-<div qv-extension style="height: 100%; position: relative; overflow: auto;">
-    <table>
-        <thead>
-            <tr>
-                <th ng-repeat="head in table.headers track by $index" ng-if="!head.qCustomProperties || !head.qCustomProperties.isHidden" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr ng-repeat="row in table.rows track by $index">
-                <td ng-repeat="cell in row.cells track by $index" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" ng-if="!cell.qCustomProperties || !cell.qCustomProperties.isHidden" qva-activate="cell.select($event)">{{cell.qText}}</td>
-            </tr>
-        </tbody>
-    </table>
-    <button ng-if="table.rowCount > table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
-</div>
