@@ -1,0 +1,95 @@
+# Define the extension folder and file names
+$extensionFolder = "custom-css-extension"
+$qextFileName = "custom-css-extension.qext"
+$jsFileName = "custom-css-extension.js"
+$cssFileName = "custom-css-extension.css"
+$propertiesFileName = "custom-css-extension-properties.js"
+
+# Create the extension folder
+New-Item -ItemType Directory -Force -Path $extensionFolder | Out-Null
+
+# Create the qext file
+$qextContent = @"
+{
+  "name": "Custom CSS Extension",
+  "description": "Extension to modify CSS of objects on the sheet",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "type": "visualization",
+  "author": "Your Name",
+  "homepage": "",
+  "keywords": [],
+  "dependencies": {
+    "qlik-sense": ">=3.0.x"
+  },
+  "preview": "preview.png",
+  "iconPath": "icon.png",
+  "previewPath": "preview.png",
+  "repository": {
+    "url": ""
+  },
+  "resources": {
+    "key": "custom-css-extension",
+    "type": "css",
+    "resource": "custom-css-extension.css"
+  }
+}
+"@
+$qextFilePath = Join-Path -Path $extensionFolder -ChildPath $qextFileName
+Set-Content -Path $qextFilePath -Value $qextContent
+
+# Create the JavaScript file
+$jsContent = @"
+define(['qlik'], function(qlik) {
+  'use strict';
+
+  return {
+    paint: function($element) {
+      var layout = this.options.layout;
+
+      // Apply CSS
+      $element.html('<style>' + layout.cssContent + '</style>');
+    }
+  };
+});
+"@
+$jsFilePath = Join-Path -Path $extensionFolder -ChildPath $jsFileName
+Set-Content -Path $jsFilePath -Value $jsContent
+
+# Create the CSS file
+$cssContent = @"
+/* Add your initial CSS styles here */
+"@
+$cssFilePath = Join-Path -Path $extensionFolder -ChildPath $cssFileName
+Set-Content -Path $cssFilePath -Value $cssContent
+
+# Create the properties file
+$propertiesContent = @"
+define([], function() {
+  'use strict';
+
+  return {
+    type: 'items',
+    component: 'accordion',
+    items: {
+      cssSettings: {
+        uses: 'settings',
+        items: {
+          cssEditor: {
+            ref: 'cssContent',
+            type: 'string',
+            label: 'CSS',
+            expression: 'optional',
+            defaultValue: ''
+          }
+        }
+      }
+    }
+  };
+});
+"@
+$propertiesFilePath = Join-Path -Path $extensionFolder -ChildPath $propertiesFileName
+Set-Content -Path $propertiesFilePath -Value $propertiesContent
+
+Write-Host "Extension files created successfully."
+  
