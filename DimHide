@@ -34,7 +34,7 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                                 }
                             }
                         },
-                        qCustomProperties: {
+                        customPropertiesDimension: {
                             ref: "qCustomProperties.isHidden",
                             type: "boolean",
                             label: "Hide Dimension",
@@ -57,7 +57,7 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                                 }
                             }
                         },
-                        qCustomProperties: {
+                        customPropertiesMeasure: {
                             ref: "qCustomProperties.isHidden",
                             type: "boolean",
                             label: "Hide Measure",
@@ -92,14 +92,88 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
             export: true,
             exportData: true
         },
-        paint: function () {
-            // Setup scope.table
-            if (!this.$scope.table) {
-                this.$scope.table = qlik.table(this);
-            }
+        paint: function ($element) {
+            // Check if dimensions are hidden
+            var hiddenDimensions = this.backendApi.getDimensionInfos().filter(function (dimInfo) {
+                return dimInfo.qCustomProperties && dimInfo.qCustomProperties.isHidden === true;
+            });
+            
+            // Check if measures are hidden
+            var hiddenMeasures = this.backendApi.getMeasureInfos().filter(function (measureInfo) {
+                return measureInfo.qCustomProperties && measureInfo.qCustomProperties.isHidden === true;
+            });
+            
+            // Get the index of hidden dimensions and measures
+            var hiddenDimensionIndexes = hiddenDimensions.map(function (dim) {
+                return dim.qIndex;
+            });
+            
+            var hiddenMeasureIndexes = hiddenMeasures.map(function (measure) {
+                return measure.qIndex;
+            });
+            
+            // Get the data for the hypercube
+            var hypercube = this.backendApi.cacheCube;
+            var dataMatrix = hypercube.qDataPages[0].qMatrix;
+            
+            // Remove hidden dimensions from the data matrix
+            dataMatrix = dataMatrix.map(function (row) {
+                return row.filter(function (cell, index) {
+                    return hiddenDimensionIndexes.indexOf(index) === -1;
+                });
+            });
+            
+            // Remove hidden measures from the data matrix
+            dataMatrix = dataMatrix.filter(function (row) {
+                return row.filter(function (cell, index) {
+                    return hiddenMeasureIndexes.indexOf(index) === -1;
+                });
+            });
+            
+            // Render the table with the updated data matrix
+            var html = "";
+            html += '<div qv-extension style="height: 100%; position: relative; overflow: auto;">';
+            html += '<table>';
+            html += '<thead>';
+            html += '<tr>';
+            
+            // Render table headers
+            hypercube.qDimensionInfo.forEach(function (dimInfo, index) {
+                if (!dimInfo.qCustomProperties || !dimInfo.qCustomProperties.isHidden) {
+                    html += '<th>' + dimInfo.qFallbackTitle + '</th>';
+                }
+            });
+            
+            hypercube.qMeasureInfo.forEach(function (measureInfo, index) {
+                if (!measureInfo.qCustomProperties || !measureInfo.qCustomProperties.isHidden) {
+                    html += '<th>' + measureInfo.qFallbackTitle + '</th>';
+                }
+            });
+            
+            html += '</tr>';
+            html += '</thead>';
+            html += '<tbody>';
+            
+            // Render table rows
+            dataMatrix.forEach(function (row) {
+                html += '<tr>';
+                
+                row.forEach(function (cell) {
+                    html += '<td>' + cell.qText + '</td>';
+                });
+                
+                html += '</tr>';
+            });
+            
+            html += '</tbody>';
+            html += '</table>';
+            html += '</div>';
+            
+            $element.html(html);
+            
             return qlik.Promise.resolve();
         },
-        controller: ['$scope', function () {
+        controller: ['$scope', function (/*$scope*/) {
         }]
     };
 });
