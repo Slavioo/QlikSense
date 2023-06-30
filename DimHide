@@ -1,21 +1,20 @@
-define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (qlik, $, cssContent, template) {
-    'use strict';
-    $("<style>").html(cssContent).appendTo("head");
-    return {
-        template: template,
-        initialProperties: {
-            qHyperCubeDef: {
-                qDimensions: [],
-                qMeasures: [],
-                qInitialDataFetch: [{
-                    qWidth: 10,
-                    qHeight: 50
-                }]
-            }
+definition: {
+    type: "items",
+    component: "accordion",
+    items: {
+        dimensions: {
+            uses: "dimensions",
+            min: 1
         },
-        definition: {
-            type: "items",
-            component: "accordion",
+        measures: {
+            uses: "measures",
+            min: 0
+        },
+        sorting: {
+            uses: "sorting"
+        },
+        settings: {
+            uses: "settings",
             items: {
                 hideDimensions: {
                     ref: "customProperties.hideDimensions",
@@ -23,62 +22,36 @@ define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function 
                     type: "integer",
                     component: "dropdown",
                     defaultValue: 0,
-                    options: (function() {
-                        var options = [];
-                        for (var i = 0; i <= 10; i++) {
-                            options.push({ value: i, label: i.toString() });
-                        }
-                        return options;
-                    })()
+                    options: [
+                        { value: 0, label: "0 (Show all dimensions)" },
+                        { value: 1, label: "1" },
+                        { value: 2, label: "2" },
+                        { value: 3, label: "3" },
+                        { value: 4, label: "4" },
+                        { value: 5, label: "5" },
+                        { value: 6, label: "6" },
+                        { value: 7, label: "7" },
+                        { value: 8, label: "8" },
+                        { value: 9, label: "9" },
+                        { value: 10, label: "10" }
+                    ]
                 },
-                dimensions: {
-                    uses: "dimensions",
-                    min: 1
-                },
-                measures: {
-                    uses: "measures",
-                    min: 0
-                },
-                sorting: {
-                    uses: "sorting"
-                },
-                settings: {
-                    uses: "settings",
-                    items: {
-                        initFetchRows: {
-                            ref: "qHyperCubeDef.qInitialDataFetch.0.qHeight",
-                            label: "Initial fetch rows",
-                            type: "number",
-                            defaultValue: 50
-                        }
-                    }
+                initFetchRows: {
+                    ref: "qHyperCubeDef.qInitialDataFetch.0.qHeight",
+                    label: "Initial fetch rows",
+                    type: "number",
+                    defaultValue: 50
                 }
             }
-        },
-        support: {
-            snapshot: true,
-            export: true,
-            exportData: true
-        },
-        paint: function () {
-            //setup scope.table
-            if (!this.$scope.table) {
-                this.$scope.table = qlik.table(this);
-            }
-            return qlik.Promise.resolve();
-        },
-        controller: ['$scope', function (/*$scope*/) {
-        }]
-    };
-});
+        }
+    }
+}
 
 <tr>
-    <th ng-repeat="head in table.headers track by $index" ng-if="$index >= customProperties.hideDimensions" qva-activate="head.orderBy()">{{head.qFallbackTitle}}</th>
+    <th ng-repeat="head in table.headers track by $index" ng-if="$index >= customProperties.hideDimensions">{{head.qFallbackTitle}}</th>
 </tr>
-
 
 <tr ng-repeat="row in table.rows track by $index">
     <td ng-repeat="cell in row.cells track by $index" ng-if="$index >= customProperties.hideDimensions" class="selectable" ng-class="{'selected':cell.selected,'numeric':cell.qNum}" qva-activate="cell.select($event)">{{cell.qText}}</td>
 </tr>
-
 
