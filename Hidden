@@ -13,3 +13,10 @@
     </table>
     <button ng-if="table.rowCount>table.rows.length" qva-activate="table.getMoreData()" class="lui-button more">More...</button>
 </div>
+
+@media all and (min-width: 0px) {
+    .qv-st-export .qv-object-tabletest th:nth-child(n+1),
+    .qv-st-export .qv-object-tabletest td:nth-child(n+1) {
+        display: none;
+    }
+}
