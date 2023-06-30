@@ -1,0 +1,4 @@
+.qv-object-TablePRO th[data-header^="#hidden"],
+.qv-object-TablePRO td[data-header^="#hidden"] {
+    display: none;
+}
