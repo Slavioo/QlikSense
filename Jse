@@ -1,0 +1,155 @@
+define(["qlik", "jquery", "text!./style.css", "text!./template.html"], function (qlik, $, cssContent, template) {
+  'use strict';
+  $("<style>").html(cssContent).appendTo("head");
+
+  // Helper function to create a temporary pop-up with distinct values
+  function createValueSelectionPopup(values, selectedColumn, headerElem) {
+    var popup = $("<div class='value-selection-popup'>");
+    popup.css({
+      position: "absolute",
+      top: headerElem.offset().top + headerElem.height(),
+      left: headerElem.offset().left,
+      width: headerElem.outerWidth(),
+      background: "#ffffff",
+      border: "1px solid #ccc",
+      borderRadius: "3px",
+      boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
+    });
+
+    // Add distinct values as checkboxes
+    values.forEach(function (value) {
+      var checkbox = $("<input type='checkbox' value='" + value + "'>");
+      var label = $("<label>" + value + "</label>");
+      checkbox.appendTo(popup);
+      label.appendTo(popup);
+    });
+
+    popup.find("input[type='checkbox']").on("change", function () {
+      var selectedValues = [];
+      popup.find("input[type='checkbox']:checked").each(function () {
+        selectedValues.push($(this).val());
+      });
+
+      if (selectedValues.length > 0) {
+        // Apply a filter on the selected column's field
+        var qlikApp = qlik.currApp();
+        var fieldToFilter = qlik.field(selectedColumn, qlikApp);
+        fieldToFilter.selectValues(selectedValues, false, true);
+      }
+
+      popup.remove();
+    });
+
+    popup.appendTo("body");
+  }
+
+  return {
+    template: template,
+    initialProperties: {
+      qHyperCubeDef: {
+        qDimensions: [],
+        qMeasures: [],
+        qInitialDataFetch: [{
+          qWidth: 50,
+          qHeight: 50
+        }]
+      }
+    },
+    definition: {
+      type: "items",
+      component: "accordion",
+      items: {
+        dimensions: {
+          uses: "dimensions",
+          min: 1,
+          items: {
+            qCalcConditionDimension: {
+              type: "items",
+              items: {
+                calculation: {
+                  ref: "qCalcCondition.qCond.qv",
+                  type: "string",
+                  expression: "optional",
+                  label: "Condition",
+                }
+              }
+            }
+          }
+        },
+        measures: {
+          uses: "measures",
+          min: 0,
+          items: {
+            qCalcConditionMeasure: {
+              type: "items",
+              items: {
+                calculation: {
+                  ref: "qCalcCondition.qCond.qv",
+                  type: "string",
+                  expression: "optional",
+                  label: "Condition",
+                }
+              }
+            }
+          }
+        },
+        sorting: {
+          uses: "sorting"
+        },
+        settings: {
+          uses: "settings",
+          items: {
+            initFetchRows: {
+              ref: "qHyperCubeDef.qInitialDataFetch.0.qHeight",
+              label: "Initial fetch rows",
+              type: "number",
+              defaultValue: 50
+            },
+            initFetchColumns: {
+              ref: "qHyperCubeDef.qInitialDataFetch.0.qWidth",
+              label: "Initial fetch columns",
+              type: "number",
+              defaultValue: 50
+            }
+          }
+        }
+      }
+    },
+    support: {
+      snapshot: true,
+      export: true,
+      exportData: true
+    },
+    paint: function ($element) {
+      var self = this;
+
+      // Your existing paint logic for the Table Extension
+
+      // Event handler for clicking the table header
+      $element.find('th').on('click', function () {
+        var headerIndex = $(this).index();
+        var selectedColumn = self.$scope.table.headers[headerIndex].qFallbackTitle;
+
+        // Get distinct values for the clicked column
+        var qlikApp = qlik.currApp();
+        var field = qlik.field(selectedColumn, qlikApp);
+
+        field.selectAlternative();
+
+        field.getListObjectData('/qListObjectDef', [{ qTop: 0, qLeft: 0, qHeight: 100, qWidth: 1 }]).then(function (reply) {
+          var distinctValues = reply.qDataPages[0].qMatrix.map(function (row) {
+            return row[0].qText;
+          });
+
+          // Create the pop-up for value selection
+          createValueSelectionPopup(distinctValues, selectedColumn, $(this));
+        });
+      });
+
+      return qlik.Promise.resolve();
+    },
+    controller: ['$scope', function (/*$scope*/) {
+      // ... Your existing controller logic
+    }]
+  };
+});
