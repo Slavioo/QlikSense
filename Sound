@@ -1,0 +1,16 @@
+# Set the path to the warning sound file
+$warningSoundFilePath = "C:\Path\To\Your\WarningSound.wav"
+
+# Function to play the warning sound
+function PlayWarningSound {
+    $MediaPlayer = New-Object -ComObject "WMPlayer.OCX"
+    $MediaPlayer.URL = $warningSoundFilePath
+    $MediaPlayer.controls.play()
+    Start-Sleep -Seconds 5  # Adjust this value to control the duration of the sound
+}
+
+# Main loop to play the warning sound every 15 minutes
+while ($true) {
+    PlayWarningSound
+    Start-Sleep -Minutes 15
+}
