@@ -1,0 +1,22 @@
+{
+    "name": "Multi KPI",
+    "type": "visualization",
+    "description": "A tiled chart that shows one KPI per dimension value and measure.\nVersion: 0.109.0",
+    "version": "0.109.0",
+    "icon": "kpi",
+    "preview": "multikpi.png",
+    "keywords": "qlik-sense, visualization",
+    "author": "Alexander Nerush <ale.nerush@gmail.com>",
+    "homepage": "https://github.com/alner/qsSimpleKPI",
+    "license": "MIT",
+    "repository": "https://github.com/alner/qsSimpleKPI",
+    "dependencies": {
+        "qlik-sense": ">=5.5.x"
+    },
+    "bundle": {
+        "id": "qlik-visualization-bundle",
+        "name": "Qlik Visualization bundle",
+        "description": "This is a set of supported objects that expands the visualization capabilities of Qlik Sense. These can be used in addition to the objects found under 'Charts'. For support conditions and limitations, see the documentation."
+    },
+    "installer": "QlikExtensionBundler"
+}

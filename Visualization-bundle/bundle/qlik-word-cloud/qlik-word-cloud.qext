@@ -1,0 +1,22 @@
+{
+    "name": "Word cloud chart",
+    "type": "visualization",
+    "description": "A graphic representation of a text dimension where size is based on the measure value.\nVersion: 0.36.0",
+    "version": "0.36.0",
+    "icon": "treemap",
+    "preview": "wordcloud.png",
+    "keywords": "qlik-sense, visualization",
+    "author": "Clever Anjos <clever@clever.com.br>",
+    "homepage": "",
+    "license": "Apache License 2.0",
+    "repository": "https://github.com/qlik-oss/br.com.clever.wordcloud",
+    "dependencies": {
+        "qlik-sense": ">=5.5.x"
+    },
+    "bundle": {
+        "id": "qlik-visualization-bundle",
+        "name": "Qlik Visualization bundle",
+        "description": "This is a set of supported objects that expands the visualization capabilities of Qlik Sense. These can be used in addition to the objects found under 'Charts'. For support conditions and limitations, see the documentation."
+    },
+    "installer": "QlikExtensionBundler"
+}
