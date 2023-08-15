@@ -1,0 +1,1 @@
+= Concatenate(Num(Floor(YourMeasure / 50)), '■')
