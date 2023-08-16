@@ -1,0 +1,102 @@
+<div id="switch-container">
+  <label class="switch">
+    <input type="checkbox" id="switch-toggle">
+    <span class="slider"></span>
+  </label>
+</div>
+
+#switch-container {
+  display: inline-block;
+  margin: 10px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: 0.4s;
+  transition: 0.4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+define(["qlik", "jquery"], function (qlik, $) {
+  return {
+    initialProperties: {
+      version: 1.0
+    },
+    definition: {
+      type: "items",
+      component: "accordion",
+      items: {
+        settings: {
+          uses: "settings",
+          items: {
+            variableName: {
+              ref: "props.variableName",
+              label: "Variable Name",
+              type: "string",
+              defaultValue: "vSwitchVariable"
+            }
+          }
+        }
+      }
+    },
+    paint: function ($element, layout) {
+      var variableName = layout.props.variableName;
+      var app = qlik.currApp();
+
+      // Get the current value of the variable
+      app.variable.getContent(variableName, function (reply) {
+        var currentValue = reply.qContent.qString;
+
+        // Update the switch state based on the variable value
+        var $switch = $element.find("#switch-toggle");
+        $switch.prop("checked", currentValue === "1");
+
+        // Toggle the variable value when the switch is clicked
+        $switch.on("change", function () {
+          var newValue = $switch.prop("checked") ? "1" : "0";
+
+          // Update the variable value
+          app.variable.setStringValue(variableName, newValue);
+        });
+      });
+    }
+  };
+});
