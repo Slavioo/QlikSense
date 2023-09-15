@@ -17,19 +17,19 @@ function Get-AllParents($node) {
 }
 
 # Loop through each element in the XML
-foreach ($element in $xmlContent.SelectNodes("//text()")) {
-    $property = $element.ParentNode.Name
-    $value = $element.Value
+foreach ($element in $xmlContent.SelectNodes("//*")) {
+    $property = $element.Name
+    $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
     # Add the property, parents, and value to the flattened data
     $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
     
-    # Add properties with no value (empty string)
-    if ($value -eq "") {
+    # Check if the tag has no child elements, and add it with an empty value
+    if (-not $element.HasChildNodes) {
         $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = "" }
     }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_with_parents.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_with_parents_and_empty.csv" -NoTypeInformation
