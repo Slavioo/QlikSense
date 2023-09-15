@@ -1,24 +1,30 @@
 [xml]$xmlData = Get-Content -Path "input.xml"  # Replace with your XML file path
+$outputFilePath = "flat_output.xml"
 
+# Create a new flat XML document
 $flatXml = New-Object System.Xml.XmlDocument
-$flatXml.AppendChild($flatXml.CreateXmlDeclaration("1.0", $null, $null))
 $flatRoot = $flatXml.CreateElement("root")
 $flatXml.AppendChild($flatRoot)
 
-function Flatten-XML($node, $flatNode) {
+# Function to recursively flatten XML elements
+function Flatten-XML($node, $flatNode, $prefix = "") {
     foreach ($child in $node.ChildNodes) {
-        $flatChild = $flatXml.CreateElement($child.Name)
-        $flatNode.AppendChild($flatChild)
-        
+        $childName = if ($prefix -eq "") { $child.Name } else { "$prefix.$($child.Name)" }
+        $flatChild = $flatXml.CreateElement($childName)
+
         if ($child.HasChildNodes) {
-            Flatten-XML $child $flatChild
+            Flatten-XML $child $flatChild $childName
         } else {
             $flatChild.InnerText = $child.InnerText
         }
+
+        $flatNode.AppendChild($flatChild)
     }
 }
 
+# Start flattening from the root node
 Flatten-XML $xmlData.DocumentElement $flatRoot
 
-$flatXml.Save("flat_output.xml")  # Save the flattened XML to a file
-Write-Host "XML flattening complete."
+# Save the flattened XML to a file
+$flatXml.Save($outputFilePath)
+Write-Host "XML flattening complete. Flat XML saved to $outputFilePath"
