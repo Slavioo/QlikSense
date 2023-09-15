@@ -7,16 +7,6 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
-# Function to check if an element has child elements with values
-function HasChildElementsWithValue($element) {
-    foreach ($child in $element.ChildNodes) {
-        if (![string]::IsNullOrEmpty($child.InnerText)) {
-            return $true
-        }
-    }
-    return $false
-}
-
 # Recursive function to get all parent elements separated by full stops
 function Get-AllParents($node) {
     $parents = @()
@@ -35,8 +25,8 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Check if the tag has child elements with values, and skip it if it does
-    if (-not (HasChildElementsWithValue $element)) {
+    # Check if the tag has child elements, and skip it if it does
+    if (-not $element.HasChildNodes) {
         # Generate a unique key for the property within its hierarchy
         $key = "$parents.$property"
 
