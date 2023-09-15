@@ -4,40 +4,13 @@ $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 # Initialize an empty array to store flattened data
 $flatData = @()
 
-# Hashtable to keep track of processed tags
-$processedTags = @{}
-
-# Recursive function to get all parent elements separated by full stops
-function Get-AllParents($node) {
-    $parents = @()
-
-    while ($node.ParentNode -ne $null) {
-        $parents = $node.ParentNode.Name + '.' + $parents
-        $node = $node.ParentNode
-    }
-
-    return $parents
-}
-
 # Loop through each element in the XML
-foreach ($element in $xmlContent.SelectNodes("//*")) {
-    $property = $element.Name
-    $value = $element.InnerText
-    $parents = (Get-AllParents $element).TrimEnd('.')
+foreach ($element in $xmlContent.SelectNodes("//text()")) {
+    $property = $element.ParentNode.Name
+    $value = $element.Value
 
-    # Skip adding the property if it has the same value as its child elements
-    $childValues = $element.ChildNodes | ForEach-Object { $_.InnerText }
-    if (-not $childValues.Contains($value)) {
-        # Generate a unique key for the property within its hierarchy
-        $key = "$parents.$property"
-
-        # Check if the tag has already been processed with the same key
-        if (-not $processedTags.ContainsKey($key)) {
-            # Add the property, parents, and value to the flattened data
-            $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-            $processedTags[$key] = $true
-        }
-    }
+    # Add the property and value to the flattened data
+    $flatData += [PSCustomObject]@{ Property = $property; Value = $value }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
