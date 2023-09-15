@@ -24,12 +24,15 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $property = $element.Name
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
+    
+    # Check if the value is directly related to this element (not a child element)
+    $hasDirectValue = -not $element.HasChildNodes -and [string]::IsNullOrEmpty($value)
 
     # Generate a unique key for the property within its hierarchy
     $key = "$parents.$property"
 
-    # Check if the tag has already been processed with the same key
-    if (-not $processedTags.ContainsKey($key)) {
+    # Check if the tag has already been processed with the same key and has a direct value
+    if (-not $processedTags.ContainsKey($key) -or $hasDirectValue) {
         # Add the property, parents, and value to the flattened data
         $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
         $processedTags[$key] = $true
