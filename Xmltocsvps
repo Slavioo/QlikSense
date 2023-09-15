@@ -1,26 +1,29 @@
 [xml]$xmlData = Get-Content -Path "input.xml"  # Replace with your XML file path
 $outputFilePath = "output.csv"
 
-# Flatten the XML into an array of custom objects
-$flattenedData = @()
-$xmlData.SelectNodes("//text()[normalize-space()]") | ForEach-Object {
-    $element = $_.ParentNode
-    $properties = @{}
-    
-    # Traverse ancestors to capture all properties
-    $ancestors = $element | Select-Object -First 1
-    while ($ancestors) {
-        $properties[$ancestors.Name] = $ancestors.InnerText.Trim()
-        $ancestors = $ancestors.ParentNode
+$recordIds = @{}
+$idCounter = 1
+
+function GetOrCreateId($property) {
+    if (-not $recordIds.ContainsKey($property)) {
+        $recordIds[$property] = $idCounter++
     }
-
-    # Add the properties from the current element
-    $properties[$element.Name] = $element.InnerText.Trim()
-
-    # Create a custom object for each element
-    $flattenedData += [PSCustomObject]$properties
+    return $recordIds[$property]
 }
 
-# Export the flattened data to CSV
-$flattenedData | Export-Csv -Path $outputFilePath -NoTypeInformation -Delimiter ',' -Encoding UTF8
+$csvData = @()
+
+$xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
+    $element = $_.ParentNode
+    $property = ($element.AncestorsAndSelf | ForEach-Object { $_.Name }) -join '.'
+    $value = $_.InnerText.Trim()
+    $id = GetOrCreateId($property)
+    $csvData += [PSCustomObject]@{
+        Property = $property
+        Value = $value
+        ID = $id
+    }
+}
+
+$csvData | Export-Csv -Path $outputFilePath -NoTypeInformation -Delimiter ',' -Encoding UTF8
 Write-Host "XML to CSV conversion complete."
