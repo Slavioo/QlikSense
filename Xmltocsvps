@@ -24,8 +24,8 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $property = $element.Name
     $value = $null  # Initialize value as null
 
-    # Check if the element has no child elements
-    if (-not $element.HasChildNodes) {
+    # Check if the element has only one child node
+    if ($element.ChildNodes.Count -eq 1) {
         $value = $element.InnerText
     }
 
@@ -43,4 +43,4 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_without_child_values.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_with_single_child_values.csv" -NoTypeInformation
