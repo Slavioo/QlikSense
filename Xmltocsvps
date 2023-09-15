@@ -28,7 +28,12 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     # Create a custom object with Property, Path, and Value columns
     $entry = New-Object -TypeName PSObject
     $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
-    $entry | Add-Member -MemberType NoteProperty -Name "Path" -Value $parents
+
+    # Calculate the correct Path by splitting and joining the parents
+    $pathComponents = $parents.Split('.')
+    $pathComponents += $property
+    $entry | Add-Member -MemberType NoteProperty -Name "Path" -Value ($pathComponents -join '.')
+
     $entry | Add-Member -MemberType NoteProperty -Name "Value" -Value $value
 
     # Add the custom object to the flattened data array
@@ -36,4 +41,4 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_with_path.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_with_correct_path.csv" -NoTypeInformation
