@@ -1,29 +1,26 @@
 # Load the XML file
 [xml]$xml = Get-Content -Path 'your_complex_xml_file.xml'
 
-# Create an array to store the results
-$results = @()
+# Create an array to store the hierarchy
+$hierarchy = @()
 
-# Function to recursively process XML nodes
-function Process-XMLNode($node, $path) {
+# Function to recursively build the hierarchy
+function Build-Hierarchy($node, $path) {
+    $result = [PSCustomObject]@{
+        "Element" = $node.Name
+        "Path"    = $path
+    }
+    $hierarchy += $result
     foreach ($child in $node.ChildNodes) {
-        $currentPath = if ($path) { "$path.$($child.Name)" } else { $child.Name }
-        if ($child.HasChildNodes) {
-            Process-XMLNode $child $currentPath
-        } else {
-            $result = [PSCustomObject]@{
-                "Property" = $currentPath -replace "\.\d+", ""  # Remove numeric suffixes
-                "Value"    = $child.InnerText
-            }
-            $results += $result
-        }
+        $currentPath = if ($path) { "$path\$($child.Name)" } else { $child.Name }
+        Build-Hierarchy $child $currentPath
     }
 }
 
-# Start processing from the root node
-Process-XMLNode $xml ''
+# Start building the hierarchy from the root node
+Build-Hierarchy $xml ''
 
-# Export the results to a CSV file
-$results | Export-Csv -Path 'output.csv' -NoTypeInformation
+# Export the hierarchy to a CSV file
+$hierarchy | Export-Csv -Path 'output_hierarchy.csv' -NoTypeInformation
 
-Write-Host "XML properties and values extracted to CSV. CSV file saved as 'output.csv'."
+Write-Host "XML hierarchy extracted to CSV. CSV file saved as 'output_hierarchy.csv'."
