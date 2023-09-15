@@ -25,14 +25,18 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Generate a unique key for the property within its hierarchy
-    $key = "$parents.$property"
+    # Skip adding the property if it has the same value as its child elements
+    $childValues = $element.ChildNodes | ForEach-Object { $_.InnerText }
+    if (-not $childValues.Contains($value)) {
+        # Generate a unique key for the property within its hierarchy
+        $key = "$parents.$property"
 
-    # Check if the tag has already been processed with the same key
-    if (-not $processedTags.ContainsKey($key)) {
-        # Add the property, parents, and value to the flattened data
-        $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-        $processedTags[$key] = $true
+        # Check if the tag has already been processed with the same key
+        if (-not $processedTags.ContainsKey($key)) {
+            # Add the property, parents, and value to the flattened data
+            $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
+            $processedTags[$key] = $true
+        }
     }
 }
 
