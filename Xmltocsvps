@@ -4,7 +4,7 @@ $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 # Initialize an empty array to store flattened data
 $flatData = @()
 
-# Initialize a hashtable to keep track of processed tags
+# Hashtable to keep track of processed tags
 $processedTags = @{}
 
 # Recursive function to get all parent elements separated by full stops
@@ -25,20 +25,14 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Add the property, parents, and value to the flattened data
+    # Generate a unique key for the property within its hierarchy
     $key = "$parents.$property"
+
+    # Check if the tag has already been processed with the same key
     if (-not $processedTags.ContainsKey($key)) {
+        # Add the property, parents, and value to the flattened data
         $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
         $processedTags[$key] = $true
-    }
-
-    # Check if the tag has no child elements, and add it with an empty value
-    if (-not $element.HasChildNodes) {
-        $emptyKey = "$parents.$property.Empty"
-        if (-not $processedTags.ContainsKey($emptyKey)) {
-            $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = "" }
-            $processedTags[$emptyKey] = $true
-        }
     }
 }
 
