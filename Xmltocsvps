@@ -5,14 +5,14 @@ $xml = [xml](Get-Content -Path 'your_xml_file.xml')
 $results = @()
 
 # Define a function to recursively extract data
-function Flatten-XML($node, $path, $id) {
+function Flatten-XML($node, $path) {
     foreach ($child in $node.ChildNodes) {
         $currentPath = if ($path) { "$path.$($child.Name)" } else { $child.Name }
         if ($child.HasChildNodes) {
-            Flatten-XML $child $currentPath $id
+            Flatten-XML $child $currentPath
         } else {
             $result = New-Object PSObject -Property @{
-                "id"          = $id
+                "id"          = $currentPath.GetHashCode()
                 "All Parents" = $currentPath
                 "Value"       = $child.InnerText
             }
@@ -22,8 +22,7 @@ function Flatten-XML($node, $path, $id) {
 }
 
 # Start flattening from the root node
-$idCounter = 1
-Flatten-XML $xml.catalog "" $idCounter
+Flatten-XML $xml.catalog ""
 
 # Export the results to a CSV file
 $results | Export-Csv -Path 'output.csv' -NoTypeInformation
