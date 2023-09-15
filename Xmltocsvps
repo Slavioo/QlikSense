@@ -1,34 +1,31 @@
-# Load the XML file (replace 'yourfile.xml' with your XML file's path)
-$xmlFile = "yourfile.xml"
-$xmlDoc = [System.Xml.XmlDocument]::new()
-$xmlDoc.Load($xmlFile)
+# Load the XML file
+$xml = [xml](Get-Content -Path 'your_xml_file.xml')
 
-# Initialize an array to store the flattened data
-$flattenedData = @()
+# Create an empty array to store the results
+$results = @()
 
-# Recursive function to flatten XML
-function Flatten-XML($node, $parentPath, $id) {
+# Define a function to recursively extract data
+function Flatten-XML($node, $path, $id) {
     foreach ($child in $node.ChildNodes) {
-        $path = if ($parentPath) { "$parentPath\$($node.Name)" } else { $node.Name }
+        $currentPath = if ($path) { "$path.$($child.Name)" } else { $child.Name }
         if ($child.HasChildNodes) {
-            Flatten-XML $child $path $id
+            Flatten-XML $child $currentPath $id
         } else {
-            $flattenedData += [PSCustomObject]@{
-                "Id"          = $id
-                "All parents" = $path
+            $result = New-Object PSObject -Property @{
+                "id"          = $id
+                "All Parents" = $currentPath
                 "Value"       = $child.InnerText
             }
+            $results += $result
         }
     }
 }
 
 # Start flattening from the root node
-$index = 0
-foreach ($person in $xmlDoc.SelectNodes('//person')) {
-    $id = $index
-    $index++
-    Flatten-XML $person $null $id
-}
+$idCounter = 1
+Flatten-XML $xml.catalog "" $idCounter
 
-# Display the flattened data (you can also export it to a CSV file)
-$flattenedData | Format-Table -AutoSize
+# Export the results to a CSV file
+$results | Export-Csv -Path 'output.csv' -NoTypeInformation
+
+Write-Host "XML flattened to CSV. CSV file saved as 'output.csv'."
