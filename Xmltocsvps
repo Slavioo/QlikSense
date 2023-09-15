@@ -11,9 +11,8 @@ function GetOrCreateId($property) {
     return $recordIds[$property]
 }
 
-$csvLines = $xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
-    $element = $_.ParentNode
-    $property = ($element.AncestorsAndSelf | ForEach-Object { $_.Name }) -join '.'
+$csvLines = $xmlData.Descendants() | Where-Object { -not $_.HasChildNodes } | ForEach-Object {
+    $property = ($_.AncestorsAndSelf | ForEach-Object { $_.Name }) -join '.'
     $value = $_.InnerText.Trim()
     $id = GetOrCreateId($property)
     [PSCustomObject]@{
