@@ -21,9 +21,14 @@ foreach ($element in $xmlContent.SelectNodes("//text()")) {
     $property = $element.ParentNode.Name
     $value = $element.Value
     $parents = (Get-AllParents $element).TrimEnd('.')
-    
-    # Add the property, parents, and value (even if it's empty) to the flattened data
+
+    # Add the property, parents, and value to the flattened data
     $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
+    
+    # Add properties with no value (empty string)
+    if ($value -eq "") {
+        $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = "" }
+    }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
