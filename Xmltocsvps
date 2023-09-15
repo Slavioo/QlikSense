@@ -4,34 +4,41 @@ $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 # Initialize an empty array to store flattened data
 $flatData = @()
 
+# Hashtable to keep track of processed tags
+$processedTags = @{}
+
+# Recursive function to get all parent elements separated by full stops
+function Get-AllParents($node) {
+    $parents = @()
+
+    while ($node.ParentNode -ne $null) {
+        $parents = $node.ParentNode.Name + '.' + $parents
+        $node = $node.ParentNode
+    }
+
+    return $parents
+}
+
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
     $property = $element.Name
-    $value = $element.InnerText
+    $parents = (Get-AllParents $element).TrimEnd('.')
+    
+    # Generate a unique key for the property within its hierarchy
+    $key = "$parents.$property"
 
-    # Determine the path by traversing parent elements
-    $parents = $element | ForEach-Object {
-        $node = $_
-        $path = @()
+    # Check if the tag has already been processed with the same key
+    if (-not $processedTags.ContainsKey($key)) {
+        # Create a custom object with Parents and Property columns, excluding Value
+        $entry = New-Object -TypeName PSObject
+        $entry | Add-Member -MemberType NoteProperty -Name "Parents" -Value $parents
+        $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
 
-        while ($node.ParentNode -ne $null) {
-            $path += $node.ParentNode.Name
-            $node = $node.ParentNode
-        }
-
-        $path = [array]::Reverse($path)
-        $path -join '.'
+        # Add the custom object to the flattened data array
+        $flatData += $entry
+        $processedTags[$key] = $true
     }
-
-    # Create a custom object with Property, Path, and Value columns
-    $entry = New-Object -TypeName PSObject
-    $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
-    $entry | Add-Member -MemberType NoteProperty -Name "Path" -Value $parents
-    $entry | Add-Member -MemberType NoteProperty -Name "Value" -Value $value
-
-    # Add the custom object to the flattened data array
-    $flatData += $entry
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_with_correct_path.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_parents_and_property.csv" -NoTypeInformation
