@@ -24,30 +24,24 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $property = $element.Name
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
+    
+    # Extract the MasterParent by splitting the Parents column
+    $parentsArray = $parents.Split('.')
+    $masterParent = $null
+    if ($parentsArray.Length -gt 1) {
+        $masterParent = $parentsArray[$parentsArray.Length - 2]
+    }
 
     # Generate a unique key for the property within its hierarchy
     $key = "$parents.$property"
 
     # Check if the tag has already been processed with the same key
     if (-not $processedTags.ContainsKey($key)) {
-        # Add the property, parents, and value to the flattened data
-        $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
+        # Add the property, parents, MasterParent, and value to the flattened data
+        $flatData += [PSCustomObject]@{ Parents = $parents; MasterParent = $masterParent; Property = $property; Value = $value }
         $processedTags[$key] = $true
-    } else {
-        # If the tag has already been processed, we need to generate a new unique key
-        # by appending a numeric suffix to the property name
-        $suffix = 1
-        $newKey = $key
-        while ($processedTags.ContainsKey($newKey)) {
-            $suffix++
-            $newKey = "$parents.$property$suffix"
-        }
-
-        # Add the property with the new unique key
-        $flatData += [PSCustomObject]@{ Parents = $parents; Property = "$property$suffix"; Value = $value }
-        $processedTags[$newKey] = $true
     }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_with_multiple_properties.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_with_master_parent.csv" -NoTypeInformation
