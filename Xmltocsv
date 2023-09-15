@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+
+class Program
+{
+    static Dictionary<string, int> idMap = new Dictionary<string, int>();
+    static int idCounter = 1;
+
+    static void Main(string[] args)
+    {
+        string xmlData = File.ReadAllText("input.xml");
+        string csvFilePath = "output.csv";
+
+        XDocument xmlDoc = XDocument.Parse(xmlData);
+
+        var csvLines = xmlDoc.Descendants().Where(e => !e.HasElements)
+            .Select(element =>
+            {
+                string property = string.Join(".", element.AncestorsAndSelf().Reverse().Select(e => e.Name.LocalName));
+                string value = element.Value;
+                int id = GetOrCreateId(property);
+                return $"{property},{value},{id}";
+            });
+
+        File.WriteAllLines(csvFilePath, new[] { "property,value,id" }.Concat(csvLines));
+
+        Console.WriteLine("XML to CSV conversion complete.");
+    }
+
+    static int GetOrCreateId(string property)
+    {
+        if (!idMap.ContainsKey(property))
+        {
+            idMap[property] = idCounter++;
+        }
+        return idMap[property];
+    }
+}
