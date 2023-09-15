@@ -46,5 +46,14 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     }
 }
 
-# Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_with_direct_children.csv" -NoTypeInformation
+# Load the result set from the last code (filtering out non-direct children)
+$lastResult = Import-Csv -Path "flattened_with_direct_children.csv"
+
+# Filter the flatData to exclude records that match the lastResult
+$filteredData = $flatData | Where-Object {
+    $key = "$($_.Parents).$($_.Property)"
+    -not ($lastResult | Where-Object { "$($_.Parents).$($_.Property)" -eq $key }) -and -not [string]::IsNullOrEmpty($_.Value)
+}
+
+# Export the filtered data as a CSV file (or any desired format)
+$filteredData | Export-Csv -Path "filtered_result.csv" -NoTypeInformation
