@@ -4,19 +4,24 @@
 # Create an array to store the results
 $results = @()
 
-# Select all elements in the XML
-$elements = $xml.SelectNodes("//*")
-
-# Loop through each element and extract property and value
-foreach ($element in $elements) {
-    $property = $element.Name
-    $value = $element.InnerText
-    $result = [PSCustomObject]@{
-        "Property" = $property
-        "Value" = $value
+# Function to recursively process XML nodes
+function Process-XMLNode($node, $path) {
+    foreach ($child in $node.ChildNodes) {
+        $currentPath = if ($path) { "$path.$($child.Name)" } else { $child.Name }
+        if ($child.HasChildNodes) {
+            Process-XMLNode $child $currentPath
+        } else {
+            $result = [PSCustomObject]@{
+                "Property" = $currentPath -replace "\.\d+", ""  # Remove numeric suffixes
+                "Value"    = $child.InnerText
+            }
+            $results += $result
+        }
     }
-    $results += $result
 }
+
+# Start processing from the root node
+Process-XMLNode $xml ''
 
 # Export the results to a CSV file
 $results | Export-Csv -Path 'output.csv' -NoTypeInformation
