@@ -1,17 +1,17 @@
 # Load the XML file
-$xml = [xml](Get-Content -Path 'your_xml_file.xml')
+[xml]$xml = Get-Content -Path 'your_xml_file.xml'
 
 # Create an empty array to store the results
 $results = @()
 
-# Define a function to recursively extract data
-function Flatten-XML($node, $path) {
+# Function to recursively process XML nodes
+function Process-XMLNode($node, $path) {
     foreach ($child in $node.ChildNodes) {
         $currentPath = if ($path) { "$path.$($child.Name)" } else { $child.Name }
         if ($child.HasChildNodes) {
-            Flatten-XML $child $currentPath
+            Process-XMLNode $child $currentPath
         } else {
-            $result = New-Object PSObject -Property @{
+            $result = [PSCustomObject]@{
                 "Property" = $currentPath
                 "Value"    = $child.InnerText
             }
@@ -20,8 +20,8 @@ function Flatten-XML($node, $path) {
     }
 }
 
-# Start flattening from the root node
-Flatten-XML $xml.catalog ""
+# Start processing from the root node
+Process-XMLNode $xml ''
 
 # Export the results to a CSV file
 $results | Export-Csv -Path 'output.csv' -NoTypeInformation
