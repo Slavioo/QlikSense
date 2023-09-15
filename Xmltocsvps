@@ -7,9 +7,6 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
-# Hashtable to keep track of unique parent.property combinations
-$parentPropertyCombinations = @{}
-
 # Recursive function to get all parent elements separated by full stops
 function Get-AllParents($node) {
     $parents = @()
@@ -36,18 +33,21 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
         # Add the property, parents, and value to the flattened data
         $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
         $processedTags[$key] = $true
+    } else {
+        # If the tag has already been processed, we need to generate a new unique key
+        # by appending a numeric suffix to the property name
+        $suffix = 1
+        $newKey = $key
+        while ($processedTags.ContainsKey($newKey)) {
+            $suffix++
+            $newKey = "$parents.$property$suffix"
+        }
 
-        # Check if the parent.property combination is already recorded
-        if ($parentPropertyCombinations.ContainsKey("$parents.$property")) {
-            # If a record with the same parent.property combination exists, remove it
-            $flatData = $flatData | Where-Object { $_.Parents.Property -ne "$parents.$property" }
-        }
-        else {
-            # Otherwise, record this parent.property combination
-            $parentPropertyCombinations["$parents.$property"] = $true
-        }
+        # Add the property with the new unique key
+        $flatData += [PSCustomObject]@{ Parents = $parents; Property = "$property$suffix"; Value = $value }
+        $processedTags[$newKey] = $true
     }
 }
 
-# Export the filtered data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "filtered_data_with_unique_parent_property.csv" -NoTypeInformation
+# Export the flattened data as a CSV file (or any desired format)
+$flatData | Export-Csv -Path "flattened_data_with_multiple_properties.csv" -NoTypeInformation
