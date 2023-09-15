@@ -7,7 +7,7 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
-# Function to check if an element's value is a concatenation of child elements
+# Function to check if an element's value is a concatenation of child values
 function IsConcatenationOfChildValues($element) {
     $childValues = $element.ChildNodes | ForEach-Object { $_.InnerText }
     $combinedValue = $childValues -join ""
@@ -32,17 +32,17 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Check if the tag's value is a concatenation of child values, and skip it if it is
-    if (-not (IsConcatenationOfChildValues $element)) {
-        # Generate a unique key for the property within its hierarchy
-        $key = "$parents.$property"
+    # Generate a unique key for the property within its hierarchy
+    $key = "$parents.$property"
 
-        # Check if the tag has already been processed with the same key
-        if (-not $processedTags.ContainsKey($key)) {
+    # Check if the tag has already been processed with the same key
+    if (-not $processedTags.ContainsKey($key)) {
+        # Check if the tag's value is a concatenation of child values, and skip it if it is
+        if (-not (IsConcatenationOfChildValues $element)) {
             # Add the property, parents, and value (even if it's empty) to the flattened data
             $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-            $processedTags[$key] = $true
         }
+        $processedTags[$key] = $true
     }
 }
 
