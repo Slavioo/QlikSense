@@ -1,30 +1,28 @@
-[xml]$xmlData = Get-Content -Path "input.xml"  # Replace with your XML file path
-$outputFilePath = "flat_output.xml"
+# Load the XML file
+$xmlContent = [xml](Get-Content -Path "your_complex.xml")
 
-# Create a new flat XML document
-$flatXml = New-Object System.Xml.XmlDocument
-$flatRoot = $flatXml.CreateElement("root")
-$flatXml.AppendChild($flatRoot)
+# Initialize an empty array to store flattened data
+$flatData = @()
 
-# Function to recursively flatten XML elements
-function Flatten-XML($node, $flatNode, $prefix = "") {
-    foreach ($child in $node.ChildNodes) {
-        $childName = if ($prefix -eq "") { $child.Name } else { "$prefix.$($child.Name)" }
-        $flatChild = $flatXml.CreateElement($childName)
+# Recursive function to traverse the XML structure and flatten it
+function Flatten-XML($xml, $prefix = "") {
+    foreach ($node in $xml.ChildNodes) {
+        $property = if ($prefix -eq "") { $node.Name } else { "$prefix`_$($node.Name)" }
+        $value = $node.InnerText
 
-        if ($child.HasChildNodes) {
-            Flatten-XML $child $flatChild $childName
+        # Check if the node has child nodes
+        if ($node.HasChildNodes) {
+            # Recursively flatten child nodes
+            Flatten-XML $node $property
         } else {
-            $flatChild.InnerText = $child.InnerText
+            # Add flattened property to the array
+            $flatData += [PSCustomObject]@{ Property = $property; Value = $value }
         }
-
-        $flatNode.AppendChild($flatChild)
     }
 }
 
 # Start flattening from the root node
-Flatten-XML $xmlData.DocumentElement $flatRoot
+Flatten-XML $xmlContent
 
-# Save the flattened XML to a file
-$flatXml.Save($outputFilePath)
-Write-Host "XML flattening complete. Flat XML saved to $outputFilePath"
+# Export the flattened data as XML
+$flatData | Export-Clixml -Path "flattened.xml"
