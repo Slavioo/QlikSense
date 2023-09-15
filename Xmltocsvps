@@ -25,19 +25,17 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Check if the end node property name in the XML matches the Property in the output CSV
-    if ($element -eq $xmlContent.DocumentElement.SelectSingleNode(".//$property")) {
-        # Generate a unique key for the property within its hierarchy
-        $key = "$parents.$property"
-
-        # Check if the tag has already been processed with the same key
-        if (-not $processedTags.ContainsKey($key)) {
-            # Add the property, parents, and value to the flattened data
-            $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-            $processedTags[$key] = $true
-        }
+    # Check if the tag has already been processed with the same key
+    $key = "$parents.$property"
+    if (-not $processedTags.ContainsKey($key)) {
+        # Add the property, parents, and value to the flattened data
+        $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
+        $processedTags[$key] = $true
     }
 }
 
+# Filter the flatData to exclude records where Property is not equal to the end node property name
+$filteredData = $flatData | Where-Object { $_.Property -eq $xmlContent.DocumentElement.Name }
+
 # Export the filtered data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "filtered_by_property.csv" -NoTypeInformation
+$filteredData | Export-Csv -Path "filtered_by_property.csv" -NoTypeInformation
