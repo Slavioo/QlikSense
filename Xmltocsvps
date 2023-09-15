@@ -5,14 +5,15 @@ $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 $flatData = @()
 
 # Loop through each element in the XML
-foreach ($element in $xmlContent.SelectNodes("//Record")) {
-    $flatItem = [ordered]@{}
-    
-    foreach ($property in $element.ChildNodes) {
-        $flatItem["$($property.Name)"] = $property.InnerText
+foreach ($record in $xmlContent.SelectNodes("//Record")) {
+    $flatItem = New-Object PSObject -Property @{}
+
+    foreach ($property in $record.ChildNodes) {
+        $propertyName = $property.Name -replace '\W', '_' # Remove special characters
+        $flatItem | Add-Member -MemberType NoteProperty -Name "Record_$propertyName" -Value $property.InnerText
     }
-    
-    $flatData += [PSCustomObject]$flatItem
+
+    $flatData += $flatItem
 }
 
 # Export the flattened data as XML
