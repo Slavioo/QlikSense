@@ -7,9 +7,9 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
-# Function to check if an element has child elements
-function HasChildElements($element) {
-    return $element.HasChildNodes
+# Function to check if an element is a direct child of the root node
+function IsDirectChildOfRoot($element) {
+    return ($element.ParentNode -eq $xmlContent.DocumentElement)
 }
 
 # Recursive function to get all parent elements separated by full stops
@@ -26,6 +26,11 @@ function Get-AllParents($node) {
 
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
+    # Skip the element if it's not a direct child of the root node
+    if (-not (IsDirectChildOfRoot $element)) {
+        continue
+    }
+
     $property = $element.Name
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
@@ -42,4 +47,4 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_with_parents_and_values.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_with_direct_children.csv" -NoTypeInformation
