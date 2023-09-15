@@ -1,27 +1,15 @@
 [xml]$xmlData = Get-Content -Path "input.xml"  # Replace with your XML file path
 $outputFilePath = "output.csv"
 
-$recordIds = @{}
-$idCounter = 1
-
-function GetOrCreateId($property) {
-    if (-not $recordIds.ContainsKey($property)) {
-        $recordIds[$property] = $idCounter++
-    }
-    return $recordIds[$property]
-}
-
 $csvData = @()
 
 $xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
     $element = $_.ParentNode
     $property = ($element.AncestorsAndSelf | ForEach-Object { $_.Name }) -join '.'
     $value = $_.InnerText.Trim()
-    $id = GetOrCreateId($property)
     $csvData += [PSCustomObject]@{
         Property = $property
         Value = $value
-        ID = $id
     }
 }
 
