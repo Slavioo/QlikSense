@@ -4,38 +4,47 @@ $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 # Initialize an empty array to store flattened data
 $flatData = @()
 
+# Hashtable to keep track of processed tags
+$processedTags = @{}
+
+# Function to check if an element has child elements
+function HasChildElements($element) {
+    return $element.HasChildNodes
+}
+
+# Recursive function to get all parent elements separated by full stops
+function Get-AllParents($node) {
+    $parents = @()
+
+    while ($node.ParentNode -ne $null) {
+        $parents = $node.ParentNode.Name + '.' + $parents
+        $node = $node.ParentNode
+    }
+
+    return $parents
+}
+
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
+    # Skip the element if it has child elements
+    if (HasChildElements $element) {
+        continue
+    }
+
     $property = $element.Name
     $value = $element.InnerText
-    $parents = $element.ParentNode | ForEach-Object { $_.Name } -join '.'
+    $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Check if the tag has child elements
-    if (-not $element.HasChildNodes) {
-        # Generate a unique key for the property within its hierarchy
-        $key = "$parents.$property"
+    # Generate a unique key for the property within its hierarchy
+    $key = "$parents.$property"
 
-        # Check if the tag has already been processed with the same key
-        if (-not $flatData | Where-Object { $_.Parents -eq $parents -and $_.Property -eq $property }) {
-            # Add the property, parents, and value (even if it's empty) to the flattened data
-            $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-        }
-    }
-    else {
-        # Check if the value is different from concatenated child values
-        $childValues = $element.ChildNodes | ForEach-Object { $_.InnerText } -join ''
-        if ($value -ne $childValues) {
-            # Generate a unique key for the property within its hierarchy
-            $key = "$parents.$property"
-
-            # Check if the tag has already been processed with the same key
-            if (-not $flatData | Where-Object { $_.Parents -eq $parents -and $_.Property -eq $property }) {
-                # Add the property, parents, and value (even if it's empty) to the flattened data
-                $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-            }
-        }
+    # Check if the tag has already been processed with the same key
+    if (-not $processedTags.ContainsKey($key)) {
+        # Add the property, parents, and value (even if it's empty) to the flattened data
+        $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
+        $processedTags[$key] = $true
     }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_with_parents_no_concatenations.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_with_parents_and_values.csv" -NoTypeInformation
