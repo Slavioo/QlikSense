@@ -12,9 +12,8 @@ function Flatten-XML($node, $path) {
             Flatten-XML $child $currentPath
         } else {
             $result = New-Object PSObject -Property @{
-                "id"          = $currentPath.GetHashCode()
-                "All Parents" = $currentPath
-                "Value"       = $child.InnerText
+                "Property" = $currentPath
+                "Value"    = $child.InnerText
             }
             $results += $result
         }
@@ -27,4 +26,4 @@ Flatten-XML $xml.catalog ""
 # Export the results to a CSV file
 $results | Export-Csv -Path 'output.csv' -NoTypeInformation
 
-Write-Host "XML flattened to CSV. CSV file saved as 'output.csv'."
+Write-Host "XML properties and values flattened to CSV. CSV file saved as 'output.csv'."
