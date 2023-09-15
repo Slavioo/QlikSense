@@ -5,10 +5,14 @@ $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 $flatData = @()
 
 # Loop through each element in the XML
-foreach ($element in $xmlContent.SelectNodes("//*")) {
-    $property = $element.Name
-    $value = $element.InnerText
-    $flatData += [PSCustomObject]@{ Property = $property; Value = $value }
+foreach ($element in $xmlContent.SelectNodes("//Record")) {
+    $flatItem = [ordered]@{}
+    
+    foreach ($property in $element.ChildNodes) {
+        $flatItem["$($property.Name)"] = $property.InnerText
+    }
+    
+    $flatData += [PSCustomObject]$flatItem
 }
 
 # Export the flattened data as XML
