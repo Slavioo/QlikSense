@@ -7,11 +7,6 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
-# Function to check if an element is a direct child of the root node
-function IsDirectChildOfRoot($element) {
-    return ($element.ParentNode -eq $xmlContent.DocumentElement)
-}
-
 # Recursive function to get all parent elements separated by full stops
 function Get-AllParents($node) {
     $parents = @()
@@ -26,11 +21,6 @@ function Get-AllParents($node) {
 
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
-    # Skip the element if it's not a direct child of the root node
-    if (-not (IsDirectChildOfRoot $element)) {
-        continue
-    }
-
     $property = $element.Name
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
@@ -40,20 +30,14 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
 
     # Check if the tag has already been processed with the same key
     if (-not $processedTags.ContainsKey($key)) {
-        # Add the property, parents, and value (even if it's empty) to the flattened data
+        # Add the property, parents, and value to the flattened data
         $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
         $processedTags[$key] = $true
     }
 }
 
-# Load the result set from the last code (filtering out non-direct children)
-$lastResult = Import-Csv -Path "flattened_with_direct_children.csv"
-
-# Filter the flatData to exclude records that match the lastResult
-$filteredData = $flatData | Where-Object {
-    $key = "$($_.Parents).$($_.Property)"
-    -not ($lastResult | Where-Object { "$($_.Parents).$($_.Property)" -eq $key }) -and -not [string]::IsNullOrEmpty($_.Value)
-}
+# Filter the flatData to exclude records where Property is not equal to the end node property name
+$filteredData = $flatData | Where-Object { $_.Property -eq $xmlContent.DocumentElement.Name }
 
 # Export the filtered data as a CSV file (or any desired format)
-$filteredData | Export-Csv -Path "filtered_result.csv" -NoTypeInformation
+$filteredData | Export-Csv -Path "filtered_by_property.csv" -NoTypeInformation
