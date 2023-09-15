@@ -22,25 +22,18 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
     
-    # Split the parents into an array
-    $parentsArray = $parents.Split('.')
-
     # Generate a unique key for the property within its hierarchy
     $key = "$parents.$property"
 
-    # Create a custom object with Property and Value columns
+    # Create a custom object with Property, Path, and Value columns
     $entry = New-Object -TypeName PSObject
     $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
+    $entry | Add-Member -MemberType NoteProperty -Name "Path" -Value $parents
     $entry | Add-Member -MemberType NoteProperty -Name "Value" -Value $value
-
-    # Add Parent columns based on the number of levels
-    for ($i = 0; $i -lt $parentsArray.Length; $i++) {
-        $entry | Add-Member -MemberType NoteProperty -Name "Parent${i}level" -Value $parentsArray[$i]
-    }
 
     # Add the custom object to the flattened data array
     $flatData += $entry
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_with_parent_levels.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_with_path.csv" -NoTypeInformation
