@@ -1,7 +1,7 @@
 # Load the XML file
 $xmlContent = [xml](Get-Content -Path "your_complex.xml")
 
-# Initialize an empty array to store flattened data
+# Initialize an empty list to store flattened data
 $flatData = @()
 
 # Recursive function to traverse the XML structure and flatten it
@@ -15,8 +15,8 @@ function Flatten-XML($xml, $prefix = "") {
             # Recursively flatten child nodes
             Flatten-XML $node $property
         } else {
-            # Add flattened property to the array
-            $flatData += [PSCustomObject]@{ Property = $property; Value = $value }
+            # Add flattened property to the list
+            $flatData.Add([PSCustomObject]@{ Property = $property; Value = $value })
         }
     }
 }
