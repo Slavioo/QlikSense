@@ -7,11 +7,6 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
-# Function to check if an element is a direct child of the root node
-function IsDirectChildOfRoot($element) {
-    return ($element.ParentNode -eq $xmlContent.DocumentElement)
-}
-
 # Recursive function to get all parent elements separated by full stops
 function Get-AllParents($node) {
     $parents = @()
@@ -26,35 +21,23 @@ function Get-AllParents($node) {
 
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
-    # Skip the element if it's not a direct child of the root node
-    if (-not (IsDirectChildOfRoot $element)) {
-        continue
-    }
+    # Check if the element is an end node (has no child elements)
+    if (-not $element.HasChildNodes) {
+        $property = $element.Name
+        $value = $element.InnerText
+        $parents = (Get-AllParents $element).TrimEnd('.')
 
-    $property = $element.Name
-    $value = $element.InnerText
-    $parents = (Get-AllParents $element).TrimEnd('.')
-    
-    # Check if there are no other tags between the tag and the value in the hierarchy
-    $hierarchy = $parents.Split('.')
-    $validHierarchy = $true
-    foreach ($node in $hierarchy) {
-        if ($processedTags.ContainsKey("$node.$property")) {
-            $validHierarchy = $false
-            break
+        # Generate a unique key for the property within its hierarchy
+        $key = "$parents.$property"
+
+        # Check if the tag has already been processed with the same key
+        if (-not $processedTags.ContainsKey($key)) {
+            # Add the property, parents, and value to the flattened data
+            $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
+            $processedTags[$key] = $true
         }
-    }
-
-    # Generate a unique key for the property within its hierarchy
-    $key = "$parents.$property"
-
-    # Check if the tag has already been processed with the same key and if the hierarchy is valid
-    if (-not $processedTags.ContainsKey($key) -and $validHierarchy) {
-        # Add the property, parents, and value to the flattened data
-        $flatData += [PSCustomObject]@{ Parents = $parents; Property = $property; Value = $value }
-        $processedTags[$key] = $true
     }
 }
 
 # Export the filtered data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "filtered_by_hierarchy.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "filtered_for_end_nodes.csv" -NoTypeInformation
