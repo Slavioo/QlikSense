@@ -26,7 +26,7 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $parents = (Get-AllParents $element).TrimEnd('.')
 
     # Check if the tag has child elements, and skip it if it does
-    if (-not $element.HasChildNodes) {
+    if (-not $element.HasChildNodes -or [string]::IsNullOrEmpty($value)) {
         # Generate a unique key for the property within its hierarchy
         $key = "$parents.$property"
 
@@ -40,4 +40,4 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_with_parents_and_empty.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_with_parents_and_values.csv" -NoTypeInformation
