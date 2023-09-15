@@ -1,26 +1,36 @@
-# Load the XML file
-[xml]$xml = Get-Content -Path 'your_complex_xml_file.xml'
+# Define the path to the XML file
+$xmlFilePath = "path_to_your_xml_file.xml"
 
-# Create an array to store the hierarchy
-$hierarchy = @()
+# Load the XML data from the file
+$xml = [xml](Get-Content -Path $xmlFilePath)
 
-# Function to recursively build the hierarchy
-function Build-Hierarchy($node, $path) {
-    $result = [PSCustomObject]@{
-        "Element" = $node.Name
-        "Path"    = $path
-    }
-    $hierarchy += $result
-    foreach ($child in $node.ChildNodes) {
-        $currentPath = if ($path) { "$path\$($child.Name)" } else { $child.Name }
-        Build-Hierarchy $child $currentPath
+# Initialize an empty array to store the flattened data
+$csvData = @()
+
+# Define a function to recursively traverse the XML and flatten it
+function Flatten-XML {
+    param (
+        [xml]$xml,
+        [string]$path = ""
+    )
+    
+    foreach ($node in $xml.ChildNodes) {
+        $currentPath = if ($path -eq "") { $node.Name } else { "$path/$($node.Name)" }
+        
+        if ($node.ChildNodes.Count -eq 0) {
+            $csvData += [PSCustomObject]@{
+                PropertyPath = $currentPath
+                PropertyValue = $node.InnerText
+            }
+        }
+        else {
+            Flatten-XML -xml $node -path $currentPath
+        }
     }
 }
 
-# Start building the hierarchy from the root node
-Build-Hierarchy $xml ''
+# Start flattening the XML
+Flatten-XML -xml $xml
 
-# Export the hierarchy to a CSV file
-$hierarchy | Export-Csv -Path 'output_hierarchy.csv' -NoTypeInformation
-
-Write-Host "XML hierarchy extracted to CSV. CSV file saved as 'output_hierarchy.csv'."
+# Export the flattened data to a CSV file
+$csvData | Export-Csv -Path "output.csv" -NoTypeInformation
