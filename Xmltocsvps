@@ -11,7 +11,7 @@ function GetOrCreateId($property) {
     return $recordIds[$property]
 }
 
-$csvLines = $xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
+$csvLines = $xmlData.SelectNodes("//text()[normalize-space()]") | ForEach-Object {
     $element = $_.ParentNode
     $property = ($element.AncestorsAndSelf | ForEach-Object { $_.Name }) -join '.'
     $value = $_.InnerText.Trim()
