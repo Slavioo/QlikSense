@@ -16,15 +16,22 @@ $csvData = @()
 $xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
     $element = $_.ParentNode
     $property = $element.Name
-    $value = $_.InnerText.Trim()
+    
+    # Create an array to capture the property hierarchy
+    $propertyHierarchy = @($property)
     
     # Traverse up the XML hierarchy to include parent property names
     $parent = $element.ParentNode
     while ($parent -ne $null) {
-        $property = "$($parent.Name).$property"
+        $propertyHierarchy += $parent.Name
         $parent = $parent.ParentNode
     }
     
+    # Reverse the property hierarchy array to build the full property name
+    $property = $propertyHierarchy[-1..-($propertyHierarchy.Count)]
+    
+    $property = $property -join '.'
+    $value = $_.InnerText.Trim()
     $id = GetOrCreateId($property)
     
     # Create a custom PowerShell property name
