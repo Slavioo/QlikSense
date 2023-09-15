@@ -25,23 +25,30 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
     
-    # Extract the MasterParent by splitting the Parents column
+    # Split the parents into an array
     $parentsArray = $parents.Split('.')
-    $masterParent = $null
-    if ($parentsArray.Length -gt 1) {
-        $masterParent = $parentsArray[$parentsArray.Length - 2]
-    }
 
     # Generate a unique key for the property within its hierarchy
     $key = "$parents.$property"
 
     # Check if the tag has already been processed with the same key
     if (-not $processedTags.ContainsKey($key)) {
-        # Add the property, parents, MasterParent, and value to the flattened data
-        $flatData += [PSCustomObject]@{ Parents = $parents; MasterParent = $masterParent; Property = $property; Value = $value }
+        # Create a custom object with Property and Value columns
+        $entry = New-Object -TypeName PSObject
+        $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
+        $entry | Add-Member -MemberType NoteProperty -Name "Value" -Value $value
+
+        # Add Parent columns based on the number of levels
+        for ($i = 0; $i -lt $parentsArray.Length; $i++) {
+            $entry | Add-Member -MemberType NoteProperty -Name "Parent${i}level" -Value $parentsArray[$i]
+        }
+
+        # Add the custom object to the flattened data array
+        $flatData += $entry
+
         $processedTags[$key] = $true
     }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_with_master_parent.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_with_parent_levels.csv" -NoTypeInformation
