@@ -7,6 +7,13 @@ $flatData = @()
 # Hashtable to keep track of processed tags
 $processedTags = @{}
 
+# Function to check if an element's value is a concatenation of child elements
+function IsConcatenationOfChildValues($element) {
+    $childValues = $element.ChildNodes | ForEach-Object { $_.InnerText }
+    $combinedValue = $childValues -join ""
+    return ($element.InnerText -eq $combinedValue)
+}
+
 # Recursive function to get all parent elements separated by full stops
 function Get-AllParents($node) {
     $parents = @()
@@ -25,8 +32,8 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
 
-    # Check if the tag has child elements, and skip it if it does
-    if (-not $element.HasChildNodes) {
+    # Check if the tag's value is a concatenation of child values, and skip it if it is
+    if (-not (IsConcatenationOfChildValues $element)) {
         # Generate a unique key for the property within its hierarchy
         $key = "$parents.$property"
 
@@ -40,4 +47,4 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_with_parents_and_values.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_with_parents_and_no_concatenations.csv" -NoTypeInformation
