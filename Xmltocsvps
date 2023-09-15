@@ -23,13 +23,12 @@ function Get-AllParents($node) {
 foreach ($element in $xmlContent.SelectNodes("//*")) {
     $property = $element.Name
     $value = $null  # Initialize value as null
-
-    # Check if the current element's name is the same as the property name
-    if ($property -eq $element.LocalName) {
+    $parents = (Get-AllParents $element).TrimEnd('.')
+    
+    # Check if the property in the CSV file will be the same as the property in the XML
+    if ($property -eq $xmlContent.DocumentElement.Name) {
         $value = $element.InnerText
     }
-
-    $parents = (Get-AllParents $element).TrimEnd('.')
 
     # Generate a unique key for the property within its hierarchy
     $key = "$parents.$property"
@@ -42,5 +41,5 @@ foreach ($element in $xmlContent.SelectNodes("//*")) {
     }
 }
 
-# Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_with_direct_values.csv" -NoTypeInformation
+# Export the filtered data as a CSV file (or any desired format)
+$flatData | Export-Csv -Path "filtered_matching_properties.csv" -NoTypeInformation
