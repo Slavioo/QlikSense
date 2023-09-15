@@ -22,23 +22,29 @@ function Get-AllParents($node) {
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
     $property = $element.Name
-    $parents = (Get-AllParents $element).TrimEnd('.')
+    $value = $element.InnerText
     
     # Generate a unique key for the property within its hierarchy
-    $key = "$parents.$property"
+    $key = "$property"
 
     # Check if the tag has already been processed with the same key
-    if (-not $processedTags.ContainsKey($key)) {
-        # Create a custom object with Parents and Property columns, excluding Value
-        $entry = New-Object -TypeName PSObject
-        $entry | Add-Member -MemberType NoteProperty -Name "Parents" -Value $parents
-        $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
-
-        # Add the custom object to the flattened data array
-        $flatData += $entry
-        $processedTags[$key] = $true
+    if ($processedTags.ContainsKey($key)) {
+        $parents = $processedTags[$key]
+    } else {
+        # Calculate parents only if not processed before
+        $parents = (Get-AllParents $element).TrimEnd('.')
+        $processedTags[$key] = $parents
     }
+
+    # Create a custom object with Parents, Property, and Value columns
+    $entry = New-Object -TypeName PSObject
+    $entry | Add-Member -MemberType NoteProperty -Name "Parents" -Value $parents
+    $entry | Add-Member -MemberType NoteProperty -Name "Property" -Value $property
+    $entry | Add-Member -MemberType NoteProperty -Name "Value" -Value $value
+
+    # Add the custom object to the flattened data array
+    $flatData += $entry
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened_data_parents_and_property.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_data_corrected.csv" -NoTypeInformation
