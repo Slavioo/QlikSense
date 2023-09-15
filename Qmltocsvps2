@@ -1,0 +1,24 @@
+[xml]$xml = Get-Content -Path 'your_input.xml'
+
+# Create an array to store the CSV-like data
+$csvData = @()
+
+# Function to recursively extract data from XML
+function Extract-Data($xmlNode, $parentPath) {
+    foreach ($child in $xmlNode.ChildNodes) {
+        $tag = $child.Name
+        $value = $child.InnerText.Trim()
+        $path = if ($parentPath) { "$parentPath/$tag" } else { $tag }
+        $csvData += [PSCustomObject]@{
+            Path = $path
+            Value = $value
+        }
+        Extract-Data $child $path
+    }
+}
+
+# Extract data from the XML
+Extract-Data $xml ''
+
+# Export data to CSV
+$csvData | Export-Csv -Path 'output.csv' -NoTypeInformation
