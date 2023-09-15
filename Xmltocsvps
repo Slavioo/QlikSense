@@ -26,11 +26,6 @@ function Get-AllParents($node) {
 
 # Loop through each element in the XML
 foreach ($element in $xmlContent.SelectNodes("//*")) {
-    # Skip the element if it has child elements
-    if (HasChildElements $element) {
-        continue
-    }
-
     $property = $element.Name
     $value = $element.InnerText
     $parents = (Get-AllParents $element).TrimEnd('.')
