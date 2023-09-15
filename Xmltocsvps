@@ -8,12 +8,13 @@ $flatData = @()
 foreach ($element in $xmlContent.SelectNodes("//text()")) {
     $property = $element.ParentNode.Name
     $value = $element.Value
+    $parent = $element.ParentNode.ParentNode.Name  # Get the grandparent node (the parent of the property)
 
-    # Add the property and value to the flattened data
+    # Add the property, parent, and value to the flattened data
     if ($property -ne "") {
-        $flatData += [PSCustomObject]@{ Property = $property; Value = $value }
+        $flatData += [PSCustomObject]@{ Parent = $parent; Property = $property; Value = $value }
     }
 }
 
 # Export the flattened data as a CSV file (or any desired format)
-$flatData | Export-Csv -Path "flattened.csv" -NoTypeInformation
+$flatData | Export-Csv -Path "flattened_with_parent.csv" -NoTypeInformation
