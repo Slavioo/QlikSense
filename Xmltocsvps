@@ -1,47 +1,24 @@
 [xml]$xmlData = Get-Content -Path "input.xml"  # Replace with your XML file path
-$outputFilePath = "output.csv"
 
-$recordIds = @{}
-$idCounter = 1
+$flatXml = New-Object System.Xml.XmlDocument
+$flatXml.AppendChild($flatXml.CreateXmlDeclaration("1.0", $null, $null))
+$flatRoot = $flatXml.CreateElement("root")
+$flatXml.AppendChild($flatRoot)
 
-function GetOrCreateId($property) {
-    if (-not $recordIds.ContainsKey($property)) {
-        $recordIds[$property] = $idCounter++
-    }
-    return $recordIds[$property]
-}
-
-$csvData = @()
-
-$xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
-    $element = $_.ParentNode
-    $property = $element.Name
-    
-    # Create an array to capture the property hierarchy
-    $propertyHierarchy = @($property)
-    
-    # Traverse up the XML hierarchy to include parent property names
-    $parent = $element.ParentNode
-    while ($parent -ne $null) {
-        $propertyHierarchy += $parent.Name
-        $parent = $parent.ParentNode
-    }
-    
-    # Reverse the property hierarchy array to build the full property name
-    $property = $propertyHierarchy[-1..-($propertyHierarchy.Count)]
-    
-    $property = $property -join '.'
-    $value = $_.InnerText.Trim()
-    $id = GetOrCreateId($property)
-    
-    # Create a custom PowerShell property name
-    $propertyForPS = $property.Replace('.', '_')
-    
-    $csvData += [PSCustomObject]@{
-        $propertyForPS = $value
-        ID = $id
+function Flatten-XML($node, $flatNode) {
+    foreach ($child in $node.ChildNodes) {
+        $flatChild = $flatXml.CreateElement($child.Name)
+        $flatNode.AppendChild($flatChild)
+        
+        if ($child.HasChildNodes) {
+            Flatten-XML $child $flatChild
+        } else {
+            $flatChild.InnerText = $child.InnerText
+        }
     }
 }
 
-$csvData | Export-Csv -Path $outputFilePath -NoTypeInformation -Delimiter ',' -Encoding UTF8
-Write-Host "XML to CSV conversion complete."
+Flatten-XML $xmlData.DocumentElement $flatRoot
+
+$flatXml.Save("flat_output.xml")  # Save the flattened XML to a file
+Write-Host "XML flattening complete."
