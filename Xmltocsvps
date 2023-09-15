@@ -1,15 +1,38 @@
 [xml]$xmlData = Get-Content -Path "input.xml"  # Replace with your XML file path
 $outputFilePath = "output.csv"
 
+$recordIds = @{}
+$idCounter = 1
+
+function GetOrCreateId($property) {
+    if (-not $recordIds.ContainsKey($property)) {
+        $recordIds[$property] = $idCounter++
+    }
+    return $recordIds[$property]
+}
+
 $csvData = @()
 
 $xmlData.SelectNodes('//text()[normalize-space()]') | ForEach-Object {
     $element = $_.ParentNode
-    $property = ($element.AncestorsAndSelf | ForEach-Object { $_.Name }) -join '.'
+    $property = $element.Name
     $value = $_.InnerText.Trim()
+    
+    # Traverse up the XML hierarchy to include parent property names
+    $parent = $element.ParentNode
+    while ($parent -ne $null) {
+        $property = "$($parent.Name).$property"
+        $parent = $parent.ParentNode
+    }
+    
+    $id = GetOrCreateId($property)
+    
+    # Create a custom PowerShell property name
+    $propertyForPS = $property.Replace('.', '_')
+    
     $csvData += [PSCustomObject]@{
-        Property = $property
-        Value = $value
+        $propertyForPS = $value
+        ID = $id
     }
 }
 
