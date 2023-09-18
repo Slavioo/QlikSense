@@ -1,0 +1,84 @@
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+class Program
+{
+    static void Main()
+    {
+        // Load the XML document from a file (replace with your XML file path)
+        string xmlFilePath = "your_xml_file.xml"; // Replace with the path to your XML file
+        XmlDocument xmlDoc = new XmlDocument();
+        xmlDoc.Load(xmlFilePath);
+
+        // Flatten the XML and print the results
+        List<FlattenedRecord> records = FlattenXML(xmlDoc.DocumentElement);
+        foreach (FlattenedRecord record in records)
+        {
+            Console.WriteLine($"Tag Path: {record.TagPath}, Value: {record.Value}");
+        }
+    }
+
+    // Generic recursive method to flatten the XML into a list of FlattenedRecord objects
+    static List<FlattenedRecord> FlattenXML(XmlNode node)
+    {
+        List<FlattenedRecord> records = new List<FlattenedRecord>();
+
+        if (node.NodeType == XmlNodeType.Element)
+        {
+            // If it's an element node, process its attributes
+            foreach (XmlAttribute attribute in node.Attributes)
+            {
+                string attributePath = $"{GetElementPath(node)}/@{attribute.Name}";
+                string attributeValue = attribute.Value;
+                records.Add(new FlattenedRecord(attributePath, attributeValue));
+            }
+
+            // Process child elements and their values
+            foreach (XmlNode childNode in node.ChildNodes)
+            {
+                records.AddRange(FlattenXML(childNode));
+            }
+        }
+        else if (node.NodeType == XmlNodeType.Text)
+        {
+            // If it's a text node (leaf node), add the record
+            string elementPath = GetElementPath(node.ParentNode);
+            string elementValue = node.InnerText;
+
+            records.Add(new FlattenedRecord(elementPath, elementValue));
+        }
+
+        return records;
+    }
+
+    // Helper method to get the element path
+    static string GetElementPath(XmlNode node)
+    {
+        List<string> pathParts = new List<string>();
+
+        while (node != null)
+        {
+            if (node.NodeType == XmlNodeType.Element)
+            {
+                pathParts.Insert(0, node.Name);
+            }
+            node = node.ParentNode;
+        }
+
+        return string.Join("/", pathParts);
+    }
+}
+
+// Class to represent a flattened record
+class FlattenedRecord
+{
+    public string TagPath { get; }
+    public string Value { get; }
+
+    public FlattenedRecord(string tagPath, string value)
+    {
+        TagPath = tagPath;
+        Value = value;
+    }
+}
