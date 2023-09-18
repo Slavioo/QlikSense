@@ -1,0 +1,109 @@
+using System;
+using System.Collections.Generic;
+using System.Xml;
+
+class Program
+{
+    static void Main()
+    {
+        // Create a new XmlDocument and set the XML structure
+        XmlDocument xmlDoc = new XmlDocument();
+
+        // Create the root element
+        XmlElement rootElement = xmlDoc.CreateElement("root");
+        xmlDoc.AppendChild(rootElement);
+
+        // Add your XML data here (any structure)
+        // For example, let's add a sample structure:
+
+        // Create a "products" element
+        XmlElement productsElement = xmlDoc.CreateElement("products");
+        rootElement.AppendChild(productsElement);
+
+        // Create product 1
+        XmlElement product1Element = xmlDoc.CreateElement("product");
+        productsElement.AppendChild(product1Element);
+
+        XmlElement productName1Element = xmlDoc.CreateElement("name");
+        productName1Element.InnerText = "Product 1";
+        product1Element.AppendChild(productName1Element);
+
+        XmlElement productPrice1Element = xmlDoc.CreateElement("price");
+        productPrice1Element.InnerText = "19.99";
+        product1Element.AppendChild(productPrice1Element);
+
+        // Create product 2
+        XmlElement product2Element = xmlDoc.CreateElement("product");
+        productsElement.AppendChild(product2Element);
+
+        XmlElement productName2Element = xmlDoc.CreateElement("name");
+        productName2Element.InnerText = "Product 2";
+        product2Element.AppendChild(productName2Element);
+
+        XmlElement productPrice2Element = xmlDoc.CreateElement("price");
+        productPrice2Element.InnerText = "29.99";
+        product2Element.AppendChild(productPrice2Element);
+
+        // Flatten the XML and print the results
+        List<FlattenedRecord> records = FlattenXML(rootElement);
+        foreach (FlattenedRecord record in records)
+        {
+            Console.WriteLine($"Tag Path: {record.TagPath}, Value: {record.Value}");
+        }
+    }
+
+    // Generic recursive method to flatten the XML into a list of FlattenedRecord objects
+    static List<FlattenedRecord> FlattenXML(XmlNode node)
+    {
+        List<FlattenedRecord> records = new List<FlattenedRecord>();
+
+        if (node.NodeType == XmlNodeType.Element)
+        {
+            // If it's an element node, process its children
+            foreach (XmlNode childNode in node.ChildNodes)
+            {
+                records.AddRange(FlattenXML(childNode));
+            }
+        }
+        else if (node.NodeType == XmlNodeType.Text)
+        {
+            // If it's a text node (leaf node), add the record
+            string elementPath = GetElementPath(node.ParentNode);
+            string elementValue = node.InnerText;
+
+            records.Add(new FlattenedRecord(elementPath, elementValue));
+        }
+
+        return records;
+    }
+
+    // Helper method to get the element path
+    static string GetElementPath(XmlNode node)
+    {
+        List<string> pathParts = new List<string>();
+
+        while (node != null)
+        {
+            if (node.NodeType == XmlNodeType.Element)
+            {
+                pathParts.Insert(0, node.Name);
+            }
+            node = node.ParentNode;
+        }
+
+        return string.Join("/", pathParts);
+    }
+}
+
+// Class to represent a flattened record
+class FlattenedRecord
+{
+    public string TagPath { get; }
+    public string Value { get; }
+
+    public FlattenedRecord(string tagPath, string value)
+    {
+        TagPath = tagPath;
+        Value = value;
+    }
+}
