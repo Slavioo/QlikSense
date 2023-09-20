@@ -32,7 +32,7 @@ class Program
             flattenedXmlDoc.AppendChild(rootElement);
 
             // Flatten the XML and add records to the new document
-            FlattenXML(xmlDoc.DocumentElement, rootElement, flattenedXmlDoc);
+            FlattenXML(xmlDoc.DocumentElement, rootElement, flattenedXmlDoc, true); // Start with a startTagAllowed flag
 
             // Construct the output XML file path
             string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + "_flattened.xml");
@@ -45,33 +45,45 @@ class Program
     }
 
     // Recursive method to flatten the XML and add records to a new XML document
-    static void FlattenXML(XmlNode node, XmlElement parentElement, XmlDocument flattenedXmlDoc)
+    static void FlattenXML(XmlNode node, XmlElement parentElement, XmlDocument flattenedXmlDoc, bool startTagAllowed)
     {
         if (node.NodeType == XmlNodeType.Element)
         {
             string elementPath = GetElementPath(node);
 
-            // Create a record for the element start tag
-            XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
-            startTagElement.SetAttribute("ElementPath", elementPath);
-            startTagElement.SetAttribute("ElementType", "StartTag");
-
-            // Add the element start tag record to the parent element
-            parentElement.AppendChild(startTagElement);
-
-            // Process its children
-            foreach (XmlNode childNode in node.ChildNodes)
+            if (startTagAllowed)
             {
-                FlattenXML(childNode, parentElement, flattenedXmlDoc);
+                // Create a record for the element start tag
+                XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
+                startTagElement.SetAttribute("ElementPath", elementPath);
+                startTagElement.SetAttribute("ElementType", "StartTag");
+
+                // Add the element start tag record to the parent element
+                parentElement.AppendChild(startTagElement);
             }
 
-            // Create a record for the element end tag
-            XmlElement endTagElement = flattenedXmlDoc.CreateElement("record");
-            endTagElement.SetAttribute("ElementPath", elementPath);
-            endTagElement.SetAttribute("ElementType", "EndTag");
+            // Process its children
+            bool childStartTagAllowed = true;
+            foreach (XmlNode childNode in node.ChildNodes)
+            {
+                // If a text node or a child element is encountered, it means there's a start tag
+                if (childNode.NodeType == XmlNodeType.Element || childNode.NodeType == XmlNodeType.Text)
+                {
+                    FlattenXML(childNode, parentElement, flattenedXmlDoc, childStartTagAllowed);
+                    childStartTagAllowed = false; // Set to false after processing the first child element or text
+                }
+            }
 
-            // Add the element end tag record to the parent element
-            parentElement.AppendChild(endTagElement);
+            if (startTagAllowed)
+            {
+                // Create a record for the element end tag
+                XmlElement endTagElement = flattenedXmlDoc.CreateElement("record");
+                endTagElement.SetAttribute("ElementPath", elementPath);
+                endTagElement.SetAttribute("ElementType", "EndTag");
+
+                // Add the element end tag record to the parent element
+                parentElement.AppendChild(endTagElement);
+            }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
