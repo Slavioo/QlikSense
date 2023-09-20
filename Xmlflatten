@@ -51,16 +51,12 @@ class Program
         if (node.NodeType == XmlNodeType.Element)
         {
             string elementPath = GetElementPath(node);
-            string elementValue = FlattenTextContent(node);
+            string elementValue = FlattenTextContent(node, idCounter);
 
-            // Generate the ID for this record
-            string elementId = GenerateID(idCounter);
-
-            // Create an element with "ElementPath," "ElementValue," and "ID" attributes
+            // Create an element with "ElementPath" and "ElementValue" attributes
             XmlElement flattenedElement = flattenedXmlDoc.CreateElement("record");
             flattenedElement.SetAttribute("ElementPath", elementPath);
             flattenedElement.SetAttribute("ElementValue", elementValue);
-            flattenedElement.SetAttribute("ID", elementId);
 
             // Add the flattened element to the parent element
             parentElement.AppendChild(flattenedElement);
@@ -73,8 +69,8 @@ class Program
         }
     }
 
-    // Helper method to flatten the text content of an element
-    static string FlattenTextContent(XmlNode node)
+    // Helper method to flatten the text content of an element and include the ID
+    static string FlattenTextContent(XmlNode node, int[] idCounter)
     {
         List<string> textContent = new List<string>();
 
@@ -86,7 +82,16 @@ class Program
             }
         }
 
-        return string.Join(" ", textContent);
+        string elementValue = string.Join(" ", textContent);
+
+        // Add the ID as part of the element value
+        string elementId = GenerateID(idCounter);
+        if (!string.IsNullOrWhiteSpace(elementId))
+        {
+            elementValue += $" (ID: {elementId})";
+        }
+
+        return elementValue;
     }
 
     // Helper method to get the element path
