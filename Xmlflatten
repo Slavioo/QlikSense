@@ -62,44 +62,54 @@ class Program
                 recordId++;
             }
 
-            // Create a record for the element start tag
-            XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
-            startTagElement.SetAttribute("id", recordId.ToString()); // Set the record id
-            startTagElement.SetAttribute("ElementPath", elementPath);
-            startTagElement.SetAttribute("ElementType", "StartTag");
+            // Create a record element for the element start tag
+            XmlElement recordElement = flattenedXmlDoc.CreateElement("record");
+            parentElement.AppendChild(recordElement);
 
-            // Add the element start tag record to the parent element
-            parentElement.AppendChild(startTagElement);
+            // Create id, path, and type elements
+            CreateAttributeElement("id", recordId.ToString(), recordElement);
+            CreateAttributeElement("path", elementPath, recordElement);
+            CreateAttributeElement("type", "StartTag", recordElement);
 
             // Process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, parentElement, flattenedXmlDoc);
+                FlattenXML(childNode, recordElement, flattenedXmlDoc);
             }
 
-            // Create a record for the element end tag
+            // Create a record element for the element end tag
             XmlElement endTagElement = flattenedXmlDoc.CreateElement("record");
-            endTagElement.SetAttribute("id", recordId.ToString()); // Set the record id
-            endTagElement.SetAttribute("ElementPath", elementPath);
-            endTagElement.SetAttribute("ElementType", "EndTag");
-
-            // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
+
+            // Create id, path, and type elements for the end tag
+            CreateAttributeElement("id", recordId.ToString(), endTagElement);
+            CreateAttributeElement("path", elementPath, endTagElement);
+            CreateAttributeElement("type", "EndTag", endTagElement);
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
-            // If it's a text node, create a record for the text content
+            // If it's a text node, create a record element for the text content
             string elementPath = GetElementPath(node.ParentNode);
             string elementValue = node.InnerText.Trim();
 
+            // Create a record element for text content
             XmlElement textElement = flattenedXmlDoc.CreateElement("record");
-            textElement.SetAttribute("id", recordId.ToString()); // Set the record id
-            textElement.SetAttribute("ElementPath", elementPath);
-            textElement.SetAttribute("ElementType", "Text");
-            textElement.SetAttribute("ElementValue", elementValue);
-
             parentElement.AppendChild(textElement);
+
+            // Create id, path, type, and value elements for text content
+            CreateAttributeElement("id", recordId.ToString(), textElement);
+            CreateAttributeElement("path", elementPath, textElement);
+            CreateAttributeElement("type", "Text", textElement);
+            CreateAttributeElement("value", elementValue, textElement);
         }
+    }
+
+    // Helper method to create an attribute element with the specified name and value
+    static void CreateAttributeElement(string name, string value, XmlElement parentElement)
+    {
+        XmlElement attributeElement = parentElement.OwnerDocument.CreateElement(name);
+        attributeElement.InnerText = value;
+        parentElement.AppendChild(attributeElement);
     }
 
     // Helper method to get the element path
