@@ -1,0 +1,73 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Xml.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        // Define the input folder containing XML files
+        string inputFolder = @"C:\Users\halad\OneDrive\Desktop\proj\input";
+
+        // Define the output folder where results will be saved
+        string outputFolder = @"C:\Users\halad\OneDrive\Desktop\proj\output";
+
+        // Ensure the output folder exists
+        Directory.CreateDirectory(outputFolder);
+
+        // Remove existing files in the output folder
+        foreach (var existingFile in Directory.GetFiles(outputFolder))
+        {
+            File.Delete(existingFile);
+        }
+
+        // Process each XML file in the input folder
+        foreach (var xmlFile in Directory.GetFiles(inputFolder, "*.xml"))
+        {
+            string fileName = Path.GetFileNameWithoutExtension(xmlFile);
+            string outputFile = Path.Combine(outputFolder, $"{fileName}_output.txt");
+
+            XElement xml = XElement.Load(xmlFile);
+
+            using (StreamWriter writer = new StreamWriter(outputFile, true))
+            {
+                // Start with hierarchicalId "1" for the root element and an empty path
+                FlattenXml(xml, "1", "", writer);
+            }
+        }
+    }
+
+    static void FlattenXml(XElement element, string hierarchicalId, string currentPath, StreamWriter writer)
+    {
+        currentPath += "/" + element.Name;
+
+        // Build a string for attributes (if any) of the current element
+        string attributes = "";
+        foreach (var attribute in element.Attributes())
+        {
+            attributes += $" {attribute.Name}='{attribute.Value}'";
+        }
+
+        // Combine currentPath and attributes with tabs as delimiters
+        string pathWithAttributes = $"{currentPath}\t{attributes}".TrimEnd();
+
+        if (element.HasElements)
+        {
+            writer.WriteLine($"{hierarchicalId}\t{pathWithAttributes}");
+
+            int childIndex = 1;
+            foreach (var child in element.Elements())
+            {
+                string childHierarchicalId = $"{hierarchicalId}.{childIndex}";
+                FlattenXml(child, childHierarchicalId, currentPath, writer);
+                childIndex++;
+            }
+        }
+        else
+        {
+            string elementValue = element.Value.TrimEnd();
+            writer.WriteLine($"{hierarchicalId}\t{pathWithAttributes}\t{elementValue}");
+        }
+    }
+}
