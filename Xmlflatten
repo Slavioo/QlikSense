@@ -102,4 +102,19 @@ class Program
     }
 
     // Helper method to get the element path
-    static string GetElementPath(XmlNode node
+    static string GetElementPath(XmlNode node)
+    {
+        List<string> pathParts = new List<string>();
+
+        while (node != null)
+        {
+            if (node.NodeType == XmlNodeType.Element)
+            {
+                pathParts.Insert(0, node.Name);
+            }
+            node = node.ParentNode;
+        }
+
+        return string.Join("/", pathParts);
+    }
+}
