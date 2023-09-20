@@ -31,7 +31,7 @@ class Program
             XmlElement rootElement = flattenedXmlDoc.CreateElement("root");
             flattenedXmlDoc.AppendChild(rootElement);
 
-            // Flatten the XML and add all records directly under the root element
+            // Flatten the XML and add records to the new document
             FlattenXML(xmlDoc.DocumentElement, rootElement, flattenedXmlDoc);
 
             // Construct the output XML file path
@@ -44,30 +44,64 @@ class Program
         }
     }
 
-    // Recursive method to flatten the XML and add all records directly under the root
+    // Recursive method to flatten the XML and add records to a new XML document
     static void FlattenXML(XmlNode node, XmlElement parentElement, XmlDocument flattenedXmlDoc)
     {
         if (node.NodeType == XmlNodeType.Element)
         {
-            // Create an element with the same name under the root
-            XmlElement flattenedElement = flattenedXmlDoc.CreateElement(node.Name);
+            string elementPath = GetElementPath(node);
 
-            // Add the flattened element directly under the root
-            parentElement.AppendChild(flattenedElement);
+            // Create a record for the element start tag
+            XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
+            startTagElement.SetAttribute("ElementPath", elementPath);
+            startTagElement.SetAttribute("ElementType", "StartTag");
+
+            // Add the element start tag record to the parent element
+            parentElement.AppendChild(startTagElement);
 
             // Process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, flattenedElement, flattenedXmlDoc);
+                FlattenXML(childNode, parentElement, flattenedXmlDoc);
             }
+
+            // Create a record for the element end tag
+            XmlElement endTagElement = flattenedXmlDoc.CreateElement("record");
+            endTagElement.SetAttribute("ElementPath", elementPath);
+            endTagElement.SetAttribute("ElementType", "EndTag");
+
+            // Add the element end tag record to the parent element
+            parentElement.AppendChild(endTagElement);
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
-            // If it's a text node (leaf node), add the text directly under the root
+            // If it's a text node, create a record for the text content
+            string elementPath = GetElementPath(node.ParentNode);
             string elementValue = node.InnerText.Trim();
 
-            // Add the text directly under the root
-            parentElement.InnerText = elementValue;
+            XmlElement textElement = flattenedXmlDoc.CreateElement("record");
+            textElement.SetAttribute("ElementPath", elementPath);
+            textElement.SetAttribute("ElementType", "Text");
+            textElement.SetAttribute("ElementValue", elementValue);
+
+            parentElement.AppendChild(textElement);
         }
+    }
+
+    // Helper method to get the element path
+    static string GetElementPath(XmlNode node)
+    {
+        List<string> pathParts = new List<string>();
+
+        while (node != null)
+        {
+            if (node.NodeType == XmlNodeType.Element)
+            {
+                pathParts.Insert(0, node.Name);
+            }
+            node = node.ParentNode;
+        }
+
+        return string.Join("/", pathParts);
     }
 }
