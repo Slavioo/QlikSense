@@ -32,7 +32,8 @@ class Program
             flattenedXmlDoc.AppendChild(rootElement);
 
             // Flatten the XML and add records to the new document
-            FlattenXML(xmlDoc.DocumentElement, rootElement, flattenedXmlDoc);
+            int[] idCounter = { 0 }; // Initialize the ID counter
+            FlattenXML(xmlDoc.DocumentElement, rootElement, flattenedXmlDoc, idCounter);
 
             // Construct the output XML file path
             string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + "_flattened.xml");
@@ -44,18 +45,22 @@ class Program
         }
     }
 
-    // Recursive method to flatten the XML and add records to a new XML document
-    static void FlattenXML(XmlNode node, XmlElement parentElement, XmlDocument flattenedXmlDoc)
+    // Recursive method to flatten the XML and add records to a new XML document with IDs
+    static void FlattenXML(XmlNode node, XmlElement parentElement, XmlDocument flattenedXmlDoc, int[] idCounter)
     {
         if (node.NodeType == XmlNodeType.Element)
         {
             string elementPath = GetElementPath(node);
             string elementValue = FlattenTextContent(node);
 
-            // Create an element with "ElementPath" and "ElementValue" attributes
+            // Generate the ID for this record
+            string elementId = GenerateID(idCounter);
+
+            // Create an element with "ElementPath," "ElementValue," and "ID" attributes
             XmlElement flattenedElement = flattenedXmlDoc.CreateElement("record");
             flattenedElement.SetAttribute("ElementPath", elementPath);
             flattenedElement.SetAttribute("ElementValue", elementValue);
+            flattenedElement.SetAttribute("ID", elementId);
 
             // Add the flattened element to the parent element
             parentElement.AppendChild(flattenedElement);
@@ -63,7 +68,7 @@ class Program
             // Process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, flattenedElement, flattenedXmlDoc);
+                FlattenXML(childNode, flattenedElement, flattenedXmlDoc, idCounter);
             }
         }
     }
@@ -99,5 +104,12 @@ class Program
         }
 
         return string.Join("/", pathParts);
+    }
+
+    // Helper method to generate the ID based on the current counter
+    static string GenerateID(int[] idCounter)
+    {
+        idCounter[0]++;
+        return string.Join(".", idCounter);
     }
 }
