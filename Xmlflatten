@@ -5,7 +5,7 @@ using System.Xml;
 
 class Program
 {
-    static int recordId = 1; // Initialize the record id
+    static int recordId = 1; // Initialize the record id to 1 by default
 
     static void Main()
     {
@@ -80,8 +80,11 @@ class Program
             // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
 
-            // Increment the record id for the next record
-            recordId++;
+            // If the element has child elements, increment the record id
+            if (node.HasChildNodes && node.ChildNodes.Count > 1)
+            {
+                recordId++;
+            }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
