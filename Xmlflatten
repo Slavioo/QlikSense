@@ -53,23 +53,40 @@ class Program
             // Check if this element has been processed already to avoid duplicates
             if (!processedElements.Contains(elementPath))
             {
-                // If it's an element node, process its children
+                string elementValue = node.InnerText;
+
+                // Check if the inner text is directly under this element (not nested under child elements)
+                if (!HasChildElements(node))
+                {
+                    // Include the element path and value in the CSV line
+                    csvLines.Add($"{elementPath},{elementValue}");
+                }
+
+                // Mark this element as processed
+                processedElements.Add(elementPath);
+
+                // Process its children
                 foreach (XmlNode childNode in node.ChildNodes)
                 {
                     csvLines.AddRange(FlattenXML(childNode, processedElements));
                 }
-
-                string elementValue = node.InnerText;
-
-                // Include the element path and value in the CSV line
-                csvLines.Add($"{elementPath},{elementValue}");
-
-                // Mark this element as processed
-                processedElements.Add(elementPath);
             }
         }
 
         return csvLines;
+    }
+
+    // Helper method to check if an element has child elements (nested elements)
+    static bool HasChildElements(XmlNode node)
+    {
+        foreach (XmlNode childNode in node.ChildNodes)
+        {
+            if (childNode.NodeType == XmlNodeType.Element)
+            {
+                return true; // Element has at least one child element
+            }
+        }
+        return false; // Element has no child elements
     }
 
     // Helper method to get the element path
