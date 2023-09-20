@@ -24,12 +24,12 @@ class Program
         // Process each XML file
         foreach (string xmlFile in xmlFiles)
         {
-            // Reset the record id for each file
-            recordId = 1;
-
             // Load the XML document from the input file
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlFile);
+
+            // Reset the record id for each file
+            recordId = 1;
 
             // Flatten the XML and create a new XML document with flattened data
             XmlDocument flattenedXmlDoc = new XmlDocument();
@@ -56,6 +56,12 @@ class Program
         {
             string elementPath = GetElementPath(node);
 
+            // If there is more than one element with the same name, increment the record id
+            if (node.ParentNode.SelectNodes(node.Name).Count > 1)
+            {
+                recordId++;
+            }
+
             // Create a record for the element start tag
             XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
             startTagElement.SetAttribute("id", recordId.ToString()); // Set the record id
@@ -79,12 +85,6 @@ class Program
 
             // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
-
-            // If there is more than one element with the same name, increment the record id
-            if (node.ParentNode.SelectNodes(node.Name).Count > 1)
-            {
-                recordId++;
-            }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
