@@ -49,42 +49,25 @@ class Program
     {
         if (node.NodeType == XmlNodeType.Element)
         {
+            // Create an element with the same name under the root
+            XmlElement flattenedElement = flattenedXmlDoc.CreateElement(node.Name);
+
+            // Add the flattened element directly under the root
+            parentElement.AppendChild(flattenedElement);
+
             // Process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, parentElement, flattenedXmlDoc);
+                FlattenXML(childNode, flattenedElement, flattenedXmlDoc);
             }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
-            // If it's a text node (leaf node), add the record directly under the root
-            string elementPath = GetElementPath(node.ParentNode);
+            // If it's a text node (leaf node), add the text directly under the root
             string elementValue = node.InnerText.Trim();
 
-            // Create an element with "ElementPath" and "ElementValue" attributes
-            XmlElement flattenedElement = flattenedXmlDoc.CreateElement("record");
-            flattenedElement.SetAttribute("ElementPath", elementPath);
-            flattenedElement.SetAttribute("ElementValue", elementValue);
-
-            // Add the flattened element directly under the root
-            parentElement.AppendChild(flattenedElement);
+            // Add the text directly under the root
+            parentElement.InnerText = elementValue;
         }
-    }
-
-    // Helper method to get the element path
-    static string GetElementPath(XmlNode node)
-    {
-        List<string> pathParts = new List<string>();
-
-        while (node != null)
-        {
-            if (node.NodeType == XmlNodeType.Element)
-            {
-                pathParts.Insert(0, node.Name);
-            }
-            node = node.ParentNode;
-        }
-
-        return string.Join("/", pathParts);
     }
 }
