@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Xml;
 
 class Program
@@ -10,7 +11,7 @@ class Program
         // Specify the input folder containing XML files
         string inputFolderPath = @"C:\Path\To\Your\Input\Folder";
 
-        // Specify the output folder where flattened XML files will be saved
+        // Specify the output folder where CSV files will be saved
         string outputFolderPath = @"C:\Path\To\Your\Output\Folder";
 
         // Create the output folder if it doesn't exist
@@ -26,49 +27,40 @@ class Program
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlFile);
 
-            // Flatten the XML and create a new XML document with flattened data
-            XmlDocument flattenedXmlDoc = new XmlDocument();
-            flattenedXmlDoc.AppendChild(flattenedXmlDoc.CreateElement("root"));
+            // Flatten the XML and create a CSV
+            List<string> csvLines = FlattenXML(xmlDoc.DocumentElement);
 
-            // Flatten the XML and add records to the new document
-            FlattenXML(xmlDoc.DocumentElement, flattenedXmlDoc.DocumentElement, null);
+            // Construct the output CSV file path
+            string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + ".csv");
 
-            // Construct the output file path
-            string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + "_flattened.xml");
+            // Write the CSV lines to the output file
+            File.WriteAllLines(outputFilePath, csvLines, Encoding.UTF8);
 
-            // Save the flattened XML document to the output file
-            flattenedXmlDoc.Save(outputFilePath);
-
-            Console.WriteLine($"Flattened XML saved to: {outputFilePath}");
+            Console.WriteLine($"CSV saved to: {outputFilePath}");
         }
     }
 
-    // Recursive method to flatten the XML and add records to a new document
-    static void FlattenXML(XmlNode node, XmlNode flattenedNode, XmlNode parentElement)
+    // Recursive method to flatten the XML and generate CSV lines
+    static List<string> FlattenXML(XmlNode node)
     {
+        var csvLines = new List<string>();
+
         if (node.NodeType == XmlNodeType.Element)
         {
-            // If it's an element node, add the element itself to the flattened document
-            string elementPath = GetElementPath(node);
-            XmlElement flattenedElement = flattenedNode.OwnerDocument.CreateElement(elementPath);
-            flattenedNode.AppendChild(flattenedElement);
-
-            // Process its children
+            // If it's an element node, process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, flattenedElement, node); // Pass the current element as the parent
+                csvLines.AddRange(FlattenXML(childNode));
             }
         }
-        else if (node.NodeType == XmlNodeType.Text)
-        {
-            // If it's a text node (leaf node), add the record to the flattened document
-            string elementPath = GetElementPath(parentElement);
-            string elementValue = node.InnerText;
 
-            XmlElement flattenedElement = flattenedNode.OwnerDocument.CreateElement(elementPath);
-            flattenedElement.InnerText = elementValue;
-            flattenedNode.AppendChild(flattenedElement);
-        }
+        string elementPath = GetElementPath(node);
+        string elementValue = node.InnerText;
+
+        // Include the element path and value in the CSV line
+        csvLines.Add($"{elementPath},{elementValue}");
+
+        return csvLines;
     }
 
     // Helper method to get the element path
@@ -87,3 +79,4 @@ class Program
 
         return string.Join("/", pathParts);
     }
+}
