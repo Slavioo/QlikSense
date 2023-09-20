@@ -9,7 +9,7 @@ class Program
     {
         // Specify the input folder containing XML files
         string inputFolderPath = @"C:\Path\To\Your\Input\Folder";
-        
+
         // Specify the output folder where flattened XML files will be saved
         string outputFolderPath = @"C:\Path\To\Your\Output\Folder";
 
@@ -30,7 +30,7 @@ class Program
             XmlDocument flattenedXmlDoc = new XmlDocument();
             flattenedXmlDoc.AppendChild(flattenedXmlDoc.CreateElement("root"));
 
-            // Flatten the XML and add records to the new document
+            // Flatten the XML and add nodes to the new document
             FlattenXML(xmlDoc.DocumentElement, flattenedXmlDoc.DocumentElement);
 
             // Construct the output file path
@@ -43,15 +43,28 @@ class Program
         }
     }
 
-    // Recursive method to flatten the XML and add records to a new document
+    // Recursive method to flatten the XML and add nodes to a new document
     static void FlattenXML(XmlNode node, XmlNode flattenedNode)
     {
         if (node.NodeType == XmlNodeType.Element)
         {
-            // If it's an element node, process its children
+            // If it's an element node, add the node to the flattened document
+            XmlElement flattenedElement = flattenedNode.OwnerDocument.CreateElement(node.Name);
+            flattenedNode.AppendChild(flattenedElement);
+
+            // Process its attributes
+            if (node.Attributes != null)
+            {
+                foreach (XmlAttribute attribute in node.Attributes)
+                {
+                    flattenedElement.SetAttribute(attribute.Name, attribute.Value);
+                }
+            }
+
+            // Process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, flattenedNode);
+                FlattenXML(childNode, flattenedElement);
             }
         }
         else if (node.NodeType == XmlNodeType.Text)
