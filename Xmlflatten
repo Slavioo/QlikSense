@@ -28,7 +28,8 @@ class Program
             xmlDoc.Load(xmlFile);
 
             // Flatten the XML and create a CSV
-            List<string> csvLines = FlattenXML(xmlDoc.DocumentElement);
+            HashSet<string> processedElements = new HashSet<string>();
+            List<string> csvLines = FlattenXML(xmlDoc.DocumentElement, processedElements);
 
             // Construct the output CSV file path
             string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + ".csv");
@@ -41,24 +42,32 @@ class Program
     }
 
     // Recursive method to flatten the XML and generate CSV lines
-    static List<string> FlattenXML(XmlNode node)
+    static List<string> FlattenXML(XmlNode node, HashSet<string> processedElements)
     {
         var csvLines = new List<string>();
 
         if (node.NodeType == XmlNodeType.Element)
         {
-            // If it's an element node, process its children
-            foreach (XmlNode childNode in node.ChildNodes)
+            string elementPath = GetElementPath(node);
+
+            // Check if this element has been processed already to avoid duplicates
+            if (!processedElements.Contains(elementPath))
             {
-                csvLines.AddRange(FlattenXML(childNode));
+                // If it's an element node, process its children
+                foreach (XmlNode childNode in node.ChildNodes)
+                {
+                    csvLines.AddRange(FlattenXML(childNode, processedElements));
+                }
+
+                string elementValue = node.InnerText;
+
+                // Include the element path and value in the CSV line
+                csvLines.Add($"{elementPath},{elementValue}");
+
+                // Mark this element as processed
+                processedElements.Add(elementPath);
             }
         }
-
-        string elementPath = GetElementPath(node);
-        string elementValue = node.InnerText;
-
-        // Include the element path and value in the CSV line
-        csvLines.Add($"{elementPath},{elementValue}");
 
         return csvLines;
     }
