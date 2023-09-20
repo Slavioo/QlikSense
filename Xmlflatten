@@ -80,11 +80,8 @@ class Program
             // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
 
-            // If the element has child elements, increment the record id
-            if (node.HasChildNodes && node.ChildNodes.Count > 1)
-            {
-                recordId++;
-            }
+            // Increment the record id for the next record
+            recordId++;
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
