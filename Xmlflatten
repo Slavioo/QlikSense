@@ -51,20 +51,14 @@ class Program
         {
             string elementPath = GetElementPath(node);
 
-            // Create a record for the element start tag
+            // Check if the element is self-closing (empty)
+            bool isSelfClosing = (node.Attributes != null && node.Attributes.Count == 0);
+
+            // Create a record for the element start tag and flag self-closing elements
             XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
             startTagElement.SetAttribute("ElementPath", elementPath);
             startTagElement.SetAttribute("ElementType", "StartTag");
-
-            // Check if the element is self-closing (empty)
-            if (node.ChildNodes.Count == 0)
-            {
-                startTagElement.SetAttribute("IsEmptyElement", "true");
-            }
-            else
-            {
-                startTagElement.SetAttribute("IsEmptyElement", "false");
-            }
+            startTagElement.SetAttribute("IsSelfClosing", isSelfClosing.ToString());
 
             // Add the element start tag record to the parent element
             parentElement.AppendChild(startTagElement);
