@@ -6,6 +6,7 @@ using System.Xml;
 class Program
 {
     static int recordId = 1; // Initialize the record id to 1 by default
+    static Stack<int> recordIdStack = new Stack<int>(); // Stack to manage record ids
 
     static void Main()
     {
@@ -30,6 +31,7 @@ class Program
 
             // Reset the record id for each file
             recordId = 1;
+            recordIdStack.Clear();
 
             // Flatten the XML and create a new XML document with flattened data
             XmlDocument flattenedXmlDoc = new XmlDocument();
@@ -59,7 +61,21 @@ class Program
             // If there is more than one element with the same name, increment the record id
             if (node.ParentNode.SelectNodes(node.Name).Count > 1)
             {
+                if (recordIdStack.Count == 0)
+                {
+                    // Start of an array of records, push the current record id to the stack
+                    recordIdStack.Push(recordId);
+                }
+
                 recordId++;
+            }
+            else
+            {
+                if (recordIdStack.Count > 0)
+                {
+                    // End of an array of records, reset the record id from the stack
+                    recordId = recordIdStack.Pop();
+                }
             }
 
             // Create a record for the element start tag
@@ -85,6 +101,15 @@ class Program
 
             // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
+
+            if (node.ParentNode.SelectNodes(node.Name).Count > 1)
+            {
+                // End of an array of records, reset the record id from the stack
+                if (recordIdStack.Count > 0)
+                {
+                    recordId = recordIdStack.Pop();
+                }
+            }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
