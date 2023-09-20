@@ -31,7 +31,7 @@ class Program
             flattenedXmlDoc.AppendChild(flattenedXmlDoc.CreateElement("root"));
 
             // Flatten the XML and add records to the new document
-            FlattenXML(xmlDoc.DocumentElement, flattenedXmlDoc.DocumentElement);
+            FlattenXML(xmlDoc.DocumentElement, flattenedXmlDoc.DocumentElement, null);
 
             // Construct the output file path
             string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + "_flattened.xml");
@@ -44,7 +44,7 @@ class Program
     }
 
     // Recursive method to flatten the XML and add records to a new document
-    static void FlattenXML(XmlNode node, XmlNode flattenedNode)
+    static void FlattenXML(XmlNode node, XmlNode flattenedNode, XmlNode parentElement)
     {
         if (node.NodeType == XmlNodeType.Element)
         {
@@ -56,13 +56,13 @@ class Program
             // Process its children
             foreach (XmlNode childNode in node.ChildNodes)
             {
-                FlattenXML(childNode, flattenedElement);
+                FlattenXML(childNode, flattenedElement, node); // Pass the current element as the parent
             }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
             // If it's a text node (leaf node), add the record to the flattened document
-            string elementPath = GetElementPath(node.ParentNode);
+            string elementPath = GetElementPath(parentElement);
             string elementValue = node.InnerText;
 
             XmlElement flattenedElement = flattenedNode.OwnerDocument.CreateElement(elementPath);
@@ -87,4 +87,3 @@ class Program
 
         return string.Join("/", pathParts);
     }
-}
