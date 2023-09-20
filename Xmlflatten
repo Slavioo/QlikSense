@@ -53,14 +53,10 @@ class Program
             // Check if this element has been processed already to avoid duplicates
             if (!processedElements.Contains(elementPath))
             {
-                string elementValue = node.InnerText;
+                string elementValue = FlattenTextContent(node);
 
-                // Check if the inner text is directly under this element (not nested under child elements)
-                if (!HasChildElements(node))
-                {
-                    // Include the element path and value in the CSV line
-                    csvLines.Add($"{elementPath},{elementValue}");
-                }
+                // Include the element path and value in the CSV line
+                csvLines.Add($"{elementPath},{elementValue}");
 
                 // Mark this element as processed
                 processedElements.Add(elementPath);
@@ -89,20 +85,21 @@ class Program
         return false; // Element has no child elements
     }
 
-    // Helper method to get the element path
-    static string GetElementPath(XmlNode node)
+    // Helper method to flatten the text content of an element
+    static string FlattenTextContent(XmlNode node)
     {
-        List<string> pathParts = new List<string>();
+        StringBuilder textContent = new StringBuilder();
 
-        while (node != null)
+        foreach (XmlNode childNode in node.ChildNodes)
         {
-            if (node.NodeType == XmlNodeType.Element)
+            if (childNode.NodeType == XmlNodeType.Text)
             {
-                pathParts.Insert(0, node.Name);
+                textContent.Append(childNode.InnerText);
             }
-            node = node.ParentNode;
         }
 
-        return string.Join("/", pathParts);
+        return textContent.ToString().Trim();
     }
-}
+
+    // Helper method to get the element path
+    static string GetElementPath(XmlNode node
