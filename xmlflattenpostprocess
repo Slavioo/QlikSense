@@ -1,0 +1,52 @@
+// Process each XML file
+foreach (string xmlFile in xmlFiles)
+{
+    // Load the XML document from the input file
+    XmlDocument xmlDoc = new XmlDocument();
+    xmlDoc.Load(xmlFile);
+
+    // Reset the record id for each file
+    recordId = 1;
+
+    // Flatten the XML and create a new XML document with flattened data
+    XmlDocument flattenedXmlDoc = new XmlDocument();
+    XmlElement rootElement = flattenedXmlDoc.CreateElement("root");
+    flattenedXmlDoc.AppendChild(rootElement);
+
+    // Flatten the XML and add records to the new document
+    FlattenXML(xmlDoc.DocumentElement, rootElement, flattenedXmlDoc);
+
+    // Post-process the IDs to make them sequential
+    PostProcessIDs(rootElement);
+
+    // Construct the output XML file path
+    string outputFilePath = Path.Combine(outputFolderPath, Path.GetFileNameWithoutExtension(xmlFile) + "_flattened.xml");
+
+    // Save the flattened XML document to the output file
+    flattenedXmlDoc.Save(outputFilePath);
+
+    Console.WriteLine($"Flattened XML saved to: {outputFilePath}");
+}
+
+// ...
+
+// Post-processing method to make IDs sequential
+static void PostProcessIDs(XmlElement rootElement)
+{
+    // Create a dictionary to map old IDs to new sequential IDs
+    Dictionary<string, int> idMappings = new Dictionary<string, int>();
+    int sequentialId = 1;
+
+    foreach (XmlElement recordElement in rootElement.SelectNodes("//record[id]"))
+    {
+        string id = recordElement.SelectSingleNode("id").InnerText;
+
+        if (!idMappings.ContainsKey(id))
+        {
+            idMappings[id] = sequentialId++;
+        }
+
+        // Update the ID element with the new sequential ID
+        recordElement.SelectSingleNode("id").InnerText = idMappings[id].ToString();
+    }
+}
