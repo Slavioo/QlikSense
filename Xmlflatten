@@ -80,8 +80,8 @@ class Program
             // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
 
-            // If the element has child elements, increment the record id
-            if (node.HasChildNodes && node.ChildNodes.Count > 1)
+            // If there is more than one element with the same name, increment the record id
+            if (node.ParentNode.SelectNodes(node.Name).Count > 1)
             {
                 recordId++;
             }
