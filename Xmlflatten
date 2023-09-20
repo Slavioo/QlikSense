@@ -66,6 +66,12 @@ class Program
             {
                 FlattenXML(childNode, flattenedElement);
             }
+
+            // If there are no children, add an empty node
+            if (!node.HasChildNodes)
+            {
+                flattenedElement.InnerText = "";
+            }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
