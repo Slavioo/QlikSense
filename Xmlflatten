@@ -5,6 +5,8 @@ using System.Xml;
 
 class Program
 {
+    static int recordId = 1; // Initialize the record id
+
     static void Main()
     {
         // Specify the input folder containing XML files
@@ -22,6 +24,9 @@ class Program
         // Process each XML file
         foreach (string xmlFile in xmlFiles)
         {
+            // Reset the record id for each file
+            recordId = 1;
+
             // Load the XML document from the input file
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(xmlFile);
@@ -51,14 +56,11 @@ class Program
         {
             string elementPath = GetElementPath(node);
 
-            // Check if the element is self-closing (empty)
-            bool isSelfClosing = (node.Attributes != null && node.Attributes.Count == 0);
-
-            // Create a record for the element start tag and flag self-closing elements
+            // Create a record for the element start tag
             XmlElement startTagElement = flattenedXmlDoc.CreateElement("record");
+            startTagElement.SetAttribute("id", recordId.ToString()); // Set the record id
             startTagElement.SetAttribute("ElementPath", elementPath);
             startTagElement.SetAttribute("ElementType", "StartTag");
-            startTagElement.SetAttribute("IsSelfClosing", isSelfClosing.ToString());
 
             // Add the element start tag record to the parent element
             parentElement.AppendChild(startTagElement);
@@ -71,11 +73,18 @@ class Program
 
             // Create a record for the element end tag
             XmlElement endTagElement = flattenedXmlDoc.CreateElement("record");
+            endTagElement.SetAttribute("id", recordId.ToString()); // Set the record id
             endTagElement.SetAttribute("ElementPath", elementPath);
             endTagElement.SetAttribute("ElementType", "EndTag");
 
             // Add the element end tag record to the parent element
             parentElement.AppendChild(endTagElement);
+
+            // If the element has child elements, increment the record id
+            if (node.HasChildNodes && node.ChildNodes.Count > 1)
+            {
+                recordId++;
+            }
         }
         else if (node.NodeType == XmlNodeType.Text)
         {
@@ -84,6 +93,7 @@ class Program
             string elementValue = node.InnerText.Trim();
 
             XmlElement textElement = flattenedXmlDoc.CreateElement("record");
+            textElement.SetAttribute("id", recordId.ToString()); // Set the record id
             textElement.SetAttribute("ElementPath", elementPath);
             textElement.SetAttribute("ElementType", "Text");
             textElement.SetAttribute("ElementValue", elementValue);
