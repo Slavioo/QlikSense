@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
 
 class Program
@@ -22,23 +21,26 @@ class Program
             File.Delete(existingFile);
         }
 
+        // Create a new XML document for the output
+        XDocument outputXml = new XDocument(new XElement("data"));
+
         // Process each XML file in the input folder
         foreach (var xmlFile in Directory.GetFiles(inputFolder, "*.xml"))
         {
-            string fileName = Path.GetFileNameWithoutExtension(xmlFile);
-            string outputFile = Path.Combine(outputFolder, $"{fileName}_output.txt");
-
             XElement xml = XElement.Load(xmlFile);
 
-            using (StreamWriter writer = new StreamWriter(outputFile, true))
-            {
-                // Start with hierarchicalId "1" for the root element and an empty path
-                FlattenXml(xml, "1", "", writer);
-            }
+            // Start with hierarchicalId "1" for the root element and an empty path
+            FlattenXml(xml, "1", "", outputXml.Root);
         }
+
+        // Save the output XML to a file
+        string outputXmlFile = Path.Combine(outputFolder, "output.xml");
+        outputXml.Save(outputXmlFile);
+
+        Console.WriteLine("XML data has been processed and saved to output.xml.");
     }
 
-    static void FlattenXml(XElement element, string hierarchicalId, string currentPath, StreamWriter writer)
+    static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml)
     {
         currentPath += "/" + element.Name;
 
@@ -46,28 +48,29 @@ class Program
         string attributes = "";
         foreach (var attribute in element.Attributes())
         {
-            attributes += $"qsaAttribute:"+$"{attribute.Name}={attribute.Value}\t";
+            attributes += $"{attribute.Name}={attribute.Value} ";
         }
 
-        // Combine currentPath and attributes with tabs as delimiters
-        string pathWithAttributes = $"{currentPath}\t{attributes}".TrimEnd();
+        // Create a new element in the output XML with the required attributes
+        XElement outputElement = new XElement("record",
+            new XAttribute("qsaId", hierarchicalId),
+            new XAttribute("qsaPath", currentPath.Trim('/')),
+            new XAttribute("qsaAttribute", attributes.TrimEnd()),
+            new XAttribute("qsaValue", element.Value.Trim())
+        );
+
+        // Add the new element to the output XML
+        outputXml.Add(outputElement);
 
         if (element.HasElements)
         {
-            writer.WriteLine($"qsaId:{hierarchicalId}\tqsaPath:{pathWithAttributes}");
-
             int childIndex = 1;
             foreach (var child in element.Elements())
             {
                 string childHierarchicalId = $"{hierarchicalId}.{childIndex}";
-                FlattenXml(child, childHierarchicalId, currentPath, writer);
+                FlattenXml(child, childHierarchicalId, currentPath, outputXml);
                 childIndex++;
             }
-        }
-        else
-        {
-            string elementValue = element.Value.TrimEnd();
-            writer.WriteLine($"qsaId:{hierarchicalId}\tqsaPath:{pathWithAttributes}\tqsaValue:{elementValue}");
         }
     }
 }
