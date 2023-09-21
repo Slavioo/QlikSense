@@ -30,7 +30,7 @@ class Program
             XElement xml = XElement.Load(xmlFile);
 
             // Start with hierarchicalId "1" for the root element and an empty path
-            FlattenXml(xml, "1", "", outputXml.Root);
+            FlattenXml(xml, "1", "", outputXml);
         }
 
         // Save the output XML to a file
@@ -51,19 +51,17 @@ class Program
             attributes += $"{attribute.Name}={attribute.Value} ";
         }
 
-        // Create a new element in the output XML with the required attributes
+        // Create a new element for all elements
         XElement outputElement = new XElement("record",
             new XAttribute("qsaId", hierarchicalId),
             new XAttribute("qsaPath", currentPath.Trim('/')),
             new XAttribute("qsaAttribute", attributes.TrimEnd()),
-            new XAttribute("qsaValue", element.Value.Trim())
+            new XAttribute("qsaValue", "") // Initialize qsaValue as empty string
         );
-
-        // Add the new element to the output XML
-        outputXml.Add(outputElement);
 
         if (element.HasElements)
         {
+            // Process child elements
             int childIndex = 1;
             foreach (var child in element.Elements())
             {
@@ -72,5 +70,13 @@ class Program
                 childIndex++;
             }
         }
+        else
+        {
+            // Assign a value only for text elements
+            outputElement.Attribute("qsaValue").Value = element.Value.Trim();
+        }
+
+        // Add the new element to the output XML
+        outputXml.Add(outputElement);
     }
 }
