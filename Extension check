@@ -1,0 +1,49 @@
+using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        var sourceDirectory = @"C:\YourSourceDirectory"; // Replace with your source directory path
+
+        ProcessFilesInDirectory(sourceDirectory);
+    }
+
+    static void ProcessFilesInDirectory(string sourceDirectory)
+    {
+        try
+        {
+            var files = Directory.GetFiles(sourceDirectory);
+
+            foreach (var file in files)
+            {
+                var extension = Path.GetExtension(file);
+
+                if (string.Equals(extension, ".txt", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Perform actions for .txt files
+                    Console.WriteLine($"Processing .txt file: {file}");
+                    // Add your code here for .txt files
+                }
+                else if (string.Equals(extension, ".xml", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Perform actions for .xml files
+                    Console.WriteLine($"Processing .xml file: {file}");
+                    // Add your code here for .xml files
+                }
+                else
+                {
+                    // Handle other file types (optional)
+                    Console.WriteLine($"Skipping file with unsupported extension: {file}");
+                }
+            }
+
+            Console.WriteLine("All files in the directory have been processed.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+}
