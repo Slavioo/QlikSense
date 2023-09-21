@@ -46,7 +46,7 @@ class Program
         string attributes = "";
         foreach (var attribute in element.Attributes())
         {
-            attributes += $" {attribute.Name}='{attribute.Value}'";
+            attributes += $"qsaAttribute:"+$"{attribute.Name}={attribute.Value}\t";
         }
 
         // Combine currentPath and attributes with tabs as delimiters
@@ -54,7 +54,7 @@ class Program
 
         if (element.HasElements)
         {
-            writer.WriteLine($"{hierarchicalId}\t{pathWithAttributes}");
+            writer.WriteLine($"qsaId:{hierarchicalId}\tqsaPath:{pathWithAttributes}");
 
             int childIndex = 1;
             foreach (var child in element.Elements())
@@ -67,7 +67,7 @@ class Program
         else
         {
             string elementValue = element.Value.TrimEnd();
-            writer.WriteLine($"{hierarchicalId}\t{pathWithAttributes}\t{elementValue}");
+            writer.WriteLine($"qsaId:{hierarchicalId}\tqsaPath:{pathWithAttributes}\tqsaValue:{elementValue}");
         }
     }
 }
