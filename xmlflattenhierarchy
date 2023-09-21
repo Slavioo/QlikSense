@@ -60,11 +60,15 @@ class Program
             attributes += $"{attribute.Name}={attribute.Value} ";
         }
 
+        // Determine the element type
+        string elementType = element.HasElements ? "Element" : "Text";
+
         // Create a new element for all elements
         XElement outputElement = new XElement("record",
             new XAttribute("qsaId", hierarchicalId),
             new XAttribute("qsaPath", currentPath.Trim('/')),
             new XAttribute("qsaAttribute", attributes.TrimEnd()),
+            new XAttribute("qsaType", elementType), // Add element type attribute
             new XAttribute("qsaValue", "") // Initialize qsaValue as empty string
         );
 
