@@ -55,14 +55,14 @@ class Program
             foreach (var attribute in ancestor.Attributes())
             {
                 // Prepend ancestor element name to attribute name
-                attributes += $"{ancestor.Name}_{attribute.Name}={attribute.Value} ";
+                attributes += $"{ancestor.Name}_{attribute.Name}={attribute.Value};";
             }
         }
 
         // Add attributes of the current element
         foreach (var attribute in element.Attributes())
         {
-            attributes += $"{element.Name}_{attribute.Name}={attribute.Value} ";
+            attributes += $"{element.Name}_{attribute.Name}={attribute.Value};";
         }
 
         // Determine the element type
@@ -78,7 +78,7 @@ class Program
         // Add the qsaAttribute attribute only if there are attributes
         if (!string.IsNullOrEmpty(attributes))
         {
-            outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
+            outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd(';')));
         }
 
         if (element.HasElements)
