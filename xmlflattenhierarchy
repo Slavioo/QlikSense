@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Xml.Linq;
-using System.Linq;
 
 class Program
 {
@@ -22,31 +21,25 @@ class Program
             File.Delete(existingFile);
         }
 
-        // Create a new XML document for the output
-        XDocument outputXml = new XDocument(new XElement("data"));
-
         // Process each XML file in the input folder
         foreach (var xmlFile in Directory.GetFiles(inputFolder, "*.xml"))
         {
+            var fileName = Path.GetFileName(xmlFile);
+
+            // Create a new XML document for the output
+            XDocument outputXml = new XDocument(new XElement("data"));
+
             XElement xml = XElement.Load(xmlFile);
 
             // Start with hierarchicalId "1" for the root element and an empty path
-            FlattenXml(xml, "1", "", outputXml);
+            FlattenXml(xml, "1", "", outputXml.Root);
+
+            // Save the output XML to a file
+            string outputXmlFile = Path.Combine(outputFolder, $"{fileName}");
+            outputXml.Save(outputXmlFile);
         }
 
-        // Sort records alphabetically by qsaId
-        var sortedRecords = outputXml.Root.Elements("record")
-            .OrderBy(record => record.Attribute("qsaId").Value);
-
-        // Replace existing records with sorted records
-        outputXml.Root.Elements().Remove();
-        outputXml.Root.Add(sortedRecords);
-
-        // Save the output XML to a file
-        string outputXmlFile = Path.Combine(outputFolder, "output.xml");
-        outputXml.Save(outputXmlFile);
-
-        Console.WriteLine("XML data has been processed, sorted, and saved to output.xml.");
+        Console.WriteLine("XML data has been processed and saved to output.xml.");
     }
 
     static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml)
@@ -60,20 +53,18 @@ class Program
             attributes += $"{attribute.Name}={attribute.Value} ";
         }
 
-        // Determine the element type
-        string elementType = element.HasElements ? "Element" : "Text";
-
-        // Create a new element for all elements
-        XElement outputElement = new XElement("record",
-            new XAttribute("qsaId", hierarchicalId),
-            new XAttribute("qsaPath", currentPath.Trim('/')),
-            new XAttribute("qsaAttribute", attributes.TrimEnd()),
-            new XAttribute("qsaType", elementType), // Add element type attribute
-            new XAttribute("qsaValue", "") // Initialize qsaValue as empty string
-        );
-
         if (element.HasElements)
         {
+            // Create a new element for all elements
+            XElement outputElement = new XElement("record",
+                new XAttribute("qsaId", hierarchicalId),
+                new XAttribute("qsaPath", currentPath.Trim('/')),
+                new XAttribute("qsaAttribute", attributes.TrimEnd())
+            );
+
+            // Add the new element to the output XML
+            outputXml.Add(outputElement);
+
             // Process child elements
             int childIndex = 1;
             foreach (var child in element.Elements())
@@ -85,11 +76,16 @@ class Program
         }
         else
         {
-            // Assign a value only for text elements
-            outputElement.Attribute("qsaValue").Value = element.Value.Trim();
-        }
+            // Create a new element for all elements
+            XElement outputElement = new XElement("record",
+                new XAttribute("qsaId", hierarchicalId),
+                new XAttribute("qsaPath", currentPath.Trim('/')),
+                new XAttribute("qsaAttribute", attributes.TrimEnd()),
+                new XAttribute("qsaValue", "")
+            );
 
-        // Add the new element to the output XML
-        outputXml.Root.Add(outputElement);
+            // Add the new element to the output XML
+            outputXml.Add(outputElement);
+        }
     }
 }
