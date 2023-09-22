@@ -48,31 +48,41 @@ class Program
 
         // Build a string for attributes (if any) of the current element
         string attributes = "";
+
+        // Collect attributes from ancestors that have attributes
+        foreach (var ancestor in element.Ancestors())
+        {
+            foreach (var attribute in ancestor.Attributes())
+            {
+                // Prepend ancestor element name to attribute name
+                attributes += $"{ancestor.Name}_{attribute.Name}={attribute.Value} ";
+            }
+        }
+
+        // Add attributes of the current element
         foreach (var attribute in element.Attributes())
         {
-            attributes += $"{attribute.Name}={attribute.Value} ";
+            attributes += $"{element.Name}_{attribute.Name}={attribute.Value} ";
+        }
+
+        // Determine the element type
+        string elementType = element.HasElements ? "Element" : "Text";
+
+        // Create a new element for all elements
+        XElement outputElement = new XElement("record",
+            new XAttribute("qsaId", hierarchicalId),
+            new XAttribute("qsaType", elementType),
+            new XAttribute("qsaPath", currentPath.Trim('/'))
+        );
+
+        // Add the qsaAttribute attribute only if there are attributes
+        if (!string.IsNullOrEmpty(attributes))
+        {
+            outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
         }
 
         if (element.HasElements)
         {
-            // Create a new element for all elements
-            XElement outputElement = new XElement("record",
-                new XAttribute("qsaId", hierarchicalId),
-                new XAttribute("qsaPath", currentPath.Trim('/'))
-            );
-
-            // Add the qsaAttribute attribute only if there are attributes on the element
-            if (!string.IsNullOrEmpty(attributes))
-            {
-                outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
-            }
-
-            // Add the qsaValue attribute if the element has a text value
-            if (!string.IsNullOrEmpty(element.Value))
-            {
-                outputElement.Add(new XAttribute("qsaValue", element.Value));
-            }
-
             // Add the new element to the output XML
             outputXml.Add(outputElement);
 
@@ -87,18 +97,6 @@ class Program
         }
         else
         {
-            // Create a new element for all elements
-            XElement outputElement = new XElement("record",
-                new XAttribute("qsaId", hierarchicalId),
-                new XAttribute("qsaPath", currentPath.Trim('/'))
-            );
-
-            // Add the qsaAttribute attribute only if there are attributes on the element
-            if (!string.IsNullOrEmpty(attributes))
-            {
-                outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
-            }
-
             // Add the qsaValue attribute if the element has a text value
             if (!string.IsNullOrEmpty(element.Value))
             {
