@@ -58,9 +58,20 @@ class Program
             // Create a new element for all elements
             XElement outputElement = new XElement("record",
                 new XAttribute("qsaId", hierarchicalId),
-                new XAttribute("qsaPath", currentPath.Trim('/')),
-                new XAttribute("qsaAttribute", attributes.TrimEnd())
+                new XAttribute("qsaPath", currentPath.Trim('/'))
             );
+
+            // Add the qsaAttribute attribute only if there are attributes on the element
+            if (!string.IsNullOrEmpty(attributes))
+            {
+                outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
+            }
+
+            // Add the qsaValue attribute if the element has a text value
+            if (!string.IsNullOrEmpty(element.Value))
+            {
+                outputElement.Add(new XAttribute("qsaValue", element.Value));
+            }
 
             // Add the new element to the output XML
             outputXml.Add(outputElement);
@@ -79,10 +90,20 @@ class Program
             // Create a new element for all elements
             XElement outputElement = new XElement("record",
                 new XAttribute("qsaId", hierarchicalId),
-                new XAttribute("qsaPath", currentPath.Trim('/')),
-                new XAttribute("qsaAttribute", attributes.TrimEnd()),
-                new XAttribute("qsaValue", "")
+                new XAttribute("qsaPath", currentPath.Trim('/'))
             );
+
+            // Add the qsaAttribute attribute only if there are attributes on the element
+            if (!string.IsNullOrEmpty(attributes))
+            {
+                outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
+            }
+
+            // Add the qsaValue attribute if the element has a text value
+            if (!string.IsNullOrEmpty(element.Value))
+            {
+                outputElement.Add(new XAttribute("qsaValue", element.Value));
+            }
 
             // Add the new element to the output XML
             outputXml.Add(outputElement);
