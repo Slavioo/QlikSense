@@ -1,0 +1,9 @@
+SELECT 
+    DISTINCT so.name AS UDF_Name
+FROM 
+    sys.sql_modules AS sm
+INNER JOIN 
+    sys.objects AS so ON sm.object_id = so.object_id
+WHERE 
+    sm.definition LIKE '%YourTableName%' -- Replace 'YourTableName' with the name of the table you're searching for
+    AND so.type_desc = 'SQL_SCALAR_FUNCTION'; -- Adjust to the type of UDF you're interested in (e.g., 'SQL_TABLE_VALUED_FUNCTION', 'SQL_INLINE_TABLE_VALUED_FUNCTION')
