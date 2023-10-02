@@ -1,0 +1,9 @@
+WITH DateRange AS (
+    SELECT YourTable.*, DATEADD(DAY, number, StartDate) AS GeneratedDate
+    FROM YourTable
+    CROSS APPLY master.dbo.spt_values
+    WHERE type = 'P'
+    AND DATEADD(DAY, number, StartDate) <= EndDate
+)
+SELECT *
+FROM DateRange;
