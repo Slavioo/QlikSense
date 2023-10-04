@@ -1,0 +1,1 @@
+SubField('YourFirstString', '|', IterNo()) <> SubField('YourSecondString', '|', IterNo())
