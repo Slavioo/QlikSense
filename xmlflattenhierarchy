@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 
 class Program
@@ -42,7 +43,7 @@ class Program
         Console.WriteLine("XML data has been processed and saved to output.xml.");
     }
 
-    static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml)
+    static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml, int parentqsaIndex = 0)
     {
         currentPath += "/" + element.Name;
 
@@ -81,6 +82,19 @@ class Program
             outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd(';')));
         }
 
+        // Add the qsaIndex attribute to count the nth occurrence of qsaPath
+        int qsaIndex;
+        if (elementType == "Text")
+        {
+            qsaIndex = parentqsaIndex;
+        }
+        else
+        {
+            qsaIndex = outputXml.Descendants("record")
+                .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/'));
+        }
+        outputElement.Add(new XAttribute("qsaIndex", qsaIndex + 1));
+
         if (element.HasElements)
         {
             // Add the new element to the output XML
@@ -91,7 +105,7 @@ class Program
             foreach (var child in element.Elements())
             {
                 string childHierarchicalId = $"{hierarchicalId}.{childIndex}";
-                FlattenXml(child, childHierarchicalId, currentPath, outputXml);
+                FlattenXml(child, childHierarchicalId, currentPath, outputXml, qsaIndex);
                 childIndex++;
             }
         }
