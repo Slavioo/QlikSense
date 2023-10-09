@@ -1,0 +1,66 @@
+using System;
+using System.Collections.Generic;
+
+class StringSimilarity
+{
+    static int CalculateLevenshteinDistance(string s1, string s2)
+    {
+        int[,] dp = new int[s1.Length + 1, s2.Length + 1];
+
+        for (int i = 0; i <= s1.Length; i++)
+        {
+            for (int j = 0; j <= s2.Length; j++)
+            {
+                if (i == 0)
+                    dp[i, j] = j;
+                else if (j == 0)
+                    dp[i, j] = i;
+                else
+                {
+                    int cost = (s1[i - 1] != s2[j - 1]) ? 1 : 0;
+                    dp[i, j] = Math.Min(Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1), dp[i - 1, j - 1] + cost);
+                }
+            }
+        }
+
+        return dp[s1.Length, s2.Length];
+    }
+
+    static void Main()
+    {
+        List<string> strings = new List<string>
+        {
+            "Apple",
+            "Apples",
+            "Banana",
+            "Bananas",
+            "Orange",
+            "Oranges",
+            "Carrot",
+            "Carrots",
+            "Grape",
+            "Grapes"
+        };
+
+        double similarityThreshold = 3.0; // Adjust this threshold as needed
+
+        List<Tuple<string, string>> similarPairs = new List<Tuple<string, string>>();
+
+        for (int i = 0; i < strings.Count; i++)
+        {
+            for (int j = i + 1; j < strings.Count; j++)
+            {
+                int distance = CalculateLevenshteinDistance(strings[i], strings[j]);
+                if (distance <= similarityThreshold)
+                {
+                    similarPairs.Add(Tuple.Create(strings[i], strings[j]));
+                }
+            }
+        }
+
+        foreach (var pair in similarPairs)
+        {
+            Console.WriteLine($"{pair.Item1} - {pair.Item2}");
+        }
+    }
+}
