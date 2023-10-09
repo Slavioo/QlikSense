@@ -1,0 +1,17 @@
+// Calculate the qsaIndex attribute with filters for both qsaPath and qsaId
+int qsaIndex;
+if (elementType == "Text")
+{
+    qsaIndex = parentqsaIndex;
+}
+else
+{
+    qsaIndex = outputXml
+        .Descendants("record")
+        .Count(e =>
+        {
+            var qsaPathAttr = e.Attribute("qsaPath")?.Value;
+            var qsaIdAttr = e.Attribute("qsaId")?.Value;
+            return qsaPathAttr == currentPath.Trim('/') && qsaIdAttr == hierarchicalId;
+        });
+}
