@@ -1,0 +1,49 @@
+using System;
+using Qlik.Engine;
+using Qlik.Engine.Communication;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        // Define your Qlik Sense Engine URL
+        var engineUrl = "ws://qlikserver:4747/app/";
+
+        try
+        {
+            // Connect to the Qlik Sense Engine
+            ILocation location = Qlik.Engine.Location.FromUri(engineUrl);
+            IGlobal global = location.AsDirectConnectionToEngine();
+
+            // Open the app you want to work with
+            var appIdentifier = "YourAppId"; // Replace with your app ID
+            var app = global.OpenApp(appIdentifier);
+
+            // Get a list of all fields in the app with detailed information
+            var fields = app.GetTablesAndKeys().Tables.SelectMany(table => table.Fields);
+
+            // Print detailed information about each field
+            Console.WriteLine("Field Details:");
+            foreach (var field in fields)
+            {
+                Console.WriteLine($"Name: {field.Name}");
+                Console.WriteLine($"Data Type: {field.DataType}");
+                Console.WriteLine($"Description: {field.Comment}");
+                Console.WriteLine($"Always One Selected Value: {field.AlwaysOneSelected}");
+                Console.WriteLine($"Tags: {string.Join(", ", field.Tags)}");
+                Console.WriteLine($"Hidden: {field.Hidden}");
+                // Add more properties as needed
+
+                Console.WriteLine();
+            }
+
+            // Close the app and disconnect
+            app.Close();
+            global.Disconnect();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+        }
+    }
+}
