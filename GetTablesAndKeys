@@ -1,49 +1,58 @@
-using System;
 using Qlik.Engine;
-using Qlik.Engine.Communication;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Xml;
 
 class Program
 {
     static void Main(string[] args)
     {
-        // Define your Qlik Sense Engine URL
-        var engineUrl = "ws://qlikserver:4747/app/";
-
         try
         {
-            // Connect to the Qlik Sense Engine
-            ILocation location = Qlik.Engine.Location.FromUri(engineUrl);
-            IGlobal global = location.AsDirectConnectionToEngine();
+            string qlikSenseServerUri = "https://your-qliksense-server";
+            string appId = "YourAppId";
+            string userId = "YourUserId";
+            string userDirectory = "YourUserDirectory";
+            string privateKeyPath = "PathToYourPrivateKey.pem";
 
-            // Open the app you want to work with
-            var appIdentifier = "YourAppId"; // Replace with your app ID
-            var app = global.OpenApp(appIdentifier);
+            var location = new Location(qlikSenseServerUri, userId, userDirectory);
+            var appIdentifier = new AppIdentifier { Id = appId };
+            var privateKey = File.ReadAllText(privateKeyPath);
 
-            // Get a list of all fields in the app with detailed information
-            var fields = app.GetTablesAndKeys().Tables.SelectMany(table => table.Fields);
-
-            // Print detailed information about each field
-            Console.WriteLine("Field Details:");
-            foreach (var field in fields)
+            using (var locationEnigma = Location.FromUri(location, privateKey))
+            using (var app = locationEnigma.App(appIdentifier))
             {
-                Console.WriteLine($"Name: {field.Name}");
-                Console.WriteLine($"Data Type: {field.DataType}");
-                Console.WriteLine($"Description: {field.Comment}");
-                Console.WriteLine($"Always One Selected Value: {field.AlwaysOneSelected}");
-                Console.WriteLine($"Tags: {string.Join(", ", field.Tags)}");
-                Console.WriteLine($"Hidden: {field.Hidden}");
-                // Add more properties as needed
+                var qWindowSize = new Size { qcx = 1, qcy = 1 };
+                var qNullSize = new Size { qcx = 1, qcy = 1 };
+                var qCellHeight = 1;
+                var qSyntheticMode = true;
+                var qIncludeSysVars = true;
+                var qIncludeProfiling = true;
 
-                Console.WriteLine();
+                var tablesAndKeys = app.GetTablesAndKeys(qWindowSize, qNullSize, qCellHeight, qSyntheticMode, qIncludeSysVars, qIncludeProfiling);
+
+                // Serialize the response JSON to XML
+                string jsonText = JsonConvert.SerializeObject(tablesAndKeys, new JsonSerializerSettings
+                {
+                    Converters = new JsonConverter[] { new StringEnumConverter() },
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+
+                XmlDocument xmlDoc = JsonConvert.DeserializeXmlNode(jsonText, "TablesAndKeys");
+
+                using (var xmlWriter = XmlWriter.Create("TablesAndKeys.xml"))
+                {
+                    xmlDoc.WriteTo(xmlWriter);
+                }
+
+                Console.WriteLine("Data exported to TablesAndKeys.xml");
             }
-
-            // Close the app and disconnect
-            app.Close();
-            global.Disconnect();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"An error occurred: {ex.Message}");
+            Console.WriteLine("Error: " + ex.Message);
         }
     }
 }
