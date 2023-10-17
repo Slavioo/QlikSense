@@ -1,0 +1,27 @@
+using System;
+using System.IO;
+using System.Linq;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        string folder1Path = @"C:\Path\To\Folder1";
+        string folder2Path = @"C:\Path\To\Folder2";
+
+        int folder1XmlCount = Directory.GetFiles(folder1Path, "*.xml").Length;
+        int folder2XmlCount = Directory.GetFiles(folder2Path, "*.xml").Length;
+
+        Console.WriteLine($"Number of XML files in Folder 1: {folder1XmlCount}");
+        Console.WriteLine($"Number of XML files in Folder 2: {folder2XmlCount}");
+
+        if (folder1XmlCount == folder2XmlCount)
+        {
+            Console.WriteLine("Both folders have the same number of XML files.");
+        }
+        else
+        {
+            Console.WriteLine("The number of XML files in the folders is different.");
+        }
+    }
+}
