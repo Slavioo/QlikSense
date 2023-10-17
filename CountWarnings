@@ -1,0 +1,13 @@
+using System;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Console.Error.WriteLine("This is a warning message.");
+
+        bool hasWarning = Console.Error.ToString().Contains("warning", StringComparison.OrdinalIgnoreCase);
+
+        Console.WriteLine(hasWarning ? "A warning has been written to the console." : "No warning has been written to the console.");
+    }
+}
