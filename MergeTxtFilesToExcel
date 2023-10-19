@@ -1,0 +1,35 @@
+using System;
+using System.IO;
+using OfficeOpenXml;
+
+class Program
+{
+    static void Main()
+    {
+        // Names of your text files and the Excel file
+        string[] textFileNames = { "file1.txt", "file2.txt", "file3.txt" };
+        string excelFileName = "MergedFiles.xlsx";
+
+        using (var package = new ExcelPackage(new FileInfo(excelFileName)))
+        {
+            foreach (var textFileName in textFileNames)
+            {
+                var sheetName = Path.GetFileNameWithoutExtension(textFileName);
+
+                // Add a new worksheet to the Excel file
+                var worksheet = package.Workbook.Worksheets.Add(sheetName);
+
+                // Read the text file and write its content to the Excel sheet
+                string[] lines = File.ReadAllLines(textFileName);
+                for (int row = 1; row <= lines.Length; row++)
+                {
+                    worksheet.Cells[row, 1].Value = lines[row - 1];
+                }
+            }
+
+            package.Save();
+        }
+
+        Console.WriteLine("Merged files into an Excel file.");
+    }
+}
