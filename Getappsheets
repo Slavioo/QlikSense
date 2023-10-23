@@ -1,0 +1,36 @@
+# Sample PowerShell objects with 'app.name' and 'app.id' properties
+$objects = @(
+    [PSCustomObject]@{
+        app = [PSCustomObject]@{
+            name = "App1"
+            id = "AppId1"
+        }
+        name = "Object1"
+    },
+    [PSCustomObject]@{
+        app = [PSCustomObject]@{
+            name = "App2"
+            id = "AppId2"
+        }
+        name = "Object2"
+    }
+)
+
+# Create an array to store the extracted properties
+$outputArray = @()
+
+# Iterate through the objects and extract the properties
+foreach ($object in $objects) {
+    $outputObject = [PSCustomObject]@{
+        'app.name' = $object.app.name
+        'app.id' = $object.app.id
+        'name' = $object.name
+    }
+    $outputArray += $outputObject
+}
+
+# Convert the array of objects to XML
+$xmlData = $outputArray | ConvertTo-Xml -As String -NoTypeInformation
+
+# Save the XML data to a file
+$xmlData | Set-Content -Path "output.xml"
