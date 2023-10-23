@@ -20,26 +20,21 @@ $sheets = @(
 # Create an array to store the XML elements
 $xmlArray = @()
 
-# Add the 'data' root element
-$xmlArray += [PSCustomObject]@{
-    data = [PSCustomObject]@{}
-}
-# Add the 'record' element for the app
-$xmlArray[0].data.record += [PSCustomObject]@{
-    appId = $appId
-    appName = $appName
-}
+# Add the XML declaration and root element
+$xmlArray += '<?xml version="1.0" encoding="utf-8"?>'
+$xmlArray += '<data>'
+$xmlArray += '  <record appId="' + $appId + '" appName="' + $appName + '" />'
 
 # Iterate through the sheets and add 'record' elements for each sheet
 foreach ($sheet in $sheets) {
-    $xmlArray[0].data.record += [PSCustomObject]@{
-        sheetId = $sheet.sheetId
-        sheetName = $sheet.sheetName
-    }
+    $xmlArray += '  <record sheetId="' + $sheet.sheetId + '" sheetName="' + $sheet.sheetName + '" />'
 }
 
-# Convert the array of XML elements to XML
-$xmlData = $xmlArray | ConvertTo-Xml -As String -NoTypeInformation
+# Close the root element
+$xmlArray += '</data>'
+
+# Convert the array to a string
+$xmlData = [string]::Join([Environment]::NewLine, $xmlArray)
 
 # Save the XML data to a file
 $xmlData | Set-Content -Path "output.xml"
