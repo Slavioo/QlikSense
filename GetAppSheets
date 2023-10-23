@@ -20,21 +20,21 @@ $sheets = @(
 # Create an array to store the XML elements
 $xmlArray = @()
 
-# Add the app information to the XML array
+# Add the 'data' root element
 $xmlArray += [PSCustomObject]@{
-    record = [PSCustomObject]@{
-        appId = $appId
-        appName = $appName
-    }
+    data = [PSCustomObject]@{}
+}
+# Add the 'record' element for the app
+$xmlArray[0].data.record += [PSCustomObject]@{
+    appId = $appId
+    appName = $appName
 }
 
-# Iterate through the sheets and add them to the XML array
+# Iterate through the sheets and add 'record' elements for each sheet
 foreach ($sheet in $sheets) {
-    $xmlArray += [PSCustomObject]@{
-        record = [PSCustomObject]@{
-            sheetId = $sheet.sheetId
-            sheetName = $sheet.sheetName
-        }
+    $xmlArray[0].data.record += [PSCustomObject]@{
+        sheetId = $sheet.sheetId
+        sheetName = $sheet.sheetName
     }
 }
 
