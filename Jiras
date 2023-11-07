@@ -1,1 +1,1 @@
-https://your-jira-instance-url/issues/?jql=updated%20%3E%3D%20startOfDay(-1)
+https://your-jira-instance-url/issues/?jql=updated%20%3E%3D%20startOfDay(-1)%20AND%20issueKey%20~%20^rrwa
