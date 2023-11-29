@@ -1,0 +1,15 @@
+To filter the issues by the JQL query: project in projectsInBoard(<board_id>) and sprint in sprintsInBoard(<board_id>), you can use the following API call:
+
+/rest/agile/1.0/board/<board_id>/issue?jql=project%20in%20projectsInBoard(<board_id>)%20and%20sprint%20in%20sprintsInBoard(<board_id>)
+
+where <board_id> is the ID of the rapid view you are interested in. You can find the board ID by looking at the URL of the board, for example:
+
+https://jira.atlassian.com/secure/RapidBoard.jspa?rapidView=**1234**
+
+The board ID in this case is **1234**.
+
+This API call will return a paginated list of issues for the board that match the JQL query, ordered by rank. You can use the fields parameter to specify which fields to return for each issue. For example, to get only the issue key and summary, you can use:
+
+/rest/agile/1.0/board/<board_id>/issue?jql=project%20in%20projectsInBoard(<board_id>)%20and%20sprint%20in%20sprintsInBoard(<board_id>)&fields=key,summary
+
+For more information on how to use this API call, you can refer to [this documentation]. I hope this helps.
