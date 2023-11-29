@@ -1,0 +1,1 @@
+GET /rest/api/2/search?jql=issueFunction in issuesInSprints("project = axes")
