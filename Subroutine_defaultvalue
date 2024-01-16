@@ -1,0 +1,15 @@
+Sub ParTrans (A,B,C)
+  A=A+1
+  B=B+1
+  If IsNull (C) Then //Check if C is NULL
+    C=3 //Assign the default value of 3 to C
+  Else
+    C=C+1
+  End If
+End Sub
+
+A=1
+X=1
+C=1
+Call ParTrans (A, (X+1)*2, C) //First call with C=1
+Call ParTrans (A, (X+1)*2) //Second call without C
