@@ -1,0 +1,7 @@
+LET vFieldExists = 0;
+FOR i = 1 to QvdNoOfFields('Example.qvd')
+  IF FieldValue('QvdFieldHeader', i) = '_Outdated' THEN
+    LET vFieldExists = 1;
+    EXIT FOR;
+  ENDIF
+NEXT i
