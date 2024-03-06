@@ -1,1 +1,1 @@
-wildmatch('*[^A-Za-z]MyField[^A-Za-z]*', 'This is MyField field')
+wildmatch('*[^A-Za-z]' & 'MyField' & '[^A-Za-z]*', 'This is MyField field')
