@@ -1,0 +1,268 @@
+qsaFields:
+LOAD * INLINE [
+    qsaDashboard, qsaField, OtherField
+    Dashboard1, Revenue
+    Dashboard1, Net Revenue
+    Dashboard1, Sales Revenue
+    Dashboard1, Number of Customers
+    Dashboard1, Product Sales
+    Dashboard1, Number of Orders
+    Dashboard1, Number of Orders Processed
+    Dashboard1, Number of Orders Processed Too Late
+    Dashboard1, Justified Number of Orders Processed Too Late
+    Dashboard1, Number of Orders Received
+    Dashboard1, Number of Orders Received in Error
+    Dashboard1, Number of Orders Received in Error Confirmed
+    Dashboard1, Average Order Value
+    Dashboard1, Top Selling Products
+    Dashboard1, Customer Churn Rate
+    Dashboard1, Quarterly Sales Growth
+    Dashboard1, Profit Margin
+    Dashboard1, Return on Investment (ROI)
+    Dashboard1, Average Revenue Per User (ARPU)
+    Dashboard1, Cost of Goods Sold (COGS)
+    Dashboard1, Gross Profit
+    Dashboard1, Net Profit
+    Dashboard1, Customer Acquisition Cost (CAC)
+    Dashboard1, Customer Lifetime Value (CLV)
+    Dashboard1, Market Share
+    Dashboard1, Sales Conversion Rate
+    Dashboard1, Average Sales Cycle Length
+    Dashboard1, Customer Satisfaction Score (CSAT)
+    Dashboard1, Average Deal Size
+    Dashboard1, Customer Retention Rate
+    Dashboard1, Lead-to-Customer Conversion Rate
+    Dashboard1, Sales Pipeline Value
+    Dashboard1, Customer Segmentation
+    Dashboard1, Sales Forecast Accuracy
+    Dashboard1, Sales Velocity
+    Dashboard1, Upsell/Cross-sell Rate
+    Dashboard1, Sales Qualified Leads (SQLs)
+    Dashboard1, Marketing Qualified Leads (MQLs)
+    Dashboard1, Opportunity Win Rate
+    Dashboard1, Average Sales Price (ASP)
+    Dashboard1, Customer Engagement Rate
+    Dashboard1, Customer Loyalty Rate
+    Dashboard1, Deal Win Rate
+    Dashboard1, Deal Loss Rate
+    Dashboard1, Average Deal Close Time
+    Dashboard1, Sales Growth Rate
+    Dashboard1, Sales Target Achievement
+    Dashboard1, Sales Performance Index (SPI)
+    Dashboard1, Customer Feedback Rating
+    Dashboard1, Referral Rate
+    Dashboard1, Sales Channel Effectiveness
+    Dashboard1, Sales Training Effectiveness
+    Dashboard1, Sales Territory Performance
+    Dashboard1, Sales Team Productivity
+    Dashboard1, Sales Funnel Conversion Rate
+    Dashboard1, Average Revenue Per Sale
+    Dashboard1, Average Revenue Per Customer
+    Dashboard1, Average Revenue Per Transaction
+    Dashboard2, Sales Revenue
+    Dashboard2, Number of Customers
+    Dashboard2, Product Sales
+    Dashboard2, Number of Orders
+    Dashboard2, Average Order Value
+    Dashboard2, Top Selling Products
+    Dashboard2, Customer Churn Rate
+    Dashboard2, Quarterly Sales Growth
+    Dashboard2, Profit Margin
+    Dashboard2, Return on Investment (ROI)
+    Dashboard2, Average Revenue Per User (ARPU)
+    Dashboard2, Cost of Goods Sold (COGS)
+    Dashboard2, Gross Profit
+    Dashboard2, Net Profit
+    Dashboard2, Customer Acquisition Cost (CAC)
+    Dashboard2, Customer Lifetime Value (CLV)
+    Dashboard2, Market Share
+    Dashboard2, Sales Conversion Rate
+    Dashboard2, Average Sales Cycle Length
+    Dashboard2, Customer Satisfaction Score (CSAT)
+    Dashboard2, Average Deal Size
+    Dashboard2, Customer Retention Rate
+    Dashboard2, Lead-to-Customer Conversion Rate
+    Dashboard2, Sales Pipeline Value
+    Dashboard2, Customer Segmentation
+    Dashboard2, Sales Forecast Accuracy
+    Dashboard2, Sales Velocity
+    Dashboard2, Upsell/Cross-sell Rate
+    Dashboard2, Sales Qualified Leads (SQLs)
+    Dashboard2, Marketing Qualified Leads (MQLs)
+    Dashboard2, Opportunity Win Rate
+    Dashboard2, Average Sales Price (ASP)
+    Dashboard2, Customer Engagement Rate
+    Dashboard2, Customer Loyalty Rate
+    Dashboard2, Deal Win Rate
+    Dashboard2, Deal Loss Rate
+    Dashboard2, Average Deal Close Time
+    Dashboard2, Sales Growth Rate
+    Dashboard2, Sales Target Achievement
+    Dashboard2, Sales Performance Index (SPI)
+    Dashboard2, Customer Feedback Rating
+    Dashboard2, Referral Rate
+    Dashboard2, Sales Channel Effectiveness
+    Dashboard2, Sales Training Effectiveness
+    Dashboard2, Sales Territory Performance
+    Dashboard2, Sales Team Productivity
+    Dashboard2, Sales Funnel Conversion Rate
+    Dashboard2, Average Revenue Per Sale
+    Dashboard2, Average Revenue Per Customer
+    Dashboard2, Average Revenue Per Transaction
+];
+
+qsaValues:
+LOAD * INLINE [
+    qsaDashboard, qsaValueTemp
+    Dashboard1, sum(Revenue)
+    Dashboard1, avg(Net Revenue)
+    Dashboard1, avg(Number of Orders)
+    Dashboard1, avg(Number of Orders Processed)
+    Dashboard1, avg(Number of Orders Processed Too Late)
+    Dashboard1, avg(Number of Orders Received)
+    Dashboard1, avg(Number of Orders Received in Error)
+    Dashboard1, avg(Number of Orders Received in Error Confirmed)
+    Dashboard1, avg(Justified Number of Orders Processed Too Late)
+    Dashboard2, avg(Sales Revenue)
+    Dashboard2, avg(Number of Customers)
+    Dashboard2, avg(Number of Orders)
+];
+
+qsaFieldsSimilarTemp1:
+LOAD distinct
+	qsaDashboard,
+	qsaField
+RESIDENT qsaFields;
+
+LEFT JOIN (qsaFieldsSimilarTemp1)
+LOAD distinct
+	qsaDashboard,
+	qsaField as qsaFieldSimilarTemp1
+RESIDENT qsaFieldsSimilarTemp1;
+
+qsaFieldsSimilarTemp2:
+LOAD distinct
+	qsaDashboard,
+	qsaFieldSimilarTemp1
+RESIDENT qsaFieldsSimilarTemp1;
+
+LEFT JOIN (qsaFieldsSimilarTemp2)
+LOAD distinct
+	qsaDashboard,
+	qsaFieldSimilarTemp1 as qsaFieldSimilarTemp2
+RESIDENT qsaFieldsSimilarTemp2;
+
+qsaFieldsSimilarTemp3:
+LOAD distinct
+	qsaDashboard,
+	qsaFieldSimilarTemp2
+RESIDENT qsaFieldsSimilarTemp2;
+
+LEFT JOIN (qsaFieldsSimilarTemp3)
+LOAD distinct
+	qsaDashboard,
+	qsaFieldSimilarTemp2 as qsaFieldSimilarTemp3
+RESIDENT qsaFieldsSimilarTemp3;
+
+LEFT JOIN (qsaFields)
+LOAD
+    qsaDashboard,
+    qsaField,
+    qsaFieldSimilarTemp1
+RESIDENT qsaFieldsSimilarTemp1
+WHERE NOT MATCH(qsaFieldSimilarTemp1,qsaField) AND WILDMATCH(qsaFieldSimilarTemp1,'*'&qsaField&'*');
+
+LEFT JOIN (qsaFields)
+LOAD
+    qsaDashboard,
+    qsaFieldSimilarTemp1,
+    qsaFieldSimilarTemp2
+RESIDENT qsaFieldsSimilarTemp2
+WHERE NOT MATCH(qsaFieldSimilarTemp2,qsaFieldSimilarTemp1) AND WILDMATCH(qsaFieldSimilarTemp2,'*'&qsaFieldSimilarTemp1&'*');
+LEFT JOIN (qsaFields)
+LOAD
+    qsaDashboard,
+    qsaFieldSimilarTemp2,
+    qsaFieldSimilarTemp3
+RESIDENT qsaFieldsSimilarTemp3
+WHERE NOT MATCH(qsaFieldSimilarTemp3,qsaFieldSimilarTemp2) AND WILDMATCH(qsaFieldSimilarTemp3,'*'&qsaFieldSimilarTemp2&'*');
+
+//DROP TABLES qsaFieldsSimilarTemp1, qsaFieldsSimilarTemp2, qsaFieldsSimilarTemp3;
+
+//Exit Script;
+
+LEFT JOIN(qsaValues)
+LOAD
+    qsaDashboard,
+    qsaField,
+    qsaFieldSimilarTemp1,
+    qsaFieldSimilarTemp2,
+    qsaFieldSimilarTemp3
+RESIDENT qsaFields;
+
+DROP TABLES qsaFields;
+
+qsaFieldMatchesTemp:
+LOAD
+    qsaDashboard,
+    qsaValueTemp,
+    qsaFieldSimilarTemp3 as qsaField,
+    4 as qsaFieldMatchingPriority
+RESIDENT qsaValues
+WHERE
+    WILDMATCH(qsaValueTemp,'*'&qsaFieldSimilarTemp3&'*')
+    AND len(qsaFieldSimilarTemp3)>0;
+
+LOAD
+    qsaDashboard,
+    qsaValueTemp,
+    qsaFieldSimilarTemp2 as qsaField,
+    3 as qsaFieldMatchingPriority
+RESIDENT qsaValues
+WHERE
+    WILDMATCH(qsaValueTemp,'*'&qsaFieldSimilarTemp2&'*')
+    AND len(qsaFieldSimilarTemp2)>0;
+
+LOAD
+    qsaDashboard,
+    qsaValueTemp,
+    qsaFieldSimilarTemp1 as qsaField,
+    2 as qsaFieldMatchingPriority
+RESIDENT qsaValues
+WHERE
+    WILDMATCH(qsaValueTemp,'*'&qsaFieldSimilarTemp1&'*')
+    AND len(qsaFieldSimilarTemp1)>0;
+
+LOAD
+    qsaDashboard,
+    qsaValueTemp,
+    qsaField as qsaField,
+    1 as qsaFieldMatchingPriority
+RESIDENT qsaValues
+WHERE
+    WILDMATCH(qsaValueTemp,'*'&qsaField&'*')
+    AND len(qsaField)>0;
+
+DROP TABLES qsaFieldsSimilarTemp1, qsaFieldsSimilarTemp2, qsaFieldsSimilarTemp3;
+
+DROP TABLES qsaValues;
+
+qsaFieldMatches:
+NoConcatenate
+LOAD DISTINCT
+    qsaDashboard,
+    qsaValueTemp,
+    max(qsaFieldMatchingPriority) as qsaFieldMatchingPriority
+RESIDENT qsaFieldMatchesTemp
+GROUP BY 
+    qsaDashboard,
+    qsaValueTemp;
+LEFT JOIN(qsaFieldMatches)
+LOAD DISTINCT
+    qsaDashboard,
+    qsaValueTemp,
+    qsaField,
+    qsaFieldMatchingPriority
+RESIDENT qsaFieldMatchesTemp;
+
+DROP TABLE qsaFieldMatchesTemp;
