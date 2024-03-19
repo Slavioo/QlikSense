@@ -1,0 +1,28 @@
+// Load script to generate combinations of specified characters in Qlik
+Let vChars = '&,*,-,+,=,|,<,>,/,';
+Let vNumChars = SubStringCount(vChars, ',') + 1;
+
+// Create an inline table with the characters
+Characters:
+LOAD * INLINE [
+Char
+$(vChars)
+];
+
+// Cartesian Product to generate all combinations
+Combinations:
+LOAD
+  Char & Char as Combination
+RESIDENT Characters
+JOIN (Characters)
+;
+
+// Load the combinations into a table
+LOAD Combination
+RESIDENT Combinations
+ORDER BY Combination
+;
+
+// Drop the temporary table
+DROP TABLE Characters;
+DROP TABLE Combinations;
