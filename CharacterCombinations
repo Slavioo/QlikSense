@@ -1,31 +1,33 @@
-// Load script to generate combinations of specified characters and store in a variable in Qlik
-Let vChars = '&,*,-,+,=,|,<,>,/,';
-Let vNumChars = SubStringCount(vChars, ',') + 1;
-Let vCombinations = '';
+SET vs_matchCharactersList = '[|]|{|}|(|)|<|>|,|=';
+LET vs_matchCharactersCount = Len(Replace('$(vs_matchCharactersList)', '|', ''));
 
-// Create an inline table with the characters
-Characters:
-LOAD * INLINE [
-Char
-$(vChars)
-];
+FOR i = 1 to vs_matchCharactersCount
+    CharactersCombinationsTemp:
+    LOAD 
+        SubField('$(vs_matchCharactersList)', '|', $(i)) as Character1
+    Autogenerate 1;
+NEXT
 
-// Cartesian Product to generate all combinations
-Combinations:
+LEFT JOIN (CharactersCombinationsTemp)
+LOAD 
+    Character1 as Character2
+RESIDENT CharactersCombinationsTemp;
+
+FOR each vs_ColumnMatch in 'qsaField',' qsaField','qsaField ',' qsaField '
+	CharactersCombinationsTemp2:
+	LOAD '''*'&Character1 & '$(vs_ColumnMatch)' & Character2&'*''' as FieldSearchMatchTemp
+	RESIDENT CharactersCombinationsTemp;
+NEXT
+
+DROP TABLE CharactersCombinationsTemp;
+
+CharactersCombinationsListTemp:
 LOAD
-  Char & Char as Combination
-RESIDENT Characters
-JOIN (Characters)
-;
+	Concat(FieldSearchMatchTemp, ',') AS FieldSearchMatchListTemp
+RESIDENT CharactersCombinationsTemp2;
 
-// Load the combinations into a variable
-FOR i = 0 TO NoOfRows('Combinations') - 1
-  Let vCombinations = vCombinations & Peek('Combination', i, 'Combinations') & Chr(10);
-END FOR
+DROP TABLE CharactersCombinationsTemp2;
 
-// Drop the temporary table
-DROP TABLE Characters;
-DROP TABLE Combinations;
+LET vs_FieldSearchMatches = peek('FieldSearchMatchListTemp');
 
-// Output the variable content
-TRACE $(vCombinations);
+DROP TABLE CharactersCombinationsListTemp;
