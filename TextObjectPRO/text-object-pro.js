@@ -1,4 +1,4 @@
-define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
+define(['jquery', 'qlik'], function($, qlik) {
     return {
         initialProperties: {
             version: 1.0,
@@ -6,7 +6,8 @@ define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
             fontColor: '#000000',
             backgroundColor: '#ffffff',
             borderColor: '#000000',
-            tooltip: ''
+            tooltip: '',
+            css: ''
         },
         definition: {
             type: 'items',
@@ -44,6 +45,12 @@ define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
                             ref: 'tooltip',
                             label: 'Tooltip',
                             expression: 'optional'
+                        },
+                        css: {
+                            type: 'string',
+                            ref: 'css',
+                            label: 'CSS',
+                            expression: 'optional'
                         }
                     }
                 }
@@ -55,7 +62,9 @@ define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
             var backgroundColor = layout.backgroundColor;
             var borderColor = layout.borderColor;
             var tooltip = layout.tooltip;
+            var css = layout.css;
 
+            $element.attr('style', css);
             $element.css('color', fontColor);
             $element.css('background-color', backgroundColor);
             $element.css('border', '1px solid ' + borderColor);
