@@ -56,15 +56,11 @@ define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
             var borderColor = layout.borderColor;
             var tooltip = layout.tooltip;
 
-            if (fontColor) {
-                $element.css('color', fontColor);
-            }
-            if (backgroundColor) {
-                $element.css('background-color', backgroundColor);
-            }
-            if (borderColor) {
-                $element.css('border', '1px solid ' + borderColor);
-            }
+            $element.css({
+                'color': fontColor || '',
+                'background-color': backgroundColor || '',
+                'border': borderColor ? '1px solid ' + borderColor : '',
+            });
             $element.attr('title', tooltip);
             $element.html(text);
         }
