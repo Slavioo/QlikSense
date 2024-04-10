@@ -1,0 +1,7 @@
+{
+    "name": "text-object-pro",
+    "description": "A Qlik Sense Text Object extension",
+    "type": "visualization",
+    "version": "1.0.0",
+    "author": "Slavomir Haladej"
+}
