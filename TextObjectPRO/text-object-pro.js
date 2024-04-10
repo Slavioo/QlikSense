@@ -1,4 +1,4 @@
-define(['jquery', 'qlik'], function($, qlik) {
+define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
     return {
         initialProperties: {
             version: 1.0,
@@ -6,9 +6,6 @@ define(['jquery', 'qlik'], function($, qlik) {
             fontColor: '#333',
             backgroundColor: '#fff',
             borderColor: '#ddd',
-            padding: '10px',
-            borderRadius: '5px',
-            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.15)',
             tooltip: ''
         },
         definition: {
@@ -42,24 +39,6 @@ define(['jquery', 'qlik'], function($, qlik) {
                             label: 'Border Color',
                             expression: 'optional'
                         },
-                        padding: {
-                            type: 'string',
-                            ref: 'padding',
-                            label: 'Padding',
-                            expression: 'optional'
-                        },
-                        borderRadius: {
-                            type: 'string',
-                            ref: 'borderRadius',
-                            label: 'Border Radius',
-                            expression: 'optional'
-                        },
-                        boxShadow: {
-                            type: 'string',
-                            ref: 'boxShadow',
-                            label: 'Box Shadow',
-                            expression: 'optional'
-                        },
                         tooltip: {
                             type: 'string',
                             ref: 'tooltip',
@@ -75,18 +54,12 @@ define(['jquery', 'qlik'], function($, qlik) {
             var fontColor = layout.fontColor;
             var backgroundColor = layout.backgroundColor;
             var borderColor = layout.borderColor;
-            var padding = layout.padding;
-            var borderRadius = layout.borderRadius;
-            var boxShadow = layout.boxShadow;
             var tooltip = layout.tooltip;
 
             $element.css({
                 'color': fontColor,
                 'background-color': backgroundColor,
                 'border': '1px solid ' + borderColor,
-                'padding': padding,
-                'border-radius': borderRadius,
-                'box-shadow': boxShadow
             });
             $element.attr('title', tooltip);
             $element.html(text);
