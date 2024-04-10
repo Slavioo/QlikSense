@@ -1,3 +1,4 @@
+--IGNORE - or modify
 define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
     return {
         initialProperties: {
