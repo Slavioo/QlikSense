@@ -57,9 +57,20 @@ define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
             var tooltip = layout.tooltip;
 
             $element.css({
+                'display': 'flex',
+                'justify-content': 'center',
+                'align-items': 'center',
+                'height': '100%',
+                'font-family': 'Arial, sans-serif',
+                'font-size': '16px',
+                'line-height': '1.5',
                 'color': fontColor,
                 'background-color': backgroundColor,
                 'border': '1px solid ' + borderColor,
+                'padding': '10px',
+                'border-radius': '5px',
+                'box-shadow': '0 2px 5px rgba(0, 0, 0, 0.15)',
+                'transition': 'all 0.3s ease'
             });
             $element.attr('title', tooltip);
             $element.html(text);
