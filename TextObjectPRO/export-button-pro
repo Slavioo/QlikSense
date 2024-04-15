@@ -1,0 +1,164 @@
+define(['jquery', 'qlik', 'css!./style.css'], function($, qlik) {
+    return {
+        initialProperties: {
+            version: 1.0,
+            qHyperCubeDef: {
+                qDimensions: [],
+                qMeasures: [],
+                qInitialDataFetch: [{
+                    qWidth: 10,
+                    qHeight: 1000
+                }]
+            },
+            text: '',
+            css: '',
+            tooltip: ''
+        },
+        definition: {
+            type: 'items',
+            component: 'accordion',
+            items: {
+                settings: {
+                    uses: 'settings',
+                    items: {
+                        text: {
+                            type: 'string',
+                            ref: 'text',
+                            label: 'Text',
+                            expression: 'optional'
+                        },
+                        css: {
+                            type: 'string',
+                            ref: 'css',
+                            label: 'CSS',
+                            expression: 'optional'
+                        },
+                        tooltip: {
+                            type: 'string',
+                            ref: 'tooltip',
+                            label: 'Tooltip',
+                            expression: 'optional'
+                        },
+                        exportSettings: {
+                            type: 'items',
+                            label: 'Export Settings',
+                            items: {
+                                tableId: {
+                                    type: 'string',
+                                    ref: 'qHyperCubeDef.qInitialDataFetch',
+                                    label: 'Table ID',
+                                    expression: 'optional'
+                                },
+                                dataFormat: {
+                                    type: 'string',
+                                    component: 'dropdown',
+                                    label: 'Data Format',
+                                    ref: 'dataFormat',
+                                    options: [{
+                                        value: 'CSV',
+                                        label: 'CSV'
+                                    }, {
+                                        value: 'OOXML',
+                                        label: 'Excel'
+                                    }],
+                                    defaultValue: 'CSV'
+                                },
+                                separator: {
+                                    type: 'string',
+                                    component: 'dropdown',
+                                    label: 'Separator',
+                                    ref: 'separator',
+                                    options: [{
+                                        value: ',',
+                                        label: 'Comma'
+                                    }, {
+                                        value: '\\t',
+                                        label: 'Tab'
+                                    }],
+                                    defaultValue: ',',
+                                    show: function(data) {
+                                        return data.dataFormat === 'CSV';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        paint: function($element, layout) {
+            var app = qlik.currApp(this);
+            var qHyperCube = layout.qHyperCube;
+            var tableId = qHyperCube.qInitialDataFetch[0].qArea.qTableId;
+            var dataFormat = layout.dataFormat;
+            var separator = layout.separator;
+
+            // Create an export button
+            var $exportButton = $('<button class="export-button">Export</button>');
+            $element.empty().append($exportButton);
+
+            // Event listener for the export button
+            $exportButton.on('click', function() {
+                // Retrieve and export the data in chunks
+                function exportDataChunk(page) {
+                    app.createCube({
+                        qDimensions: qHyperCube.qDimensionInfo,
+                        qMeasures: qHyperCube.qMeasureInfo,
+                        qInitialDataFetch: [page]
+                    }, function(reply) {
+                        // Process the data and convert to CSV format
+                        var data = reply.qHyperCube.qDataPages[0].qMatrix.map(function(row) {
+                            return row.map(function(cell) {
+                                return cell.qText;
+                            }).join(separator);
+                        }).join('\\n');
+
+                        // Create a Blob from the CSV string
+                        var blob = new Blob([data], { type: 'text/csv;charset=utf-8;' });
+
+                        // Generate a download link
+                        var downloadLink = document.createElement('a');
+                        var url = URL.createObjectURL(blob);
+                        downloadLink.href = url;
+                        var fileName = 'exported_data_' + (new Date()).toISOString() + '.csv';
+                        downloadLink.download = fileName;
+
+                        // Programmatically click the link to trigger the download
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+
+                        // Check if there's more data to fetch
+                        if (reply.qHyperCube.qDataPages[0].qArea.qHeight < page.qHeight) {
+                            // All data has been fetched
+                            console.log('All data exported');
+                        } else {
+                            // Fetch the next chunk
+                            page.qTop += page.qHeight;
+                            exportDataChunk(page);
+                        }
+                    });
+                }
+
+                // Define the first page to fetch
+                var page = {
+                    qLeft: 0,
+                    qTop: 0,
+                    qWidth: qHyperCube.qSize.qcx,
+                    qHeight: 1000 // Adjust as needed
+                };
+
+                // Start the export process
+                exportDataChunk(page);
+            });
+
+            // Set the text, css, and tooltip based on the layout settings
+            var text = layout.text;
+            var css = layout.css;
+            var tooltip = layout.tooltip;
+            $element.attr('style', css);
+            $element.attr('title', tooltip);
+            $element.html(text);
+        }
+    };
+});
