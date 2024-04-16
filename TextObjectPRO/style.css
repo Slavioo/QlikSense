@@ -1,7 +1,7 @@
-.text-object:hover {
+.qv-object-text-object-pro:hover {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.text-object:active {
+.qv-object-text-object-pro:active {
     box-shadow: none;
 }
