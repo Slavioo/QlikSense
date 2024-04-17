@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f0f0;
+    }
+
+    .dashboard {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        padding: 20px;
+    }
+
+    .kpi {
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin: 20px;
+        flex: 1 0 200px;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative; /* Added for tooltip */
+    }
+
+    .kpi:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+
+    .kpi h2 {
+        font-size: 36px;
+        margin: 0;
+        color: #333;
+    }
+
+    .kpi p {
+        font-size: 18px;
+        color: #888;
+        margin-top: 5px;
+    }
+
+    /* Tooltip styles */
+    .tooltip {
+        visibility: hidden;
+        width: 120px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        padding: 5px 0;
+        border-radius: 6px;
+        position: absolute;
+        z-index: 1;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        margin-left: -5px;
+        border-width: 5px;
+        border-style: solid;
+        border-color: #555 transparent transparent transparent;
+    }
+
+    .kpi:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* Slightly colored KPI boxes */
+    .kpi:nth-child(1) {
+        background-color: #f2f2f2;
+    }
+
+    .kpi:nth-child(2) {
+        background-color: #e6f2ff;
+    }
+
+    .kpi:nth-child(3) {
+        background-color: #f2ffe6;
+    }
+
+    .kpi:nth-child(4) {
+        background-color: #fff2f2;
+    }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="kpi">
+            <h2>123</h2>
+            <p>KPI 1</p>
+            <span class="tooltip">Tooltip for KPI 1</span>
+        </div>
+        <div class="kpi">
+            <h2>456</h2>
+            <p>KPI 2</p>
+            <span class="tooltip">Tooltip for KPI 2</span>
+        </div>
+        <div class="kpi">
+            <h2>789</h2>
+            <p>KPI 3</p>
+            <span class="tooltip">Tooltip for KPI 3</span>
+        </div>
+        <div class="kpi">
+            <h2>1011</h2>
+            <p>KPI 4</p>
+            <span class="tooltip">Tooltip for KPI 4</span>
+        </div>
+    </div>
+</body>
+</html>
