@@ -1,0 +1,12 @@
+SELECT 
+    c.name AS 'Column Name',
+    t.name AS 'Data Type',
+    c.max_length AS 'Max Length',
+    c.precision,
+    c.scale,
+    c.is_nullable
+FROM tempdb.sys.columns AS c
+INNER JOIN tempdb.sys.types AS t
+    ON c.system_type_id = t.system_type_id
+    AND c.user_type_id = t.user_type_id
+WHERE c.[object_id] = OBJECT_ID(N'tempdb..#YourTempTableName');
