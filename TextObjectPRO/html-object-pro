@@ -1,0 +1,30 @@
+define(['jquery', 'qlik'], function($, qlik) {
+    return {
+        initialProperties: {
+            version: 1.0,
+            html: ''
+        },
+        definition: {
+            type: 'items',
+            component: 'accordion',
+            items: {
+                settings: {
+                    uses: 'settings',
+                    items: {
+                        html: {
+                            type: 'string',
+                            ref: 'html',
+                            label: 'HTML',
+                            expression: 'optional'
+                        }
+                    }
+                }
+            }
+        },
+        paint: function($element, layout) {
+            var html = layout.html;
+
+            $element.html(html);
+        }
+    };
+});
