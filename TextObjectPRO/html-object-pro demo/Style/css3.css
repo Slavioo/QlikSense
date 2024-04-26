@@ -1,7 +1,13 @@
 #treeWrapper {
   position: relative;
   margin-left: 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
+
 .zoomButton {
   font-size:3vw;
   width:3vw;
