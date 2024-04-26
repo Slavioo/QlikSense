@@ -1,0 +1,126 @@
+#treeWrapper {
+  position: relative;
+  margin-left: 5px;
+}
+.zoomButton {
+  font-size:3vw;
+  width:3vw;
+  height:3vw;
+  position: absolute;
+  top:0rem;
+  opacity: 0.2;
+  transition: opacity 0.3s;
+  background: #495057;
+  color: #efefef;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease 0s;
+}
+.zoomButton:hover {
+  background: #2E9AFE;
+  color: #fff;
+  box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+}
+.treeBranch {
+  position: relative;
+  margin-left: 250px;
+}
+.treeBranch:before {
+  content: "";
+  width: 50px;
+  border-top: 2px solid #A2D9CE;
+  position: absolute;
+  left: -100px;
+  top: 50%;
+  margin-top: 1px;
+}
+.treeEntry {
+  position: relative;
+  min-height: 60px;
+}
+.treeEntry:before {
+  content: "";
+  height: 100%;
+  border-left: 2px solid #A2D9CE;
+  position: absolute;
+  left: -50px;
+}
+.treeEntry:after {
+  content: "";
+  width: 50px;
+  border-top: 2px solid #A2D9CE;
+  position: absolute;
+  left: -50px;
+  top: 50%;
+  margin-top: 1px;
+}
+.treeEntry:first-child:before {
+  width: 10px;
+  height: 50%;
+  top: 50%;
+  margin-top: 2px;
+  border-radius: 10px 0 0 0;
+}
+.treeEntry:first-child:after {
+  height: 10px;
+  border-radius: 10px 0 0 0;
+}
+.treeEntry:last-child:before {
+  width: 10px;
+  height: 50%;
+  border-radius: 0 0 0 10px;
+}
+.treeEntry:last-child:after {
+  height: 10px;
+  border-top: none;
+  border-bottom: 2px solid #A2D9CE;
+  border-radius: 0 0 0 10px;
+  margin-top: -9px;
+}
+.treeEntry.sole:before {
+  display: none;
+}
+.treeEntry.sole:after {
+  width: 50px;
+  height: 0;
+  margin-top: 1px;
+  border-radius: 0;
+}
+.treeLabel {
+  display: block;
+  min-width: 150px;
+  padding: 5px 10px;
+  line-height: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: #117A65;
+  border: 2px solid #A2D9CE;
+  border-radius: 5px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-top: -15px;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+.treeLabel:hover {
+  background-color: #A2D9CE;
+  transform: scale(1.05);
+}
+.treeLabel::before {
+  content: attr(data-title);
+  display: block;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #AAB7B8;
+  position: absolute;
+  top: -25px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
