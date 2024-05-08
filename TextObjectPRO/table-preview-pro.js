@@ -12,50 +12,33 @@ define(["qlik", "jquery"], function(qlik, $) {
                             ref: "visualizationId",
                             label: "Visualization ID",
                             defaultValue: "",
-                            expression: "optional"
+                            expression: 'optional'
+                        },
+                        pageSize: {
+                            type: "integer",
+                            ref: "pageSize",
+                            label: "Page Size (records per page)",
+                            defaultValue: 50,
+                            expression: 'optional'
                         },
                         css: {
                             type: "string",
                             ref: "css",
                             label: "CSS",
                             defaultValue: "",
-                            expression: "optional"
+                            expression: 'optional'
                         },
-                        pageSize: {
-                            type: "number",
-                            ref: "pageSize",
-                            label: "Page Size",
-                            defaultValue: 10,
-                            min: 1,
-                            max: 100
-                        }
                     }
                 }
             }
         },
         paint: function($element, layout) {
             const app = qlik.currApp(this);
-            const visualizationId = layout.visualizationId;
             const css = layout.css;
+            const visualizationId = layout.visualizationId;
             const pageSize = layout.pageSize;
 
-            if (!visualizationId) {
-                console.error("No visualization id provided.");
-                return;
-            }
-
-            app.visualization.get(visualizationId).then(function(vis) {
-                const requestPage = [{
-                    qTop: 0,
-                    qLeft: 0,
-                    qWidth: vis.model.layout.qHyperCube.qSize.qcx,
-                    qHeight: Math.min(pageSize, vis.model.layout.qHyperCube.qSize.qcy)
-                }];
-
-                vis.model.getHyperCubeData('/qHyperCubeDef', requestPage).then(function(dataPage) {
-                    displayData(dataPage, vis, $element, css);
-                });
-            });
+            displayData(app, visualizationId, pageSize, $element, css);
         }
     };
 
@@ -74,9 +57,23 @@ define(["qlik", "jquery"], function(qlik, $) {
         return populatedHeaders;
     };
 
-    function displayData(dataPage, vis, $element, css) {
+    async function displayData(app, visualizationId, pageSize, $element, css) {
+        if (!visualizationId) {
+            console.error("No visualization id provided.");
+            return;
+        }
+
+        const vis = await app.visualization.get(visualizationId);
+        const requestPage = [{
+            qTop: 0,
+            qLeft: 0,
+            qWidth: vis.model.layout.qHyperCube.qSize.qcx,
+            qHeight: Math.min(pageSize, vis.model.layout.qHyperCube.qSize.qcy)
+        }];
+
+        const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
         const headers = getHeaders(vis);
-        const table = $('<table class="table"></table>');
+        const table = $('<table class="table-preview"></table>');
         const headerRow = $('<tr></tr>');
         headers.forEach(function(header) {
             const th = $('<th></th>');
