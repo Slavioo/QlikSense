@@ -56,8 +56,14 @@ define(["qlik", "jquery"], function(qlik, $) {
                         $button.prop('disabled', true);
                         app.visualization.get(visualizationId).then(function(vis) {
                             var numberOfPages = Math.ceil(vis.model.layout.qHyperCube.qSize.qcy / pageSize);
-                            var dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({ Id: id, Header: dim.qFallbackTitle }));
-                            var measureHeaders = vis.model.layout.qHyperCube.qMeasureInfo.map((measure, id) => ({ Id: id + dimensionHeaders.length, Header: measure.qFallbackTitle }));
+                            var dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({
+                                Id: id,
+                                Header: dim.qFallbackTitle
+                            }));
+                            var measureHeaders = vis.model.layout.qHyperCube.qMeasureInfo.map((measure, id) => ({
+                                Id: id + dimensionHeaders.length,
+                                Header: measure.qFallbackTitle
+                            }));
                             var allHeaders = dimensionHeaders.concat(measureHeaders);
                             var orderedHeaders = vis.model.layout.qHyperCube.qColumnOrder.map(id => allHeaders.find(h => h.Id === id));
                             var promises = [];
@@ -77,12 +83,17 @@ define(["qlik", "jquery"], function(qlik, $) {
                                                     }];
                                                     var filePromise = vis.model.getHyperCubeData('/qHyperCubeDef', requestPage).then(function(dataPage) {
                                                         csvContent += dataPage[0].qMatrix.map(row => row.map(cell => cell.qText).join(csvDelimiter)).join('\n');
+                                                        if (page < startPage + fileSize - 1 && page < numberOfPages - 1) {
+                                                            csvContent += '\n';
+                                                        }
                                                     });
                                                     filePromises.push(filePromise);
                                                 })(j);
                                             }
                                             Promise.all(filePromises).then(function() {
-                                                var csvFile = new Blob([csvContent], {type: "text/csv"});
+                                                var csvFile = new Blob([csvContent], {
+                                                    type: "text/csv"
+                                                });
                                                 var downloadLink = document.createElement("a");
                                                 downloadLink.download = visualizationId + '_pages' + (startPage + 1) + '-' + (startPage + fileSize) + '.csv';
                                                 downloadLink.href = window.URL.createObjectURL(csvFile);
@@ -91,7 +102,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                                                 downloadLink.click();
                                                 resolve();
                                             });
-                                        }, startPage * delay * fileSize); // delay between each file
+                                        }, startPage * delay);
                                     });
                                     promises.push(promise);
                                 })(i);
