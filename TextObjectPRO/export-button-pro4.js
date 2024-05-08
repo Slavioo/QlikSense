@@ -23,7 +23,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                             type: "integer",
                             ref: "fileSize",
                             label: "File Size (pages per file)",
-                            defaultValue: 1
+                            defaultValue: 1000
                         },
                         csvDelimiter: {
                             type: "string",
@@ -35,7 +35,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                             type: "integer",
                             ref: "delay",
                             label: "Delay (ms)",
-                            defaultValue: 1
+                            defaultValue: 100
                         }
                     }
                 }
