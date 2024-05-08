@@ -71,7 +71,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                                 (function(startPage) {
                                     var promise = new Promise(function(resolve, reject) {
                                         setTimeout(function() {
-                                            var csvContent = orderedHeaders.map(h => h.Header).join(csvDelimiter) + '\n';
+                                            var csvContent = orderedHeaders.filter(h => h.Header && h.Header.trim() !== '').map(h => h.Header).join(csvDelimiter) + '\n';
                                             var filePromises = [];
                                             for (var j = startPage; j < startPage + fileSize && j < numberOfPages; j++) {
                                                 (function(page) {
