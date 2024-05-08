@@ -131,7 +131,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                 type: "text/csv"
             });
             const downloadLink = document.createElement("a");
-            downloadLink.download = (fileNameMask ? fileNameMask : visualizationId) + '_pages' + (startPage + 1) + '-' + (startPage + fileSize) + '.csv';
+            downloadLink.download = (fileNameMask ? fileNameMask : visualizationId) + '_records' + (startPage * pageSize + 1) + '-' + Math.min((startPage + fileSize) * pageSize, vis.model.layout.qHyperCube.qSize.qcy) + '.csv';
             downloadLink.href = window.URL.createObjectURL(csvFile);
             downloadLink.style.display = "none";
             document.body.appendChild(downloadLink);
