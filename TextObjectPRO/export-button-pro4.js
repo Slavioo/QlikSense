@@ -35,7 +35,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                             type: "integer",
                             ref: "delay",
                             label: "Delay (ms)",
-                            defaultValue: 100
+                            defaultValue: 1
                         }
                     }
                 }
