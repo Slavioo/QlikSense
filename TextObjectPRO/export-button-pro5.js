@@ -49,6 +49,13 @@ define(["qlik", "jquery"], function(qlik, $) {
                             defaultValue: "",
                             expression: 'optional'
                         },
+                        fileNameMask: {
+                            type: "string",
+                            ref: "fileNameMask",
+                            label: "File Name Mask",
+                            defaultValue: "",
+                            expression: 'optional'
+                        },
                     }
                 }
             }
@@ -89,6 +96,7 @@ define(["qlik", "jquery"], function(qlik, $) {
         const fileSize = layout.fileSize;
         const csvDelimiter = layout.csvDelimiter;
         const delay = layout.delay;
+        const fileNameMask = layout.fileNameMask;
 
         if (!visualizationId) {
             console.error("No visualization id provided.");
@@ -123,7 +131,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                 type: "text/csv"
             });
             const downloadLink = document.createElement("a");
-            downloadLink.download = visualizationId + '_pages' + (startPage + 1) + '-' + (startPage + fileSize) + '.csv';
+            downloadLink.download = (fileNameMask ? fileNameMask : visualizationId) + '_pages' + (startPage + 1) + '-' + (startPage + fileSize) + '.csv';
             downloadLink.href = window.URL.createObjectURL(csvFile);
             downloadLink.style.display = "none";
             document.body.appendChild(downloadLink);
