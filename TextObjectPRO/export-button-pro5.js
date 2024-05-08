@@ -12,35 +12,35 @@ define(["qlik", "jquery"], function(qlik, $) {
                             ref: "visualizationId",
                             label: "Visualization ID",
                             defaultValue: "",
-							expression: 'optional'
+                            expression: 'optional'
                         },
                         pageSize: {
                             type: "integer",
                             ref: "pageSize",
                             label: "Page Size (records per page)",
                             defaultValue: 50,
-							expression: 'optional'
+                            expression: 'optional'
                         },
                         fileSize: {
                             type: "integer",
                             ref: "fileSize",
                             label: "File Size (pages per file)",
                             defaultValue: 1000,
-							expression: 'optional'
+                            expression: 'optional'
                         },
                         csvDelimiter: {
                             type: "string",
                             ref: "csvDelimiter",
                             label: "CSV Delimiter",
                             defaultValue: ",",
-							expression: 'optional'
+                            expression: 'optional'
                         },
                         delay: {
                             type: "integer",
                             ref: "delay",
                             label: "Delay (ms)",
                             defaultValue: 100,
-							expression: 'optional'
+                            expression: 'optional'
                         },
                         css: {
                             type: "string",
@@ -132,7 +132,7 @@ define(["qlik", "jquery"], function(qlik, $) {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
 
-		$button.prop('disabled', false);
+        $button.prop('disabled', false);
         $button.css('background-color', '#0E6655');
         $button.text('Completed');
         $button.one('click', function() {
