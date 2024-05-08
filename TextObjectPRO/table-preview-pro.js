@@ -53,29 +53,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }];
 
                 vis.model.getHyperCubeData('/qHyperCubeDef', requestPage).then(function(dataPage) {
-                    const headers = getHeaders(vis);
-                    const table = $('<table class="table"></table>');
-                    const headerRow = $('<tr></tr>');
-                    headers.forEach(function(header) {
-                        const th = $('<th></th>');
-                        th.text(header.Header);
-                        headerRow.append(th);
-                    });
-                    table.append(headerRow);
-
-                    dataPage[0].qMatrix.forEach(function(row) {
-                        const tr = $('<tr></tr>');
-                        row.forEach(function(cell) {
-                            const td = $('<td></td>');
-                            td.text(cell.qText);
-                            tr.append(td);
-                        });
-                        table.append(tr);
-                    });
-
-                    $element.empty();
-                    $element.append('<style>' + css + '</style>');
-                    $element.append(table);
+                    displayData(dataPage, vis, $element, css);
                 });
             });
         }
@@ -95,4 +73,30 @@ define(["qlik", "jquery"], function(qlik, $) {
         const populatedHeaders = orderedHeaders.filter(h => h.Header && h.Header.trim() !== '');
         return populatedHeaders;
     };
+
+    function displayData(dataPage, vis, $element, css) {
+        const headers = getHeaders(vis);
+        const table = $('<table class="table"></table>');
+        const headerRow = $('<tr></tr>');
+        headers.forEach(function(header) {
+            const th = $('<th></th>');
+            th.text(header.Header);
+            headerRow.append(th);
+        });
+        table.append(headerRow);
+
+        dataPage[0].qMatrix.forEach(function(row) {
+            const tr = $('<tr></tr>');
+            row.forEach(function(cell) {
+                const td = $('<td></td>');
+                td.text(cell.qText);
+                tr.append(td);
+            });
+            table.append(tr);
+        });
+
+        $element.empty();
+        $element.append('<style>' + css + '</style>');
+        $element.append(table);
+    }
 });
