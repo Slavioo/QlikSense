@@ -78,11 +78,11 @@ define(["qlik", "jquery"], function(qlik, $) {
     function getHeaders(vis) {
         const dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({
             Id: id,
-            Header: dim.qFallbackTitle
+            Header: dim.qFallbackTitle.replace(/[\r\n]/g, ' ')
         }));
         const measureHeaders = vis.model.layout.qHyperCube.qMeasureInfo.map((measure, id) => ({
             Id: id + dimensionHeaders.length,
-            Header: measure.qFallbackTitle
+            Header: measure.qFallbackTitle.replace(/[\r\n]/g, ' ')
         }));
         const allHeaders = dimensionHeaders.concat(measureHeaders);
         const orderedHeaders = vis.model.layout.qHyperCube.qColumnOrder.map(id => allHeaders.find(h => h.Id === id));
