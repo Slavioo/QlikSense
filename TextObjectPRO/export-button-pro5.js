@@ -149,3 +149,5 @@ define(["qlik", "jquery"], function(qlik, $) {
         });
     };
 });
+
+//css: ='.export-button {    background-color: #0095ff;    border: 1px solid transparent;    border-radius: 3px;    box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;    box-sizing: border-box;    color: #fff;    cursor: pointer;    display: inline-block;    font-family: -apple-system,system-ui,"Segoe UI","Liberation Sans",sans-serif;    font-size: 1vw;    font-weight: 600;    margin: 0;    outline: none;    position: relative;    text-align: center;    text-decoration: none;    user-select: none;    -webkit-user-select: none;    touch-action: manipulation;    vertical-align: baseline;    white-space: nowrap;    width: 100%;    height: 100%;}.export-button:hover,.export-button:focus {    background-color: #07c;}.export-button:focus {    box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);}.export-button:active {    background-color: #0064bd;    box-shadow: none;}'
