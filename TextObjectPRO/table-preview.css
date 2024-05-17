@@ -1,25 +1,37 @@
+/* Basic table styling */
 .table-preview {
     width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
 }
-.table-preview th,
-.table-preview td {
-    padding: 10px;
-    border: 1px solid #ddd;
-}
+
+/* Table header style */
 .table-preview th {
     background-color: #f2f2f2;
     font-weight: bold;
     text-align: left;
+    padding: 10px;
+    border: 1px solid #ddd;
 }
+
+/* Table cell style */
+.table-preview td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    font-size: 1rem; /* Responsive font size */
+}
+
+/* Alternating row colors */
 .table-preview tr:nth-child(even) {
     background-color: #f9f9f9;
 }
-/* Add responsive font size */
-.table-preview td {
-    font-size: 1rem;
+
+/* Highlight row on hover */
+.table-preview tr:hover {
+    background-color: #ffff99;
+    cursor: pointer;
 }
+
 /* Add scrollbars if needed */
 .table-container {
     overflow-x: auto;
