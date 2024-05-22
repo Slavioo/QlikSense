@@ -1,28 +1,39 @@
 .table-container {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* Defines a 3-column layout */
+  grid-template-columns: repeat(3, 1fr); /* Creates a 3-column layout */
   gap: 20px;
   width: 100%;
   overflow: auto;
   align-items: start;
 }
 
-.table-container > :nth-child(1) {
-  grid-column: 1; /* Places the first table in the first column */
+/* Target the first table for the first column */
+.table-container > :first-child {
+  grid-column: 1 / 2;
+  grid-row: 1;
 }
 
+/* Target the next four tables for the second column */
 .table-container > :nth-child(n+2):nth-child(-n+5) {
-  grid-column: 2; /* Places the next four tables in the second column */
+  grid-column: 2 / 3;
+  grid-row: 1;
 }
 
-/* Adds row highlight on hover */
+/* Ensures that the third column is reserved for future tables */
+.table-container > :nth-child(n+6) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+/* Add row highlight on hover */
 table tr:hover {
   background-color: #f5f5f5;
 }
 
+/* Rest of the table and button styles remain the same */
 table {
   border-collapse: collapse;
-  width: 100%; /* Full width of the column */
+  width: 100%;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
 }
