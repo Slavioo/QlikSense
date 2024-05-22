@@ -3,8 +3,9 @@
   grid-template-columns: repeat(3, 1fr); /* Creates a 3-column layout */
   gap: 20px;
   width: 100%;
-  height: 90vh; /* Ensures the container has a fixed height */
-  overflow: auto;
+  padding: 10px; /* Added padding around the container */
+  box-sizing: border-box; /* Ensures padding doesn't affect the overall width */
+  overflow: auto; /* Adds scrollbars if content overflows */
   align-items: stretch; /* Aligns the content to stretch to container height */
 }
 
@@ -63,4 +64,4 @@ th {
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9em;
-  }
+}
