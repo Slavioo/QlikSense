@@ -1,43 +1,42 @@
 .table-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(30%, 1fr)); /* Creates a 3-column layout */
-  gap: 20px; /* Increased gap for better spacing */
+  grid-template-columns: repeat(auto-fill, minmax(30%, 1fr));
+  gap: 20px;
   width: 100%;
-  height: 90vh;
   overflow: auto;
-  align-items: flex-start;
+  align-items: start;
+  justify-content: space-between;
 }
 
 table {
   border-collapse: collapse;
-  width: 100%; /* Adjusted to fill the column */
-  margin-bottom: 20px; /* Increased margin for better spacing */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Added shadow for depth */
-  background-color: #ffffff; /* Added a white background */
+  width: 100%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
 }
 
 th, td {
   border: 1px solid #ddd;
-  padding: 15px; /* Increased padding for a better look */
+  padding: 1px;
   text-align: left;
-  font-size: 0.9em; /* Adjusted font size for professionalism */
+  font-size: 0.85em;
 }
 
 th {
-  background-color: #4CAF50; /* Changed to match the button color for consistency */
-  color: white; /* Changed text color for better contrast */
-  font-weight: bold; /* Made header text bold */
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
 }
 
 #download-btn {
   position: fixed;
-  bottom: 20px; /* Increased spacing from the bottom */
-  right: 20px; /* Increased spacing from the right */
-  padding: 15px; /* Increased padding for a larger button */
+  bottom: 20px;
+  right: 20px;
+  padding: 15px;
   background-color: #4CAF50;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 0.9em; /* Adjusted font size to match table text */
+  font-size: 0.9em;
 }
