@@ -3,20 +3,21 @@
   grid-template-columns: repeat(3, 1fr); /* Creates a 3-column layout */
   gap: 20px;
   width: 100%;
+  height: 90vh; /* Ensures the container has a fixed height */
   overflow: auto;
-  align-items: start;
+  align-items: stretch; /* Aligns the content to stretch to container height */
 }
 
 /* Target the first table for the first column */
 .table-container > :first-child {
   grid-column: 1 / 2;
-  grid-row: 1;
+  grid-row: 1 / span 5; /* Stretches the table to the height of 5 rows */
 }
 
 /* Target the next four tables for the second column */
 .table-container > :nth-child(n+2):nth-child(-n+5) {
   grid-column: 2 / 3;
-  grid-row: 1;
+  grid-row: auto; /* Places tables one below another */
 }
 
 /* Ensures that the third column is reserved for future tables */
@@ -33,16 +34,16 @@ table tr:hover {
 /* Rest of the table and button styles remain the same */
 table {
   border-collapse: collapse;
-  width: 100%;
+  width: 100%; /* Full width of the column */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   background-color: #ffffff;
 }
 
 th, td {
   border: 1px solid #ddd;
-  padding: 1px; /* Keeps padding to 1px as requested */
+  padding: 1px;
   text-align: left;
-  font-size: 0.85em; /* Keeps font size to 0.85em as requested */
+  font-size: 0.85em;
 }
 
 th {
@@ -62,4 +63,4 @@ th {
   border-radius: 5px;
   cursor: pointer;
   font-size: 0.9em;
-}
+  }
