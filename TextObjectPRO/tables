@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 20px;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .column {
+            flex: 1;
+            min-width: 30%;
+            max-width: 32%;
+            overflow-y: auto;
+            margin: 0 10px;
+            box-sizing: border-box;
+        }
+        .table-container {
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr {
+            height: 40px;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .scroll-container {
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="column">
+            <div class="scroll-container">
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Repeat <tr><td>Data</td></tr> as needed -->
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="scroll-container">
+                <!-- Repeat this block 4 times for the second column -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="column">
+            <div class="scroll-container">
+                <!-- Repeat this block 3 times for the third column -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Header 1</th>
+                                <th>Header 2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                            <tr><td>Data 1</td><td>Data 2</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
