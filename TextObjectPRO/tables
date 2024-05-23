@@ -7,36 +7,34 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            font-size: 1.2vw; /* Responsive font size */
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            overflow: hidden;
         }
         .container {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            padding: 20px;
             height: 100vh;
-            overflow: hidden;
+            overflow-y: auto; /* Single vertical scrollbar for the container */
         }
         .column {
             flex: 1;
             min-width: 30%;
             max-width: 32%;
-            overflow-y: auto;
-            margin: 0 10px;
             box-sizing: border-box;
         }
         .table-container {
-            margin-bottom: 20px;
+            margin: 10px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 20px;
         }
         th, td {
-            padding: 8px 12px;
+            padding: 0.6vw; /* Responsive padding */
             text-align: left;
             border: 1px solid #ddd;
         }
@@ -45,152 +43,142 @@
             font-weight: bold;
         }
         tr {
-            height: 40px;
+            height: calc(100vh / 55); /* Ensure 50 records fit within the window size */
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        tr:hover {
+            background-color: #f1f1f1; /* Highlight color on hover */
         }
-        .scroll-container {
-            height: calc(100vh - 60px);
-            overflow-y: auto;
+        .highlight td:nth-child(2),
+        .highlight td:nth-child(3) {
+            background-color: #ffdddd; /* Highlight color for different values */
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="column">
-            <div class="scroll-container">
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Repeat <tr><td>Data</td></tr> as needed -->
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         <div class="column">
-            <div class="scroll-container">
-                <!-- Repeat this block 4 times for the second column -->
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         <div class="column">
-            <div class="scroll-container">
-                <!-- Repeat this block 3 times for the third column -->
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Header 1</th>
-                                <th>Header 2</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                            <tr><td>Data 1</td><td>Data 2</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
+                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
