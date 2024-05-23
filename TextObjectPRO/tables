@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            font-size: 1.2vw; /* Responsive font size */
+            font-size: 0.8vw; /* Smaller font size for better fit */
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -34,7 +34,7 @@
             border-collapse: collapse;
         }
         th, td {
-            padding: 0.6vw; /* Responsive padding */
+            padding: 0.4vw; /* Smaller padding for better fit */
             text-align: left;
             border: 1px solid #ddd;
         }
@@ -69,8 +69,8 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -88,8 +88,8 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -105,8 +105,8 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -122,8 +122,25 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Header 1</th>
+                            <th>Header 2</th>
+                            <th>Header 3</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample rows -->
+                        <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -141,8 +158,8 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -158,8 +175,8 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -175,12 +192,22 @@
                     <tbody>
                         <!-- Sample rows -->
                         <tr><td>Data 1</td><td>Value A</td><td>Value A</td></tr>
-                        <tr class="highlight"><td>Data 2</td><td>Value B</td><td>Value C</td></tr>
-                        <tr><td>Data 3</td><td>Value D</td><td>Value D</td></tr>
+                        <tr><td>Data 2</td><td>Value B</td><td>Value B</td></tr>
+                        <tr><td>Data 3</td><td>Value C</td><td>Value C</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <script>
+        // JavaScript to add 'highlight' class to rows where the second column differs from the third
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells[1] && cells[2] && cells[1].innerText !== cells[2].innerText) {
+                row.classList.add('highlight');
+            }
+        });
+    </script>
 </body>
 </html>
