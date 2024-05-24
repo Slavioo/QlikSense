@@ -1,111 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  .table-container {
-    width: 100%;
-    height: 90vh;
-    overflow: auto;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  table {
-    border-collapse: collapse;
-    width: calc(20% - 10px); /* Adjusted for 5 tables */
-    min-width: 150px;
-    margin-bottom: 10px; /* Added margin for spacing between tables and buttons */
-  }
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  th {
-    background-color: #f2f2f2;
-  }
-  #download-btn {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    padding: 10px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-</style>
-<script>
-function downloadAllTablesAsExcel(filename) {
-  var tables = document.querySelectorAll(".table-container table");
-  var html = '';
-
-  // Start of the HTML string for the Excel file
-  html += '<html><head><meta charset="UTF-8"></head><body>';
-
-  // Add all tables to the HTML string
-  tables.forEach(function(table) {
-    html += table.outerHTML;
-  });
-
-  // End of the HTML string for the Excel file
-  html += '</body></html>';
-
-  var blob = new Blob([html], {type: "application/vnd.ms-excel;charset=utf-8"});
-  var downloadLink = document.createElement("a");
-  downloadLink.download = filename;
-  downloadLink.href = window.URL.createObjectURL(blob);
-  downloadLink.style.display = "none";
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-  document.body.removeChild(downloadLink);
-}
-</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Tables to XLSX</title>
 </head>
 <body>
+    <h1>Tables to XLSX</h1>
+    <table id="table1" border="1">
+        <tr><th>Header 1</th><th>Header 2</th></tr>
+        <tr><td>Row 1 Cell 1</td><td>Row 1 Cell 2</td></tr>
+        <tr><td>Row 2 Cell 1</td><td>Row 2 Cell 2</td></tr>
+    </table>
+    <br>
+    <table id="table2" border="1">
+        <tr><th>Header A</th><th>Header B</th></tr>
+        <tr><td>Row A1</td><td>Row B1</td></tr>
+        <tr><td>Row A2</td><td>Row B2</td></tr>
+    </table>
+    <br>
+    <table id="table3" border="1">
+        <tr><th>Header X</th><th>Header Y</th></tr>
+        <tr><td>Row X1</td><td>Row Y1</td></tr>
+        <tr><td>Row X2</td><td>Row Y2</td></tr>
+    </table>
+    <br>
+    <button onclick="downloadTables()">Download Tables as XLSX</button>
 
-<div class="table-container">
-  <!-- Table 1 -->
-  <table id="table1">
-    <tr><th>Header 1</th><th>Header 2</th></tr>
-    <tr><td>Data 1</td><td>Data 2</td></tr>
-    <!-- Add more rows as needed -->
-  </table>
-  
-  <!-- Table 2 -->
-  <table id="table2">
-    <tr><th>Header 1</th><th>Header 2</th></tr>
-    <tr><td>Data 1</td><td>Data 2</td></tr>
-    <!-- Add more rows as needed -->
-  </table>
-  
-  <!-- Table 3 -->
-  <table id="table3">
-    <tr><th>Header 1</th><th>Header 2</th></tr>
-    <tr><td>Data 1</td><td>Data 2</td></tr>
-    <!-- Add more rows as needed -->
-  </table>
-  
-  <!-- Table 4 -->
-  <table id="table4">
-    <tr><th>Header 1</th><th>Header 2</th></tr>
-    <tr><td>Data 1</td><td>Data 2</td></tr>
-    <!-- Add more rows as needed -->
-  </table>
-  
-  <!-- Table 5 -->
-  <table id="table5">
-    <tr><th>Header 1</th><th>Header 2</th></tr>
-    <tr><td>Data 1</td><td>Data 2</td></tr>
-    <!-- Add more rows as needed -->
-  </table>
-</div>
+    <script>
+        function downloadTables() {
+            let tables = document.querySelectorAll('table');
+            let workbook = createWorkbook(tables);
+            let xlsx = workbookToXlsx(workbook);
+            downloadFile(xlsx, 'tables.xlsx');
+        }
 
-<button id="download-btn" onclick="downloadAllTablesAsExcel('all_tables.xls')">Download All Tables</button>
+        function createWorkbook(tables) {
+            let workbook = '';
+            for (let table of tables) {
+                workbook += tableToSheet(table);
+            }
+            return workbook;
+        }
 
+        function tableToSheet(table) {
+            let sheet = '';
+            for (let row of table.rows) {
+                for (let cell of row.cells) {
+                    sheet += cell.innerText + '\t';
+                }
+                sheet += '\n';
+            }
+            return sheet + '\n';
+        }
+
+        function workbookToXlsx(workbook) {
+            let uri = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
+            let base64 = btoa(unescape(encodeURIComponent(workbook)));
+            return uri + base64;
+        }
+
+        function downloadFile(dataUri, filename) {
+            let link = document.createElement('a');
+            link.href = dataUri;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>
