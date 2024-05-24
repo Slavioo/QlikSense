@@ -55,10 +55,10 @@ function downloadAllTablesAsExcel(filename) {
   // End of the HTML string for the Excel file
   html += '</body></html>';
 
-  var blob = new Blob([html], {type: "application/vnd.ms-excel"});
+  var blob = new Blob([html], {type: "application/vnd.ms-excel;charset=utf-8"});
   var downloadLink = document.createElement("a");
   downloadLink.download = filename;
-  downloadLink.href = 'data:application/vnd.ms-excel;base64,' + btoa(unescape(encodeURIComponent(html)));
+  downloadLink.href = window.URL.createObjectURL(blob);
   downloadLink.style.display = "none";
   document.body.appendChild(downloadLink);
   downloadLink.click();
@@ -105,7 +105,7 @@ function downloadAllTablesAsExcel(filename) {
   </table>
 </div>
 
-<button id="download-btn" onclick="downloadAllTablesAsExcel('all_tables.xlsx')">Download All Tables</button>
+<button id="download-btn" onclick="downloadAllTablesAsExcel('all_tables.xls')">Download All Tables</button>
 
 </body>
 </html>
