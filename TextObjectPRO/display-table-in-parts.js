@@ -36,29 +36,12 @@ define(['qlik'], function(qlik) {
 
         // Initial rendering
         paint: function($element, layout) {
-            // Get the table ID, chunk size, and wait time from the extension settings
-            var tableId = layout.props.tableId;
-            var chunkSize = layout.props.chunkSize || 50000; // Default to 50000 if not set
-            var waitTime = layout.props.waitTime || 5; // Default to 5 seconds if not set
+            var button = document.createElement('button');
+            button.innerHTML = 'Display Next Chunk';
+            button.onclick = displayChunk;
+            $element.html(button);
 
-            // Fetch the data from the table
-            var tableData = qlik.table(tableId).qHyperCube.qDataPages[0].qMatrix;
-
-            // Function to display records in chunks
-            var currentIndex = 0;
-            var displayChunk = function() {
-                var recordsToDisplay = tableData.slice(currentIndex, currentIndex + chunkSize);
-                $element.html('<pre>' + JSON.stringify(recordsToDisplay, null, 2) + '</pre>');
-                currentIndex += chunkSize;
-
-                // Check if there are more records to display
-                if (currentIndex < tableData.length) {
-                    setTimeout(displayChunk, waitTime * 1000); // Schedule the next chunk
-                }
-            };
-
-            // Start displaying the first chunk
-            displayChunk();
+            // Rest of your code...
         }
     };
 
