@@ -13,36 +13,94 @@ define(["qlik", "jquery"], function(qlik, $) {
                             label: "Visualization ID",
                             defaultValue: "",
                             expression: 'optional'
-                        }
+                        },
+                        pageSize: {
+                            type: "integer",
+                            ref: "pageSize",
+                            label: "Page Size (records per page)",
+                            defaultValue: 50,
+                            expression: 'optional'
+                        },
+                        css: {
+                            type: "string",
+                            ref: "css",
+                            label: "CSS",
+                            defaultValue: "",
+                            expression: 'optional'
+                        },
                     }
                 }
             }
         },
         paint: function($element, layout) {
             const app = qlik.currApp(this);
+            const css = layout.css;
             const visualizationId = layout.visualizationId;
+            const pageSize = layout.pageSize;
 
-            // Create the button if it doesn't exist
-            if (!$element.html().includes('filter-button')) {
-                $element.empty();
-                const $button = $('<button class="filter-button">Filter First 5 Records</button>');
-                $element.append($button);
-
-                $button.on('click', function() {
-                    app.getObject(visualizationId).then(function(vis) {
-                        vis.getLayout().then(function(layout) {
-                            const data = layout.qHyperCube.qDataPages[0].qMatrix;
-                            const recordsToFilter = data.slice(0, 5).map(function(row) {
-                                return row[0].qText; // Assuming the first column contains the values to filter
-                            });
-
-                            const field = app.field('YourFieldName');
-                            field.clear();
-                            field.selectValues(recordsToFilter, false, false);
-                        });
-                    });
-                });
-            }
+            displayData(app, visualizationId, pageSize, $element, css);
         }
     };
+
+    function getHeaders(vis) {
+        const dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({
+            Id: id,
+            Header: dim.qFallbackTitle
+        }));
+        const measureHeaders = vis.model.layout.qHyperCube.qMeasureInfo.map((measure, id) => ({
+            Id: id + dimensionHeaders.length,
+            Header: measure.qFallbackTitle
+        }));
+        const allHeaders = dimensionHeaders.concat(measureHeaders);
+        const orderedHeaders = vis.model.layout.qHyperCube.qColumnOrder.map(id => allHeaders.find(h => h.Id === id));
+        const populatedHeaders = orderedHeaders.filter(h => h.Header && h.Header.trim() !== '');
+        return populatedHeaders;
+    };
+
+    async function displayData(app, visualizationId, pageSize, $element, css) {
+        if (!visualizationId) {
+            console.error("No visualization id provided.");
+            return;
+        }
+
+        const vis = await app.visualization.get(visualizationId);
+        let totalHeight = vis.model.layout.qHyperCube.qSize.qcy;
+        let currentHeight = 0;
+
+        const headers = getHeaders(vis);
+        const table = $('<table class="table-preview"></table>');
+        const headerRow = $('<tr></tr>');
+        headers.forEach(function(header) {
+            const th = $('<th></th>');
+            th.text(header.Header);
+            headerRow.append(th);
+        });
+        table.append(headerRow);
+
+        while (currentHeight < totalHeight) {
+            const requestPage = [{
+                qTop: currentHeight,
+                qLeft: 0,
+                qWidth: vis.model.layout.qHyperCube.qSize.qcx,
+                qHeight: Math.min(pageSize, totalHeight - currentHeight)
+            }];
+
+            const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
+            dataPage[0].qMatrix.forEach(function(row) {
+                const tr = $('<tr></tr>');
+                row.forEach(function(cell) {
+                    const td = $('<td></td>');
+                    td.text(cell.qText);
+                    tr.append(td);
+                });
+                table.append(tr);
+            });
+
+            currentHeight += dataPage[0].qMatrix.length;
+        }
+
+        $element.empty();
+        $element.append('<style>' + css + '</style>');
+        $element.append(table);
+    }
 });
