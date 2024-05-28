@@ -21,6 +21,13 @@ define(["qlik", "jquery"], function(qlik, $) {
                             defaultValue: 50,
                             expression: 'optional'
                         },
+                        fileSize: {
+                            type: "integer",
+                            ref: "fileSize",
+                            label: "File Size (pages per file)",
+                            defaultValue: 1000,
+                            expression: 'optional'
+                        },
                         csvDelimiter: {
                             type: "string",
                             ref: "csvDelimiter",
@@ -33,6 +40,13 @@ define(["qlik", "jquery"], function(qlik, $) {
                             ref: "delay",
                             label: "Delay (ms)",
                             defaultValue: 100,
+                            expression: 'optional'
+                        },
+                        css: {
+                            type: "string",
+                            ref: "css",
+                            label: "CSS",
+                            defaultValue: "",
                             expression: 'optional'
                         },
                         fileNameMask: {
@@ -64,6 +78,7 @@ define(["qlik", "jquery"], function(qlik, $) {
     async function exportData(app, layout, $button) {
         const visualizationId = layout.visualizationId;
         const pageSize = layout.pageSize;
+        const fileSize = layout.fileSize;
         const csvDelimiter = layout.csvDelimiter;
         const delay = layout.delay;
         const fileNameMask = layout.fileNameMask;
@@ -88,7 +103,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                     qTop: currentPage * pageSize,
                     qLeft: 0,
                     qWidth: vis.model.layout.qHyperCube.qSize.qcx,
-                    qHeight: pageSize
+                    qHeight: Math.min(pageSize, vis.model.layout.qHyperCube.qSize.qcy - currentPage * pageSize)
                 }];
                 const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
 
@@ -127,6 +142,8 @@ define(["qlik", "jquery"], function(qlik, $) {
         }
     }
 
+    function getHeaders(vis) {
+        const dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id
     function getHeaders(vis) {
         const dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({
             Id: id,
