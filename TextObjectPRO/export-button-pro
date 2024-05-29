@@ -1,4 +1,6 @@
 define(["qlik", "jquery"], function(qlik, $) {
+    'use strict';
+
     return {
         definition: {
             type: "items",
@@ -9,8 +11,20 @@ define(["qlik", "jquery"], function(qlik, $) {
                     items: {
                         visualizationId: {
                             type: "string",
-                            ref: "visualizationId",
+                            ref: "props.visualizationId",
                             label: "Visualization ID",
+                            defaultValue: ""
+                        },
+                        fieldName: {
+                            type: "string",
+                            ref: "props.fieldName",
+                            label: "Field Name",
+                            defaultValue: ""
+                        },
+                        filterExpression: {
+                            type: "string",
+                            ref: "props.filterExpression",
+                            label: "Filter Expression",
                             defaultValue: ""
                         }
                     }
@@ -18,26 +32,24 @@ define(["qlik", "jquery"], function(qlik, $) {
             }
         },
         paint: function($element, layout) {
-            var app = qlik.currApp(this);
-            var $button = $('<button>Export Data</button>');
+            const app = qlik.currApp(this);
+            const $button = $('<button>Apply Filter</button>');
+
             $button.on('click', function() {
-                var visualizationId = layout.visualizationId;
-                if (visualizationId) {
-                    app.visualization.get(visualizationId).then(function(vis) {
-                        vis.exportData().then(function(data) {
-                            var csvFile = new Blob([data], {type: "text/csv"});
-                            var downloadLink = document.createElement("a");
-                            downloadLink.download = 'data.csv';
-                            downloadLink.href = window.URL.createObjectURL(csvFile);
-                            downloadLink.style.display = "none";
-                            document.body.appendChild(downloadLink);
-                            downloadLink.click();
-                        });
-                    });
+                const { visualizationId, fieldName, filterExpression } = layout.props;
+                if (visualizationId && fieldName && filterExpression) {
+                    try {
+                        const field = app.field(fieldName);
+                        field.selectMatch(filterExpression);
+                        console.log(`Filter applied to ${fieldName}: ${filterExpression}`);
+                    } catch (error) {
+                        console.error("Error applying filter:", error.message);
+                    }
                 } else {
-                    console.error("No visualization id provided.");
+                    console.error("Please provide all settings.");
                 }
             });
+
             $element.empty();
             $element.append($button);
         }
