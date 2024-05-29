@@ -27,19 +27,29 @@ define(["qlik", "jquery"], function(qlik, $) {
         },
         paint: function($element, layout) {
             const app = qlik.currApp(this);
-            const $button = $('<button>Apply Chunk Filter</button>');
+            const $button = $('<button>Start Chunk Filter</button>');
+            let intervalId;
+            let currentChunk = 0;
 
             $button.on('click', function() {
                 const { fieldName, chunkSize } = layout.props;
                 if (fieldName) {
-                    try {
-                        const field = app.field(fieldName);
-                        const filterExpression = `=rowno(total)>0 and rowno(total)<=${chunkSize}`;
-                        field.selectMatch(filterExpression, false);
-                        console.log(`Chunk filter applied to ${fieldName}: ${filterExpression}`);
-                    } catch (error) {
-                        console.error("Error applying chunk filter:", error.message);
+                    if (intervalId) {
+                        clearInterval(intervalId); // Clear previous interval if button is clicked again
                     }
+                    intervalId = setInterval(function() {
+                        currentChunk++;
+                        const startValue = (currentChunk - 1) * chunkSize + 1;
+                        const endValue = currentChunk * chunkSize;
+                        const filterExpression = `=rowno(total)>=${startValue} and rowno(total)<=${endValue}`;
+                        try {
+                            const field = app.field(fieldName);
+                            field.selectMatch(filterExpression, false);
+                            console.log(`Chunk filter applied to ${fieldName}: Rows ${startValue} to ${endValue}`);
+                        } catch (error) {
+                            console.error("Error applying chunk filter:", error.message);
+                        }
+                    }, 5000); // Update filter every 5 seconds
                 } else {
                     console.error("Please provide a field name.");
                 }
