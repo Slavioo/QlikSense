@@ -1,3 +1,4 @@
+// myfilterpane.js
 
 define(["qlik"], function (qlik) {
     return {
@@ -22,25 +23,28 @@ define(["qlik"], function (qlik) {
             // Get the selected field value
             var selectedField = layout.props.field;
 
+            // Get the current app
+            var app = qlik.currApp();
+
             // Fetch data for the selected field
-            qlik.currApp().field(selectedField).getData().then(function (data) {
+            app.field(selectedField).getData().then(function (data) {
                 var values = data.rows.map(function (row) {
                     return row.qText;
                 });
 
-                // Create a listbox UI element
-                $element.html('<select id="myListbox"></select>');
-                var $listbox = $("#myListbox");
+                // Create a filterpane UI element
+                $element.html('<select id="myFilterpane"></select>');
+                var $filterpane = $("#myFilterpane");
 
-                // Populate the listbox with values
+                // Populate the filterpane with values
                 values.forEach(function (value) {
-                    $listbox.append('<option value="' + value + '">' + value + '</option>');
+                    $filterpane.append('<option value="' + value + '">' + value + '</option>');
                 });
 
                 // Handle selection changes
-                $listbox.on("change", function () {
-                    var selectedValues = [$listbox.val()];
-                    qlik.currApp().field(selectedField).selectValues(selectedValues, true);
+                $filterpane.on("change", function () {
+                    var selectedValues = [$filterpane.val()];
+                    app.field(selectedField).selectValues(selectedValues, true);
                 });
             });
         },
