@@ -1,3 +1,4 @@
+
 define(["qlik"], function (qlik) {
     return {
         definition: {
@@ -9,41 +10,39 @@ define(["qlik"], function (qlik) {
                     items: {
                         field: {
                             type: "string",
-                            label: "Field Name",
-                            ref: "props.fieldName"
-                        }
-                    }
-                }
-            }
+                            label: "Select Field",
+                            ref: "props.field",
+                            expression: "optional",
+                        },
+                    },
+                },
+            },
         },
         paint: function ($element, layout) {
-            // Retrieve the field name from the extension settings
-            var fieldName = layout.props.fieldName;
+            // Get the selected field value
+            var selectedField = layout.props.field;
 
-            // Get the current app
-            var app = qlik.currApp();
-
-            // Get all distinct values from the field
-            app.field(fieldName).getData().then(function (fieldData) {
-                var fieldValues = fieldData.rows.map(function (row) {
+            // Fetch data for the selected field
+            qlik.currApp().field(selectedField).getData().then(function (data) {
+                var values = data.rows.map(function (row) {
                     return row.qText;
                 });
 
-                // Sort the values alphabetically
-                fieldValues.sort();
+                // Create a listbox UI element
+                $element.html('<select id="myListbox"></select>');
+                var $listbox = $("#myListbox");
 
-                // Initialize index for cycling through values
-                var currentIndex = 0;
+                // Populate the listbox with values
+                values.forEach(function (value) {
+                    $listbox.append('<option value="' + value + '">' + value + '</option>');
+                });
 
-                // Function to update the filter value
-                function updateFilterValue() {
-                    app.field(fieldName).selectMatch(fieldValues[currentIndex]);
-                    currentIndex = (currentIndex + 1) % fieldValues.length;
-                }
-
-                // Set an interval to update the filter value every 10 seconds
-                setInterval(updateFilterValue, 10000);
+                // Handle selection changes
+                $listbox.on("change", function () {
+                    var selectedValues = [$listbox.val()];
+                    qlik.currApp().field(selectedField).selectValues(selectedValues, true);
+                });
             });
-        }
+        },
     };
 });
