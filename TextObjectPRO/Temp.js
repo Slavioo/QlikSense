@@ -31,6 +31,12 @@ define(["qlik", "jquery"], function(qlik, $) {
             let intervalId;
             let currentChunk = 0;
 
+            const updateButtonText = () => {
+                const startValue = (currentChunk - 1) * layout.props.chunkSize + 1;
+                const endValue = currentChunk * layout.props.chunkSize;
+                $button.text(`Apply Chunk Filter (${startValue}-${endValue})`);
+            };
+
             $button.on('click', function() {
                 const { fieldName, chunkSize } = layout.props;
                 if (fieldName) {
@@ -39,17 +45,17 @@ define(["qlik", "jquery"], function(qlik, $) {
                     }
                     intervalId = setInterval(function() {
                         currentChunk++;
-                        const startValue = (currentChunk - 1) * chunkSize + 1;
-                        const endValue = currentChunk * chunkSize;
-                        const filterExpression = `=rowno(total)>=${startValue} and rowno(total)<=${endValue}`;
+                        const filterExpression = `=rowno(total)>=${(currentChunk - 1) * chunkSize + 1} and rowno(total)<=${currentChunk * chunkSize}`;
                         try {
                             const field = app.field(fieldName);
                             field.selectMatch(filterExpression, false);
+                            updateButtonText();
                             console.log(`Chunk filter applied to ${fieldName}: Rows ${startValue} to ${endValue}`);
                         } catch (error) {
                             console.error("Error applying chunk filter:", error.message);
                         }
                     }, 5000); // Update filter every 5 seconds
+                    updateButtonText();
                 } else {
                     console.error("Please provide a field name.");
                 }
@@ -59,4 +65,4 @@ define(["qlik", "jquery"], function(qlik, $) {
             $element.append($button);
         }
     };
-});
+});       
