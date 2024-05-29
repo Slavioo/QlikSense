@@ -1,63 +1,49 @@
-define(["qlik", "jquery"], function (qlik, $) {
-  return {
-    definition: {
-      type: "items",
-      component: "accordion",
-      items: {
-        settings: {
-          uses: "settings",
-          items: {
-            visualizationId: {
-              type: "string",
-              ref: "visualizationId",
-              label: "Visualization ID",
-              defaultValue: ""
-            },
-            exportFormat: {
-              type: "string",
-              component: "dropdown",
-              label: "Export Format",
-              ref: "params.exportFormat",
-              options: [
-                {
-                  value: "OOXML",
-                  label: "Excel (OOXML)"
-                },
-                {
-                  value: "CSV_C",
-                  label: "CSV (Comma separated)"
-                },
-                {
-                  value: "CSV_T",
-                  label: "CSV (Tab separated)"
+define(["qlik"], function (qlik) {
+    return {
+        definition: {
+            type: "items",
+            component: "accordion",
+            items: {
+                settings: {
+                    uses: "settings",
+                    items: {
+                        field: {
+                            type: "string",
+                            label: "Field Name",
+                            ref: "props.fieldName"
+                        }
+                    }
                 }
-              ],
-              defaultValue: "OOXML"
             }
-          }
-        }
-      }
-    },
-    paint: function ($element, layout) {
-      var app = qlik.currApp(this);
-      var $button = $('<button>Export Data</button>');
-      $button.on('click', function () {
-        var visualizationId = layout.visualizationId;
-        var exportFormat = layout.params.exportFormat || "OOXML";
+        },
+        paint: function ($element, layout) {
+            // Retrieve the field name from the extension settings
+            var fieldName = layout.props.fieldName;
 
-        if (visualizationId) {
-          app.visualization.get(visualizationId).then(function (vis) {
-            vis.exportData({
-              format: exportFormat,
-              download: true
+            // Get the current app
+            var app = qlik.currApp();
+
+            // Get all distinct values from the field
+            app.field(fieldName).getData().then(function (fieldData) {
+                var fieldValues = fieldData.rows.map(function (row) {
+                    return row.qText;
+                });
+
+                // Sort the values alphabetically
+                fieldValues.sort();
+
+                // Initialize index for cycling through values
+                var currentIndex = 0;
+
+                // Function to update the filter value
+                function updateFilterValue() {
+                    app.field(fieldName).selectMatch(fieldValues[currentIndex]);
+                    currentIndex = (currentIndex + 1) % fieldValues.length;
+                }
+
+                // Set an interval to update the filter value every 10 seconds
+                setInterval(updateFilterValue, 10000);
             });
-          });
-        } else {
-          console.error("No visualization id provided.");
         }
-      });
-      $element.empty();
-      $element.append($button);
-    }
-  };
+    };
 });
