@@ -1,6 +1,6 @@
-// myfilterpane.js
+define(["qlik", "jquery"], function(qlik, $) {
+    'use strict';
 
-define(["qlik"], function (qlik) {
     return {
         definition: {
             type: "items",
@@ -9,44 +9,43 @@ define(["qlik"], function (qlik) {
                 settings: {
                     uses: "settings",
                     items: {
-                        field: {
+                        fieldName: {
                             type: "string",
-                            label: "Select Field",
-                            ref: "props.field",
-                            expression: "optional",
+                            ref: "props.fieldName",
+                            label: "Field Name",
+                            defaultValue: ""
                         },
-                    },
-                },
-            },
+                        filterExpression: {
+                            type: "string",
+                            ref: "props.filterExpression",
+                            label: "Filter Expression",
+                            defaultValue: ""
+                        }
+                    }
+                }
+            }
         },
-        paint: function ($element, layout) {
-            // Get the selected field value
-            var selectedField = layout.props.field;
+        paint: function($element, layout) {
+            const app = qlik.currApp(this);
+            const $button = $('<button>Apply Filter</button>');
 
-            // Get the current app
-            var app = qlik.currApp();
-
-            // Fetch data for the selected field
-            app.field(selectedField).getData().then(function (data) {
-                var values = data.rows.map(function (row) {
-                    return row.qText;
-                });
-
-                // Create a filterpane UI element
-                $element.html('<select id="myFilterpane"></select>');
-                var $filterpane = $("#myFilterpane");
-
-                // Populate the filterpane with values
-                values.forEach(function (value) {
-                    $filterpane.append('<option value="' + value + '">' + value + '</option>');
-                });
-
-                // Handle selection changes
-                $filterpane.on("change", function () {
-                    var selectedValues = [$filterpane.val()];
-                    app.field(selectedField).selectValues(selectedValues, true);
-                });
+            $button.on('click', function() {
+                const { fieldName, filterExpression } = layout.props;
+                if (fieldName && filterExpression) {
+                    try {
+                        const field = app.field(fieldName);
+                        field.selectMatch(filterExpression);
+                        console.log(`Filter applied to ${fieldName}: ${filterExpression}`);
+                    } catch (error) {
+                        console.error("Error applying filter:", error.message);
+                    }
+                } else {
+                    console.error("Please provide both field name and filter expression.");
+                }
             });
-        },
+
+            $element.empty();
+            $element.append($button);
+        }
     };
 });
