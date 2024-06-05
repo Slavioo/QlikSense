@@ -1,0 +1,34 @@
+# Define the paths to the JSON files
+$jsonFilePath1 = 'path\to\first.json'
+$jsonFilePath2 = 'path\to\second.json'
+$outputFilePath = 'path\to\output.json'
+
+# Read the JSON files and convert them to PowerShell objects
+$json1 = Get-Content $jsonFilePath1 | ConvertFrom-Json
+$json2 = Get-Content $jsonFilePath2 | ConvertFrom-Json
+
+# Function to compare two objects and return the common properties with equal values
+function Join-JsonObjects {
+    param (
+        [PSCustomObject]$Object1,
+        [PSCustomObject]$Object2
+    )
+    $result = @{}
+    foreach ($property in $Object1.PSObject.Properties.Name) {
+        if ($Object2.PSObject.Properties.Name -contains $property) {
+            if ($Object1.$property -eq $Object2.$property) {
+                $result[$property] = $Object1.$property
+            }
+        }
+    }
+    return $result
+}
+
+# Join the JSON objects
+$joinedJson = Join-JsonObjects -Object1 $json1 -Object2 $json2
+
+# Save the result to a new JSON file
+$joinedJson | ConvertTo-Json | Set-Content -Path $outputFilePath
+
+# Output a message indicating successful completion
+Write-Host "Joined JSON data saved to $outputFilePath"
