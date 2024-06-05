@@ -1,0 +1,10 @@
+$directories = @("C:\Path\To\Directory1", "C:\Path\To\Directory2", "C:\Path\To\Directory3")
+
+foreach ($dir in $directories) {
+    if (Test-Path -Path $dir -PathType Container) {
+        Remove-Item -Path $dir -Recurse -Force
+        Write-Host "Deleted directory: $dir"
+    } else {
+        Write-Host "Directory not found: $dir"
+    }
+}
