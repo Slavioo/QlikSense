@@ -7,28 +7,37 @@ $outputFilePath = 'path\to\output.json'
 $json1 = Get-Content $jsonFilePath1 | ConvertFrom-Json
 $json2 = Get-Content $jsonFilePath2 | ConvertFrom-Json
 
-# Function to compare two objects and return the common properties with equal values
-function Join-JsonObjects {
+# Function to perform a left join on two arrays of objects
+function Left-JoinJsonObjects {
     param (
-        [PSCustomObject]$Object1,
-        [PSCustomObject]$Object2
+        [PSCustomObject[]]$LeftArray,
+        [PSCustomObject[]]$RightArray
     )
-    $result = @{}
-    foreach ($property in $Object1.PSObject.Properties.Name) {
-        if ($Object2.PSObject.Properties.Name -contains $property) {
-            if ($Object1.$property -eq $Object2.$property) {
-                $result[$property] = $Object1.$property
+    $result = @()
+    foreach ($leftObj in $LeftArray) {
+        $joinedObj = $leftObj | Select-Object * # Clone the left object
+        foreach ($rightObj in $RightArray) {
+            $commonProperties = Compare-Object -ReferenceObject $leftObj.PSObject.Properties -DifferenceObject $rightObj.PSObject.Properties -IncludeEqual | Where-Object { $_.SideIndicator -eq '==' }
+            foreach ($prop in $commonProperties) {
+                $propertyName = $prop.InputObject.Name
+                if ($leftObj.$propertyName -eq $rightObj.$propertyName) {
+                    # Add properties from right object that are not in the left object
+                    $rightObj.PSObject.Properties | Where-Object { $_.Name -ne $propertyName -and !$joinedObj.PSObject.Properties.Name.Contains($_.Name) } | ForEach-Object {
+                        $joinedObj | Add-Member -NotePropertyName $_.Name -NotePropertyValue $_.Value
+                    }
+                }
             }
         }
+        $result += $joinedObj
     }
     return $result
 }
 
-# Join the JSON objects
-$joinedJson = Join-JsonObjects -Object1 $json1 -Object2 $json2
+# Perform the left join operation
+$joinedJsonArray = Left-JoinJsonObjects -LeftArray $json1 -RightArray $json2
 
 # Save the result to a new JSON file
-$joinedJson | ConvertTo-Json | Set-Content -Path $outputFilePath
+$joinedJsonArray | ConvertTo-Json | Set-Content -Path $outputFilePath
 
 # Output a message indicating successful completion
 Write-Host "Joined JSON data saved to $outputFilePath"
