@@ -1,48 +1,34 @@
 # Define the paths to the JSON files
 $jsonFilePath1 = 'path\to\first.json'
 $jsonFilePath2 = 'path\to\second.json'
-$outputFilePath = 'path\to\merged.json'
+$outputFilePath = 'path\to\result.json'
 
 # Read the JSON files and convert them to PowerShell objects
 $json1 = Get-Content $jsonFilePath1 | ConvertFrom-Json
 $json2 = Get-Content $jsonFilePath2 | ConvertFrom-Json
 
-# Merge function
-function Merge-JsonObjects {
-    param (
-        [PSCustomObject]$PrimaryObject,
-        [PSCustomObject]$SecondaryObject
-    )
-    foreach ($prop in $SecondaryObject.PSObject.Properties) {
-        if ($null -ne $PrimaryObject.$($prop.Name)) {
-            $PrimaryObject | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
-        }
-    }
-    return $PrimaryObject
-}
-
-# Loop through each object in the first JSON
-for ($i=0; $i -lt $json1.Count; $i++) {
-    # Find a matching object in the second JSON
-    $matchingObject = $json2 | Where-Object {
-        $match = $true
-        foreach ($prop in $_.PSObject.Properties) {
-            if ($json1[$i].$($prop.Name) -ne $prop.Value) {
-                $match = $false
+# Loop through each object in json2 and add properties to json1 if they don't exist
+foreach ($obj2 in $json2) {
+    foreach ($prop2 in $obj2.PSObject.Properties) {
+        # Check if the property exists in any object of json1
+        $existsInJson1 = $false
+        foreach ($obj1 in $json1) {
+            if ($obj1.PSObject.Properties.Name -contains $prop2.Name) {
+                $existsInJson1 = $true
                 break
             }
         }
-        return $match
-    }
-
-    # If a matching object is found, merge it with the current object from the first JSON
-    if ($matchingObject) {
-        $json1[$i] = Merge-JsonObjects -PrimaryObject $json1[$i] -SecondaryObject $matchingObject
+        # If the property doesn't exist, add it to all objects in json1
+        if (-not $existsInJson1) {
+            foreach ($obj1 in $json1) {
+                $obj1 | Add-Member -NotePropertyName $prop2.Name -NotePropertyValue $prop2.Value
+            }
+        }
     }
 }
 
-# Save the merged content to a new JSON file
+# Save the result to a new JSON file
 $json1 | ConvertTo-Json -Depth 10 | Set-Content $outputFilePath
 
 # Output a message indicating successful completion
-Write-Host "Merged JSON data saved to $outputFilePath"
+Write-Host "Result saved to $outputFilePath"
