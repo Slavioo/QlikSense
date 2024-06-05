@@ -1,34 +1,18 @@
-# Define the paths to the JSON files
-$jsonFilePath1 = 'path\to\first.json'
-$jsonFilePath2 = 'path\to\second.json'
-$outputFilePath = 'path\to\result.json'
+# Read the original JSON content
+$originalJsonPath = "path\to\original.json"
+$originalJson = Get-Content $originalJsonPath | ConvertFrom-Json
 
-# Read the JSON files and convert them to PowerShell objects
-$json1 = Get-Content $jsonFilePath1 | ConvertFrom-Json
-$json2 = Get-Content $jsonFilePath2 | ConvertFrom-Json
+# Read the JSON content with additional properties
+$extendJsonPath = "path\to\extend.json"
+$extendJson = Get-Content $extendJsonPath | ConvertFrom-Json
 
-# Loop through each object in json2 and add properties to json1 if they don't exist
-foreach ($obj2 in $json2) {
-    foreach ($prop2 in $obj2.PSObject.Properties) {
-        # Check if the property exists in any object of json1
-        $existsInJson1 = $false
-        foreach ($obj1 in $json1) {
-            if ($obj1.PSObject.Properties.Name -contains $prop2.Name) {
-                $existsInJson1 = $true
-                break
-            }
-        }
-        # If the property doesn't exist, add it to all objects in json1
-        if (-not $existsInJson1) {
-            foreach ($obj1 in $json1) {
-                $obj1 | Add-Member -NotePropertyName $prop2.Name -NotePropertyValue $prop2.Value
-            }
-        }
-    }
+# Extend the original JSON with the additional properties
+foreach ($prop in $extendJson.PSObject.Properties) {
+    $originalJson | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value
 }
 
-# Save the result to a new JSON file
-$json1 | ConvertTo-Json -Depth 10 | Set-Content $outputFilePath
+# Convert back to JSON and save to a new file
+$extendedJsonPath = "path\to\extended.json"
+$originalJson | ConvertTo-Json | Set-Content $extendedJsonPath
 
-# Output a message indicating successful completion
-Write-Host "Result saved to $outputFilePath"
+Write-Host "The original JSON file has been extended and saved as extended.json"
