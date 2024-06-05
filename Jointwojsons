@@ -1,18 +1,37 @@
-# Read the original JSON content
-$originalJsonPath = "path\to\original.json"
-$originalJson = Get-Content $originalJsonPath | ConvertFrom-Json
+# Assuming $json1 and $json2 are your JSON strings
 
-# Read the JSON content with additional properties
-$extendJsonPath = "path\to\extend.json"
-$extendJson = Get-Content $extendJsonPath | ConvertFrom-Json
+# Convert JSON strings to objects
+$jsonObject1 = $json1 | ConvertFrom-Json
+$jsonObject2 = $json2 | ConvertFrom-Json
 
-# Extend the original JSON with the additional properties
-foreach ($prop in $extendJson.PSObject.Properties) {
-    $originalJson | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value
+# Function to recursively find and enrich matching elements
+function Enrich-Json {
+    param (
+        [PSCustomObject]$sourceObject,
+        [PSCustomObject]$enrichObject
+    )
+    foreach ($property in $enrichObject.PSObject.Properties) {
+        if ($sourceObject.PSObject.Properties.Name -contains $property.Name) {
+            if ($property.Value -is [PSCustomObject]) {
+                Enrich-Json -sourceObject $sourceObject.$($property.Name) -enrichObject $property.Value
+            } elseif ($property.Value -is [Array]) {
+                for ($i = 0; $i -lt $property.Value.Count; $i++) {
+                    if ($sourceObject.$($property.Name).Count -gt $i) {
+                        Enrich-Json -sourceObject $sourceObject.$($property.Name)[$i] -enrichObject $property.Value[$i]
+                    }
+                }
+            }
+        } else {
+            $sourceObject | Add-Member -MemberType NoteProperty -Name $property.Name -Value $property.Value
+        }
+    }
 }
 
-# Convert back to JSON and save to a new file
-$extendedJsonPath = "path\to\extended.json"
-$originalJson | ConvertTo-Json | Set-Content $extendedJsonPath
+# Enrich the first JSON object with the second JSON object
+Enrich-Json -sourceObject $jsonObject1 -enrichObject $jsonObject2
 
-Write-Host "The original JSON file has been extended and saved as extended.json"
+# Convert back to JSON string with indentation
+$enrichedJson = $jsonObject1 | ConvertTo-Json -Depth 10
+
+# Output the enriched JSON
+Write-Output $enrichedJson
