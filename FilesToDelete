@@ -1,0 +1,20 @@
+--json
+{
+  "FilesToDelete": [
+    "C:\\path\\to\\file1.txt",
+    "C:\\path\\to\\file2.txt",
+    "C:\\path\\to\\file3.txt"
+  ]
+}
+--ps
+$jsonPath = "C:\\path\\to\\your\\file.json" # Replace with the path to your JSON file
+$jsonContent = Get-Content -Path $jsonPath -Raw | ConvertFrom-Json
+
+foreach ($file in $jsonContent.FilesToDelete) {
+    if (Test-Path $file) {
+        Remove-Item $file -Force
+        Write-Host "Deleted: $file"
+    } else {
+        Write-Host "File not found: $file"
+    }
+}
