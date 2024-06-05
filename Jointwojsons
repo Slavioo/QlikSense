@@ -1,43 +1,48 @@
 # Define the paths to the JSON files
 $jsonFilePath1 = 'path\to\first.json'
 $jsonFilePath2 = 'path\to\second.json'
-$outputFilePath = 'path\to\output.json'
+$outputFilePath = 'path\to\merged.json'
 
 # Read the JSON files and convert them to PowerShell objects
 $json1 = Get-Content $jsonFilePath1 | ConvertFrom-Json
 $json2 = Get-Content $jsonFilePath2 | ConvertFrom-Json
 
-# Function to perform a left join on two arrays of objects
-function Left-JoinJsonObjects {
+# Merge function
+function Merge-JsonObjects {
     param (
-        [PSCustomObject[]]$LeftArray,
-        [PSCustomObject[]]$RightArray
+        [PSCustomObject]$PrimaryObject,
+        [PSCustomObject]$SecondaryObject
     )
-    $result = @()
-    foreach ($leftObj in $LeftArray) {
-        $joinedObj = $leftObj | Select-Object * # Clone the left object
-        foreach ($rightObj in $RightArray) {
-            $commonProperties = Compare-Object -ReferenceObject $leftObj.PSObject.Properties -DifferenceObject $rightObj.PSObject.Properties -IncludeEqual | Where-Object { $_.SideIndicator -eq '==' }
-            foreach ($prop in $commonProperties) {
-                $propertyName = $prop.InputObject.Name
-                if ($leftObj.$propertyName -eq $rightObj.$propertyName) {
-                    # Add properties from right object that are not in the left object
-                    $rightObj.PSObject.Properties | Where-Object { $_.Name -ne $propertyName -and !$joinedObj.PSObject.Properties.Name.Contains($_.Name) } | ForEach-Object {
-                        $joinedObj | Add-Member -NotePropertyName $_.Name -NotePropertyValue $_.Value
-                    }
-                }
-            }
+    foreach ($prop in $SecondaryObject.PSObject.Properties) {
+        if ($null -ne $PrimaryObject.$($prop.Name)) {
+            $PrimaryObject | Add-Member -NotePropertyName $prop.Name -NotePropertyValue $prop.Value -Force
         }
-        $result += $joinedObj
     }
-    return $result
+    return $PrimaryObject
 }
 
-# Perform the left join operation
-$joinedJsonArray = Left-JoinJsonObjects -LeftArray $json1 -RightArray $json2
+# Loop through each object in the first JSON
+for ($i=0; $i -lt $json1.Count; $i++) {
+    # Find a matching object in the second JSON
+    $matchingObject = $json2 | Where-Object {
+        $match = $true
+        foreach ($prop in $_.PSObject.Properties) {
+            if ($json1[$i].$($prop.Name) -ne $prop.Value) {
+                $match = $false
+                break
+            }
+        }
+        return $match
+    }
 
-# Save the result to a new JSON file
-$joinedJsonArray | ConvertTo-Json | Set-Content -Path $outputFilePath
+    # If a matching object is found, merge it with the current object from the first JSON
+    if ($matchingObject) {
+        $json1[$i] = Merge-JsonObjects -PrimaryObject $json1[$i] -SecondaryObject $matchingObject
+    }
+}
+
+# Save the merged content to a new JSON file
+$json1 | ConvertTo-Json -Depth 10 | Set-Content $outputFilePath
 
 # Output a message indicating successful completion
-Write-Host "Joined JSON data saved to $outputFilePath"
+Write-Host "Merged JSON data saved to $outputFilePath"
