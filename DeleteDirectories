@@ -1,6 +1,8 @@
-$directories = @("C:\Path\To\Directory1", "C:\Path\To\Directory2", "C:\Path\To\Directory3")
+$destination = "C:\Your\Destination\Path"
+$folders = @("folder1", "folder2", "folder3")
 
-foreach ($dir in $directories) {
+foreach ($folder in $folders) {
+    $dir = Join-Path -Path $destination -ChildPath $folder
     if (Test-Path -Path $dir -PathType Container) {
         Remove-Item -Path $dir -Recurse -Force
         Write-Host "Deleted directory: $dir"
