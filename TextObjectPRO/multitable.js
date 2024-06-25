@@ -36,7 +36,12 @@ define(["qlik", "jquery"], function(qlik, $) {
             ];
 
             $element.empty().append('<style>' + css + '</style>');
-            visualizations.forEach(viz => displayData(app, viz.id, pageSize, $element, viz.class));
+
+            visualizations.forEach((viz, index) => {
+                const tableContainer = $(`<div class="table-container-${index}"></div>`);
+                $element.append(tableContainer);
+                displayData(app, viz.id, pageSize, tableContainer, viz.class);
+            });
         }
     };
 
@@ -52,38 +57,45 @@ define(["qlik", "jquery"], function(qlik, $) {
         return dimensionHeaders.concat(measureHeaders).sort((a, b) => a.Id - b.Id);
     }
 
-    async function displayData(app, visualizationId, pageSize, $element, tableClass) {
+    async function displayData(app, visualizationId, pageSize, $container, tableClass) {
         try {
             const vis = await app.visualization.get(visualizationId);
-            const requestPage = [{
-                qTop: 0,
-                qLeft: 0,
-                qWidth: vis.model.layout.qHyperCube.qSize.qcx,
-                qHeight: Math.min(pageSize, vis.model.layout.qHyperCube.qSize.qcy)
-            }];
 
-            const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
-            const headers = await getHeaders(vis);
-            const table = $(`<table class="${tableClass} table-preview"></table>`);
-            const headerRow = $('<tr></tr>');
+            const updateData = async () => {
+                const layout = await vis.model.getLayout();
+                const requestPage = [{
+                    qTop: 0,
+                    qLeft: 0,
+                    qWidth: layout.qHyperCube.qSize.qcx,
+                    qHeight: Math.min(pageSize, layout.qHyperCube.qSize.qcy)
+                }];
 
-            headers.forEach(header => {
-                const th = $('<th></th>').text(header.Header);
-                headerRow.append(th);
-            });
+                const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
+                const headers = await getHeaders(vis);
+                const table = $(`<table class="${tableClass} table-preview"></table>`);
+                const headerRow = $('<tr></tr>');
 
-            table.append(headerRow);
-
-            dataPage[0].qMatrix.forEach(row => {
-                const tr = $('<tr></tr>');
-                row.forEach(cell => {
-                    const td = $('<td></td>').text(cell.qText);
-                    tr.append(td);
+                headers.forEach(header => {
+                    const th = $('<th></th>').text(header.Header);
+                    headerRow.append(th);
                 });
-                table.append(tr);
-            });
 
-            $element.append(table);
+                table.append(headerRow);
+
+                dataPage[0].qMatrix.forEach(row => {
+                    const tr = $('<tr></tr>');
+                    row.forEach(cell => {
+                        const td = $('<td></td>').text(cell.qText);
+                        tr.append(td);
+                    });
+                    table.append(tr);
+                });
+
+                $container.empty().append(table);
+            };
+
+            vis.model.on("changed", updateData);
+            updateData(); // Initial data load
         } catch (error) {
             console.error("Error displaying data:", error);
         }
