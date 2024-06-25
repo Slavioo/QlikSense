@@ -101,3 +101,36 @@ define(["qlik", "jquery"], function(qlik, $) {
         }
     }
 });
+
+//css example
+.table-preview {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.table-preview th {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    text-align: left;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.table-preview tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table-preview tr:hover {
+    background-color: #ddd;
+}
+
+.table-preview td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
