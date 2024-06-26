@@ -25,42 +25,45 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }
             }
         },
-        paint: function($element, layout) {
+        paint: async function($element, layout) {
             const app = qlik.currApp(this);
-            const css = layout.css;
-            const pageSize = layout.pageSize;
+            const css = '<style>' + layout.css + '</style>';
 
             const visualizations = [
-                { id: "kpSSaA", class: "table1" },
-                { id: "kTcUKt", class: "table2" }
+                { id: "kpSSaA",  columnId: 1 },
+                { id: "kTcUKt",  columnId: 2 },
+                { id: "kpSSaA",  columnId: 2 },
+                { id: "kTcUKt",  columnId: 2 },
+                { id: "kpSSaA",  columnId: 2 },
+                { id: "kTcUKt",  columnId: 3 },
+                { id: "kpSSaA",  columnId: 3 },
+                { id: "kpSSaA",  columnId: 3 }
             ];
 
-            $element.empty().append('<style>' + css + '</style>');
+            $element.empty().append(css);
 
-            visualizations.forEach((viz, index) => {
-                const tableContainer = $(`<div class="table-container-${index}"></div>`);
-                $element.append(tableContainer);
-                displayData(app, viz.id, pageSize, tableContainer, viz.class);
-            });
+            const groupedVisualizations = groupByColumnId(visualizations);
+
+            const mainContainer = $('<div class="container"></div>');
+            $element.append(mainContainer);
+
+            for (const columnId in groupedVisualizations) {
+                const columnContainer = $('<div class="column"></div>');
+                mainContainer.append(columnContainer);
+
+                for (const viz of groupedVisualizations[columnId]) {
+                    const tableContainer = $('<div class="table-container"></div>')
+                        .attr('data-grid-column-id', columnId);
+                    columnContainer.append(tableContainer);
+                    await displayData(app, viz.id, layout.pageSize, tableContainer);
+                }
+            }
         }
     };
 
-    async function getHeaders(vis) {
-        const dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({
-            Id: id,
-            Header: dim.qFallbackTitle
-        }));
-        const measureHeaders = vis.model.layout.qHyperCube.qMeasureInfo.map((measure, id) => ({
-            Id: id + dimensionHeaders.length,
-            Header: measure.qFallbackTitle
-        }));
-        return dimensionHeaders.concat(measureHeaders).sort((a, b) => a.Id - b.Id);
-    }
-
-    async function displayData(app, visualizationId, pageSize, $container, tableClass) {
+    async function displayData(app, visualizationId, pageSize, $container) {
         try {
             const vis = await app.visualization.get(visualizationId);
-
             const updateData = async () => {
                 const layout = await vis.model.getLayout();
                 const requestPage = [{
@@ -72,7 +75,7 @@ define(["qlik", "jquery"], function(qlik, $) {
 
                 const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
                 const headers = await getHeaders(vis);
-                const table = $(`<table class="${tableClass} table-preview"></table>`);
+                const table = $('<table class="table-preview"></table>');
                 const headerRow = $('<tr></tr>');
 
                 headers.forEach(header => {
@@ -95,42 +98,92 @@ define(["qlik", "jquery"], function(qlik, $) {
             };
 
             vis.model.on("changed", updateData);
-            updateData(); // Initial data load
+            updateData();
         } catch (error) {
             console.error("Error displaying data:", error);
         }
     }
+
+    async function getHeaders(vis) {
+        const dimensionHeaders = vis.model.layout.qHyperCube.qDimensionInfo.map((dim, id) => ({
+            Id: id,
+            Header: dim.qFallbackTitle
+        }));
+        const measureHeaders = vis.model.layout.qHyperCube.qMeasureInfo.map((measure, id) => ({
+            Id: id + dimensionHeaders.length,
+            Header: measure.qFallbackTitle
+        }));
+        return dimensionHeaders.concat(measureHeaders).sort((a, b) => a.Id - b.Id);
+    }
+
+    function groupByColumnId(visualizations) {
+        return visualizations.reduce((acc, viz) => {
+            const { columnId } = viz;
+            if (!acc[columnId]) {
+                acc[columnId] = [];
+            }
+            acc[columnId].push(viz);
+            return acc;
+        }, {});
+    }
 });
 
-//css example
+/css example
+/* CSS styling for Qlik Sense extension */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 0.8vw; /* Smaller font size for better fit */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: 100vh;
+    overflow-y: auto; /* Single vertical scrollbar for the container */
+}
+
+.column {
+    flex: 1;
+    min-width: 30%;
+    max-width: 32%;
+    box-sizing: border-box;
+    margin: 10px; /* Margin between columns */
+}
+
+.table-container {
+    margin-bottom: 10px; /* Margin between tables */
+}
+
 .table-preview {
     width: 100%;
     border-collapse: collapse;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    margin: 10px 0;
 }
 
-.table-preview th {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px;
+th, td {
+    padding: 0.4vw; /* Smaller padding for better fit */
     text-align: left;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.table-preview tr:nth-child(even) {
-    background-color: #f2f2f2;
-}
-
-.table-preview tr:hover {
-    background-color: #ddd;
-}
-
-.table-preview td {
-    padding: 10px;
     border: 1px solid #ddd;
-    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr {
+    height: calc(100vh / 55); /* Ensure 50 records fit within the window size */
+}
+
+tr:hover {
+    background-color: #f1f1f1; /* Highlight color on hover */
+}
+
+.highlight td:nth-child(2),
+.highlight td:nth-child(3) {
+    background-color: #ffdddd; /* Highlight color for different values */
 }
