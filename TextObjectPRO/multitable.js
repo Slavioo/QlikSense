@@ -7,6 +7,30 @@ define(["qlik", "jquery"], function(qlik, $) {
                 settings: {
                     uses: "settings",
                     items: {
+                        visualizations: {
+                            type: "array",
+                            ref: "visualizations",
+                            label: "Visualizations",
+                            itemTitleRef: "id",
+                            allowAdd: true,
+                            allowRemove: true,
+                            addTranslation: "Add Visualization",
+                            items: {
+                                id: {
+                                    type: "string",
+                                    ref: "id",
+                                    label: "Visualization ID",
+                                    expression: "optional"
+                                },
+                                columnId: {
+                                    type: "integer",
+                                    ref: "columnId",
+                                    label: "Column ID",
+                                    expression: "optional",
+                                    defaultValue: 1
+                                }
+                            }
+                        },
                         pageSize: {
                             type: "integer",
                             ref: "pageSize",
@@ -29,16 +53,7 @@ define(["qlik", "jquery"], function(qlik, $) {
             const app = qlik.currApp(this);
             const css = '<style>' + layout.css + '</style>';
 
-            const visualizations = [
-                { id: "kpSSaA",  columnId: 1 },
-                { id: "kTcUKt",  columnId: 2 },
-                { id: "kpSSaA",  columnId: 2 },
-                { id: "kTcUKt",  columnId: 2 },
-                { id: "kpSSaA",  columnId: 2 },
-                { id: "kTcUKt",  columnId: 3 },
-                { id: "kpSSaA",  columnId: 3 },
-                { id: "kpSSaA",  columnId: 3 }
-            ];
+            const visualizations = layout.visualizations || [];
 
             $element.empty().append(css);
 
