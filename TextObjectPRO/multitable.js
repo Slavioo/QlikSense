@@ -82,10 +82,13 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }
             }
 
-            // Execute custom JavaScript
+            // Execute custom JavaScript at the end
             if (javascript) {
                 try {
-                    eval(javascript);
+                    const script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.text = javascript;
+                    document.body.appendChild(script);
                 } catch (error) {
                     console.error("Error executing custom JavaScript:", error);
                 }
