@@ -44,6 +44,13 @@ define(["qlik", "jquery"], function(qlik, $) {
                             label: "CSS",
                             defaultValue: "",
                             expression: 'optional'
+                        },
+                        javascript: {
+                            type: "string",
+                            ref: "javascript",
+                            label: "JavaScript",
+                            defaultValue: "",
+                            expression: 'optional'
                         }
                     }
                 }
@@ -52,6 +59,7 @@ define(["qlik", "jquery"], function(qlik, $) {
         paint: async function($element, layout) {
             const app = qlik.currApp(this);
             const css = '<style>' + layout.css + '</style>';
+            const javascript = layout.javascript || "";
 
             const visualizations = layout.visualizations || [];
 
@@ -71,6 +79,15 @@ define(["qlik", "jquery"], function(qlik, $) {
                         .attr('data-grid-column-id', columnId);
                     columnContainer.append(tableContainer);
                     await displayData(app, viz.id, layout.pageSize, tableContainer);
+                }
+            }
+
+            // Execute custom JavaScript
+            if (javascript) {
+                try {
+                    eval(javascript);
+                } catch (error) {
+                    console.error("Error executing custom JavaScript:", error);
                 }
             }
         }
