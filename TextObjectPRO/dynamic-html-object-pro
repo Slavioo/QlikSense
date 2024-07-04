@@ -1,0 +1,39 @@
+define(['jquery', 'qlik'], function($, qlik) {
+    return {
+        initialProperties: {
+            version: 1.0,
+            html: ''
+        },
+        definition: {
+            type: 'items',
+            component: 'accordion',
+            items: {
+                settings: {
+                    uses: 'settings',
+                    items: {
+                        html: {
+                            type: 'string',
+                            ref: 'html',
+                            label: 'HTML',
+                            expression: 'optional'
+                        }
+                    }
+                }
+            }
+        },
+        paint: function($element, layout) {
+            var html = layout.html;
+
+            // Evaluate Qlik expressions on the server
+            qlik.currApp().model.evaluate({
+                qStringExpression: html
+            }, function(reply) {
+                // Replace variables in HTML with evaluated values
+                var evaluatedHtml = reply.qResult.qPreview;
+
+                // Update the DOM with the evaluated HTML
+                $element.html(evaluatedHtml);
+            });
+        }
+    };
+});
