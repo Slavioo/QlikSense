@@ -24,12 +24,9 @@ define(['jquery', 'qlik'], function($, qlik) {
         paint: function($element, layout) {
             var html = layout.html;
 
-            // Evaluate Qlik expressions on the server
-            qlik.currApp().model.evaluate({
-                qStringExpression: html
-            }, function(reply) {
-                // Replace variables in HTML with evaluated values
-                var evaluatedHtml = reply.qResult.qPreview;
+            // Evaluate Qlik expression on the server
+            qlik.currApp().evaluateEx(html, function(reply) {
+                var evaluatedHtml = reply.qResult.qReturn; // Assuming qReturn contains the evaluated result
 
                 // Update the DOM with the evaluated HTML
                 $element.html(evaluatedHtml);
