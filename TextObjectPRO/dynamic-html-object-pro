@@ -1,36 +1,38 @@
-define(['jquery', 'qlik'], function($, qlik) {
+define(["qlik", "jquery"], function (qlik, $) {
+    'use strict';
+
     return {
         initialProperties: {
-            version: 1.0,
-            html: ''
+            qHyperCubeDef: {
+                qMeasures: [],
+                qInitialDataFetch: [{
+                    qWidth: 1,
+                    qHeight: 1
+                }]
+            }
         },
         definition: {
-            type: 'items',
-            component: 'accordion',
+            type: "items",
+            component: "accordion",
             items: {
-                settings: {
-                    uses: 'settings',
-                    items: {
-                        html: {
-                            type: 'string',
-                            ref: 'html',
-                            label: 'HTML',
-                            expression: 'optional'
-                        }
-                    }
+                measures: {
+                    uses: "measures",
+                    min: 1,
+					max: 1
                 }
             }
         },
-        paint: function($element, layout) {
-            var html = layout.html;
+        paint: function ($element, layout) {
+            var hypercube = layout.qHyperCube;
+            
+            if (hypercube.qDataPages[0] && hypercube.qDataPages[0].qMatrix && hypercube.qDataPages[0].qMatrix.length > 0) {
+                var measureValue = hypercube.qDataPages[0].qMatrix[0][0].qText;
+                $element.html("<div>" + measureValue + "</div>");
+            } else {
+                $element.html("<div>No data available</div>");
+            }
 
-            // Evaluate Qlik expression on the server
-            qlik.currApp().evaluateEx(html, function(reply) {
-                var evaluatedHtml = reply.qResult.qReturn; // Assuming qReturn contains the evaluated result
-
-                // Update the DOM with the evaluated HTML
-                $element.html(evaluatedHtml);
-            });
+            return qlik.Promise.resolve();
         }
     };
 });
