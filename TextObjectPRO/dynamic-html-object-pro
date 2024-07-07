@@ -4,7 +4,12 @@ define(["qlik", "jquery"], function (qlik, $) {
     return {
         initialProperties: {
             qHyperCubeDef: {
-                qMeasures: [],
+                qMeasures: [{
+                    qDef: {
+                        qLabel: "HTML Contents",
+                        qDef: ""
+                    }
+                }],
                 qInitialDataFetch: [{
                     qWidth: 1,
                     qHeight: 1
@@ -25,12 +30,8 @@ define(["qlik", "jquery"], function (qlik, $) {
         paint: function ($element, layout) {
             var hypercube = layout.qHyperCube;
             
-            if (hypercube.qDataPages[0] && hypercube.qDataPages[0].qMatrix && hypercube.qDataPages[0].qMatrix.length > 0) {
-                var measureValue = hypercube.qDataPages[0].qMatrix[0][0].qText;
-                $element.html("<div>" + measureValue + "</div>");
-            } else {
-                $element.html("<div>No data available</div>");
-            }
+			var htmlContents = hypercube.qDataPages[0].qMatrix[0][0].qText;
+			$element.html(htmlContents);
 
             return qlik.Promise.resolve();
         }
