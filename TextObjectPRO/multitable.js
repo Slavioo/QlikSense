@@ -82,7 +82,6 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }
             }
 
-            // Execute custom JavaScript at the end
             if (javascript) {
                 try {
                     const script = document.createElement('script');
@@ -122,8 +121,13 @@ define(["qlik", "jquery"], function(qlik, $) {
 
                 dataPage[0].qMatrix.forEach(row => {
                     const tr = $('<tr></tr>');
-                    row.forEach(cell => {
+                    row.forEach((cell, index) => {
                         const td = $('<td></td>').text(cell.qText);
+                        if (index === 1 || index === 2) {
+                            if (row[1].qText !== row[2].qText) {
+                                td.addClass('highlight');
+                            }
+                        }
                         tr.append(td);
                     });
                     table.append(tr);
@@ -162,63 +166,3 @@ define(["qlik", "jquery"], function(qlik, $) {
         }, {});
     }
 });
-
-/css example
-/* CSS styling for Qlik Sense extension */
-body {
-    font-family: Arial, sans-serif;
-    font-size: 0.8vw; /* Smaller font size for better fit */
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-
-.container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    height: 100vh;
-    overflow-y: auto; /* Single vertical scrollbar for the container */
-}
-
-.column {
-    flex: 1;
-    min-width: 30%;
-    max-width: 32%;
-    box-sizing: border-box;
-    margin: 10px; /* Margin between columns */
-}
-
-.table-container {
-    margin-bottom: 10px; /* Margin between tables */
-}
-
-.table-preview {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 0.4vw; /* Smaller padding for better fit */
-    text-align: left;
-    border: 1px solid #ddd;
-}
-
-th {
-    background-color: #f2f2f2;
-    font-weight: bold;
-}
-
-tr {
-    height: calc(100vh / 55); /* Ensure 50 records fit within the window size */
-}
-
-tr:hover {
-    background-color: #f1f1f1; /* Highlight color on hover */
-}
-
-.highlight td:nth-child(2),
-.highlight td:nth-child(3) {
-    background-color: #ffdddd; /* Highlight color for different values */
-}
