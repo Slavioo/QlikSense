@@ -44,6 +44,24 @@ define(["qlik", "jquery"], function(qlik, $) {
                             label: "CSS",
                             defaultValue: "",
                             expression: 'optional'
+                        },
+                        valuesToCompare: {
+                            type: "items",
+                            label: "Values to compare",
+                            items: {
+                                prevColumnName: {
+                                    type: "string",
+                                    ref: "prevColumnName",
+                                    label: "Previous Column Name",
+                                    defaultValue: "Prev"
+                                },
+                                currColumnName: {
+                                    type: "string",
+                                    ref: "currColumnName",
+                                    label: "Current Column Name",
+                                    defaultValue: "Curr"
+                                }
+                            }
                         }
                     }
                 }
@@ -53,6 +71,8 @@ define(["qlik", "jquery"], function(qlik, $) {
             const app = qlik.currApp(this);
             const css = '<style>' + layout.css + '</style>';
             const visualizations = layout.visualizations || [];
+            const prevColumnName = layout.prevColumnName || "Prev";
+            const currColumnName = layout.currColumnName || "Curr";
 
             $element.empty().append(css);
 
@@ -69,7 +89,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                     const tableContainer = $('<div class="table-container"></div>')
                         .attr('data-grid-column-id', columnId);
                     columnContainer.append(tableContainer);
-                    await displayData(app, viz.id, layout.pageSize, tableContainer);
+                    await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName);
                 }
             }
 
@@ -102,7 +122,7 @@ define(["qlik", "jquery"], function(qlik, $) {
         }
     };
 
-    async function displayData(app, visualizationId, pageSize, $container) {
+    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName) {
         try {
             const vis = await app.visualization.get(visualizationId);
             const updateData = async () => {
@@ -115,7 +135,11 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }];
 
                 const dataPage = await vis.model.getHyperCubeData('/qHyperCubeDef', requestPage);
-                const headers = dataPage[0].qMatrix[0].map(cell => cell.qText);
+                const headers = dataPage[0].qMatrix[0].map(cell => cell.qText.replace(/^\[|\]$/g, ''));
+
+                const prevColumnIndex = headers.indexOf(prevColumnName);
+                const currColumnIndex = headers.indexOf(currColumnName);
+
                 const table = $('<table class="table-preview"></table>');
                 const headerRow = $('<tr></tr>');
 
@@ -130,11 +154,15 @@ define(["qlik", "jquery"], function(qlik, $) {
                     const tr = $('<tr></tr>');
                     row.forEach((cell, index) => {
                         const td = $('<td class="copyable"></td>').text(cell.qText);
-                        if (index === 1 || index === 2) {
-                            if (row[1].qText !== row[2].qText) {
-                                td.addClass('highlight');
+
+                        if (prevColumnIndex !== -1 && currColumnIndex !== -1) {
+                            if (index === prevColumnIndex || index === currColumnIndex) {
+                                if (row[prevColumnIndex].qText !== row[currColumnIndex].qText) {
+                                    td.addClass('highlight');
+                                }
                             }
                         }
+
                         tr.append(td);
                     });
                     table.append(tr);
@@ -185,19 +213,19 @@ define(["qlik", "jquery"], function(qlik, $) {
         document.body.removeChild(el);
     }
 
-	function getTableText($table) {
-		let tableText = "";
-		$table.find('tr').each(function(rowIndex, row) {
-			$(row).find('th, td').each(function(cellIndex, cell) {
-				tableText += $(cell).text().trim();
-				if (cellIndex < row.children.length - 1) {
-					tableText += '\t';
-				}
-			});
-			tableText += '\n';
-		});
-		return tableText;
-	}
+    function getTableText($table) {
+        let tableText = "";
+        $table.find('tr').each(function(rowIndex, row) {
+            $(row).find('th, td').each(function(cellIndex, cell) {
+                tableText += $(cell).text().trim();
+                if (cellIndex < row.children.length - 1) {
+                    tableText += '\t';
+                }
+            });
+            tableText += '\n';
+        });
+        return tableText;
+    }
 });
 
 //css example
