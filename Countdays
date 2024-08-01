@@ -1,7 +1,18 @@
+WITH BusinessDatesCTE AS (
+    SELECT 
+        BusinessDate,
+        ROW_NUMBER() OVER (PARTITION BY YEAR(BusinessDate), MONTH(BusinessDate) ORDER BY BusinessDate) AS BusinessDateCount
+    FROM 
+        YourTable
+)
 SELECT 
-    date_field,
-    SUM(DAY(date_field)) OVER (PARTITION BY DATEPART(YEAR, date_field), DATEPART(MONTH, date_field) ORDER BY date_field) AS sum_days_passed
+    YT.BusinessDate,
+    BDC.BusinessDateCount
 FROM 
-    your_table
+    YourTable YT
+JOIN 
+    BusinessDatesCTE BDC
+ON 
+    YT.BusinessDate = BDC.BusinessDate
 ORDER BY 
-    date_field;
+    YT.BusinessDate;
