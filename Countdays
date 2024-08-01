@@ -1,0 +1,7 @@
+SELECT 
+    date_field,
+    SUM(DAY(date_field)) OVER (PARTITION BY DATEPART(YEAR, date_field), DATEPART(MONTH, date_field) ORDER BY date_field) AS sum_days_passed
+FROM 
+    your_table
+ORDER BY 
+    date_field;
