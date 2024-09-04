@@ -1,6 +1,5 @@
 $tagName = "YourTagName"
-$tags = Get-QlikTag
-$tag = $tags | Where-Object { $_.name -eq $tagName }
+$tag = Get-QlikTag -filter "name eq '$tagName'"
 
 if ($tag) {
     Remove-QlikTag -Id $tag.id
