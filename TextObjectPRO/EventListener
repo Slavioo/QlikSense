@@ -11,9 +11,9 @@
     <script>
         const button = document.getElementById('downloadButton');
 
-        function downloadTables() {
+        function downloadTables(filename) {
             // Your download logic here
-            console.log('Downloading tables...');
+            console.log(`Downloading tables to ${filename}...`);
 
             // Simulate a delay for the download process
             setTimeout(() => {
@@ -21,7 +21,7 @@
             }, 1000);
         }
 
-        button.addEventListener('click', downloadTables);
+        button.addEventListener('click', () => downloadTables('example_filename.csv'));
     </script>
 </body>
 </html>
