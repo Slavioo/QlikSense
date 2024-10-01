@@ -31,5 +31,7 @@ function downloadCustomTablesAsTXT(filename) {
   document.body.removeChild(downloadLink);
 }
 
-// Update the button's onclick event to use the new function
-document.getElementById('download-btn').setAttribute('onclick', "downloadCustomTablesAsTXT('custom_tables.txt')");
+// Add event listener to the button
+document.getElementById('download-btn').addEventListener('click', function() {
+  downloadCustomTablesAsTXT('custom_tables.txt');
+});
