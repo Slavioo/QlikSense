@@ -6,10 +6,22 @@
     <title>Download Tables</title>
 </head>
 <body>
-    <button id="downloadButton">Download Tables</button>
+    <button id="downloadButton" ondblclick="setButtonClicked()">Download Tables</button>
 
     <script>
-        const button = document.getElementById('downloadButton');
+        let buttonClicked = false;
+
+        function setButtonClicked() {
+            buttonClicked = true;
+            checkAndDownload();
+        }
+
+        function checkAndDownload() {
+            if (buttonClicked) {
+                downloadTables('example_filename.csv');
+                buttonClicked = false; // Reset the flag after the download
+            }
+        }
 
         function downloadTables(filename) {
             // Your download logic here
@@ -20,8 +32,6 @@
                 console.log('Download complete.');
             }, 1000);
         }
-
-        button.addEventListener('click', () => downloadTables('example_filename.csv'));
     </script>
 </body>
 </html>
