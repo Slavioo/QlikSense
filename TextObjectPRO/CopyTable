@@ -40,3 +40,17 @@ $element.on('mouseenter', '.download-icon', function() {
 $element.on('mouseleave', '.download-icon', function() {
     $(this).removeAttr('title');
 });
+
+
+
+headers.forEach((header, index) => {
+    const th = $('<th></th>').text(header);
+    if (index === headers.length - 1) {
+        const downloadEmoji = $('<span></span>').text('📥').addClass('download-icon');
+        th.append(downloadEmoji);
+    }
+    headerRow.append(th);
+});
+
+table.append(headerRow);
+
