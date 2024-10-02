@@ -1,66 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Table with Copy Icon</title>
-    <style>
-        .table-container {
-            position: relative;
-            display: inline-block;
-        }
-        .copy-icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
-<body>
-    <div class="table-container">
-        <span class="copy-icon" onclick="copyTable()">📋</span>
-        <table>
-            <tr>
-                <th>Header 1</th>
-                <th>Header 2</th>
-                <th>Header 3</th>
-            </tr>
-            <tr>
-                <td>Data 1</td>
-                <td>Data 2</td>
-                <td>Data 3</td>
-            </tr>
-            <tr>
-                <td>Data 4</td>
-                <td>Data 5</td>
-                <td>Data 6</td>
-            </tr>
-        </table>
-    </div>
+// Event delegation for dynamically created elements
+$element.on('click', '.copyable', function() {
+    const text = $(this).text().trim();
+    copyToClipboard(text);
+});
 
-    <script>
-        function copyTable() {
-            const table = document.querySelector('table');
-            const range = document.createRange();
-            range.selectNode(table);
-            window.getSelection().removeAllRanges();
-            window.getSelection().addRange(range);
-            document.execCommand('copy');
-            window.getSelection().removeAllRanges();
-            alert('Table copied to clipboard!');
-        }
-    </script>
-</body>
-</html>
+$element.on('click', '.download-icon', function() {
+    copyTableToClipboard($(this).closest('.table-preview'));
+});
+
+// Tooltip on hover
+$element.on('mouseenter', '.copyable', function() {
+    $(this).attr('title', 'Click to copy');
+});
+
+$element.on('mouseleave', '.copyable', function() {
+    $(this).removeAttr('title');
+});
+
+$element.on('mouseenter', '.download-icon', function() {
+    $(this).attr('title', 'Click to copy the entire table');
+});
+
+$element.on('mouseleave', '.download-icon', function() {
+    $(this).removeAttr('title');
+});
