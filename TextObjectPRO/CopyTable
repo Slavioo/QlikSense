@@ -1,3 +1,19 @@
+<!-- Your table structure -->
+<table class="table-preview">
+    <thead>
+        <tr>
+            <th>
+                Header
+                <div class="download-icon" style="float: right; cursor: pointer;">📥</div>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Table rows -->
+    </tbody>
+</table>
+
+
 // Event delegation for dynamically created elements
 $element.on('click', '.copyable', function() {
     const text = $(this).text().trim();
