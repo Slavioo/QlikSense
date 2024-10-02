@@ -1,77 +1,58 @@
-<!-- Your table structure -->
-<table class="table-preview">
-    <thead>
-        <tr>
-            <th>
-                Header
-                <div class="download-icon" style="float: right; cursor: pointer;">📥</div>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Table rows -->
-    </tbody>
-</table>
+paint: async function($element, layout) {
+    const app = qlik.currApp(this);
+    const css = '<style>' + layout.css + '</style>';
+    const visualizations = layout.visualizations || [];
+    const prevColumnName = layout.prevColumnName || "Prev";
+    const currColumnName = layout.currColumnName || "Curr";
 
+    $element.empty().append(css);
 
-// Event delegation for dynamically created elements
-$element.on('click', '.copyable', function() {
-    const text = $(this).text().trim();
-    copyToClipboard(text);
-});
+    const groupedVisualizations = groupByColumnId(visualizations);
 
-$element.on('click', '.download-icon', function() {
-    copyTableToClipboard($(this).closest('.table-preview'));
-});
+    const mainContainer = $('<div class="container"></div>');
+    $element.append(mainContainer);
 
-// Tooltip on hover
-$element.on('mouseenter', '.copyable', function() {
-    $(this).attr('title', 'Click to copy');
-});
+    for (const columnId in groupedVisualizations) {
+        const columnContainer = $('<div class="column"></div>');
+        mainContainer.append(columnContainer);
 
-$element.on('mouseleave', '.copyable', function() {
-    $(this).removeAttr('title');
-});
+        for (const viz of groupedVisualizations[columnId]) {
+            const tableContainer = $('<div class="table-container"></div>')
+                .attr('data-grid-column-id', columnId);
 
-$element.on('mouseenter', '.download-icon', function() {
-    $(this).attr('title', 'Click to copy the entire table');
-});
+            // Add clipboard icon
+            const clipboardIcon = $('<i class="fa fa-clipboard clipboard-icon"></i>').css({
+                position: 'absolute',
+                top: '0',
+                right: '0',
+                cursor: 'pointer'
+            });
 
-$element.on('mouseleave', '.download-icon', function() {
-    $(this).removeAttr('title');
-});
+            // Append table container and clipboard icon
+            columnContainer.append(tableContainer);
+            columnContainer.append(clipboardIcon);
 
+            await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName);
 
-
-headers.forEach((header, index) => {
-    const th = $('<th></th>').text(header);
-    if (index === headers.length - 1) {
-        const downloadEmoji = $('<span></span>').text('📥').addClass('download-icon');
-        th.append(downloadEmoji);
-    }
-    headerRow.append(th);
-});
-
-table.append(headerRow);
-
-function copyTableToClipboard($table) {
-    const el = document.createElement('textarea');
-    el.value = getTableText($table);
-
-    // Filter out the last character if it's an icon with class 'download-icon'
-    const headers = $table.querySelectorAll('th');
-    if (headers.length > 0) {
-        const lastHeader = headers[headers.length - 1];
-        if (lastHeader.classList.contains('download-icon')) {
-            el.value = el.value.slice(0, -1); // Remove the last character
+            // Event listener for clipboard icon click
+            clipboardIcon.on('click', function() {
+                copyTableToClipboard(tableContainer.find('.table-preview'));
+            });
         }
     }
 
-    el.setAttribute('readonly', '');
-    el.style.position = 'absolute';
-    el.style.left = '-9999px';
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
+    // Event delegation for dynamically created elements
+    $element.on('click', '.copyable', function() {
+        const text = $(this).text().trim();
+        copyToClipboard(text);
+    });
+
+    // Tooltip on hover for clipboard icon
+    $element.on('mouseenter', '.clipboard-icon', function() {
+        $(this).attr('title', 'Click to copy the table');
+    });
+
+    $element.on('mouseleave', '.clipboard-icon', function() {
+        $(this).removeAttr('title');
+    });
 }
