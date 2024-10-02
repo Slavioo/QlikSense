@@ -55,18 +55,13 @@ headers.forEach((header, index) => {
 table.append(headerRow);
 
 function copyTableToClipboard($table) {
-    const el = document.createElement('textarea');
-    const tableHtml = $table[0].outerHTML;
-    el.value = tableHtml;
-    el.setAttribute('readonly', '');
-    el.style.position = 'absolute';
-    el.style.left = '-9999px';
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand('copy');
-    document.body.removeChild(el);
-}
-
-// Usage example
-const $table = $('table');
-copyTableToClipboard($table);
+        const el = document.createElement('textarea');
+        el.value = getTableText($table);
+        el.setAttribute('readonly', '');
+        el.style.position = 'absolute';
+        el.style.left = '-9999px';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+    }
