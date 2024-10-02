@@ -56,7 +56,8 @@ table.append(headerRow);
 
 function copyTableToClipboard($table) {
     const el = document.createElement('textarea');
-    el.value = $table.prop('outerHTML');
+    const tableHtml = $table[0].outerHTML;
+    el.value = tableHtml;
     el.setAttribute('readonly', '');
     el.style.position = 'absolute';
     el.style.left = '-9999px';
@@ -69,4 +70,3 @@ function copyTableToClipboard($table) {
 // Usage example
 const $table = $('table');
 copyTableToClipboard($table);
-
