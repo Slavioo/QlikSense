@@ -1,0 +1,56 @@
+using System;
+using Qlik.Engine;
+using Qlik.Sense.Client;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        string appId = "your-app-id";
+
+        using (IApp app = ConnectToQlikSense(appId))
+        {
+            GetVisualizationDetails(app);
+        }
+    }
+
+    static IApp ConnectToQlikSense(string appId)
+    {
+        // Connect to Qlik Sense
+        ILocation location = Qlik.Engine.Location.FromUri(new Uri("http://localhost:4848"));
+        location.AsDirectConnectionToPersonalEdition();
+        return location.App(appId);
+    }
+
+    static void GetVisualizationDetails(IApp app)
+    {
+        foreach (var obj in app.GetSheetObjects())
+        {
+            if (obj.Type == "table")
+            {
+                var table = obj.GetProperties();
+                Console.WriteLine($"Visualization ID: {table.Info.Id}");
+                Console.WriteLine($"Visualization Title: {table.Title}");
+
+                foreach (var dimension in table.Dimensions)
+                {
+                    Console.WriteLine($"Dimension Name: {dimension.Title}");
+                    Console.WriteLine($"Expression: {dimension.Def.DimensionalFieldDef}");
+                    Console.WriteLine($"Text Color: {dimension.GetAttributeExpression("color")}");
+                    Console.WriteLine($"Background Color: {dimension.GetAttributeExpression("background")}");
+                    Console.WriteLine($"Calculation Condition: {dimension.CalcCond}");
+                }
+
+                foreach (var measure in table.Measures)
+                {
+                    Console.WriteLine($"Measure Name: {measure.Title}");
+                    Console.WriteLine($"Expression: {measure.Def.Expression}");
+                    Console.WriteLine($"Formatting: {measure.Def.NumberFormat.Type}");
+                    Console.WriteLine($"Text Color: {measure.GetAttributeExpression("color")}");
+                    Console.WriteLine($"Background Color: {measure.GetAttributeExpression("background")}");
+                    Console.WriteLine($"Calculation Condition: {measure.CalcCond}");
+                }
+            }
+        }
+    }
+}
