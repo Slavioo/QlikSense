@@ -1,0 +1,42 @@
+private static void ExportObjects(IApp app, string dumpPath, IEnumerable<string> visualisationsList, IReadOnlyCollection<string> excludedTags)
+{
+    var objectOptions = new NxGetObjectOptions
+    {
+        IncludeSessionObjects = true,
+        Types = visualisationsList
+    };
+    var elements = app.GetObjects(objectOptions);
+
+    // Prepare to write dimensions to a TXT file
+    string txtFilePath = Path.Combine(dumpPath, "Dimensions.txt");
+    using (StreamWriter writer = new StreamWriter(txtFilePath))
+    {
+        writer.WriteLine("Title\tDefinition\tCalculation Condition\tFont Color\tBackground Color");
+        writer.WriteLine("--------------------------------------------------------------------------------");
+
+        foreach (var element in elements.ToList())
+        {
+            var elementId = element.Info.Id;
+            var elementType = element.Info.Type ?? "unknownElementType";
+
+            if (elementType.Equals("table", StringComparison.OrdinalIgnoreCase))
+            {
+                var elementLayout = app.GetObject<GenericObject>(elementId).GetLayout();
+                var elementLayoutXml = JsonConvert.DeserializeXmlNode(elementLayout.ToString(), "document");
+
+                // Assuming qHypercubeDef structure
+                var dimensions = elementLayoutXml.Descendants("qHypercubeDef").SelectMany(h => h.Descendants("qDimensions"));
+
+                foreach (var dimension in dimensions)
+                {
+                    var title = dimension.Element("qDef")?.Element("qFieldDefs")?.Value ?? "N/A";
+                    var calcCondition = dimension.Element("qCalcCondition")?.Element("qv")?.Value ?? "N/A";
+                    var fontColor = "N/A"; // Set based on your context
+                    var backgroundColor = "N/A"; // Set based on your context
+
+                    writer.WriteLine($"{title}\t{dimension.Element("qDef")?.Value}\t{calcCondition}\t{fontColor}\t{backgroundColor}");
+                }
+            }
+        }
+    }
+}
