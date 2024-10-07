@@ -25,16 +25,21 @@ private static void ExportObjects(IApp app, string dumpPath, IEnumerable<string>
                 var elementLayoutXml = JsonConvert.DeserializeXmlNode(elementLayout.ToString(), "document");
 
                 // Assuming qHypercubeDef structure
-                var dimensions = elementLayoutXml.Descendants("qHypercubeDef").SelectMany(h => h.Descendants("qDimensions"));
+                var qHypercubeDefNodes = elementLayoutXml.SelectNodes("//qHypercubeDef");
 
-                foreach (var dimension in dimensions)
+                foreach (XmlNode qHypercubeDefNode in qHypercubeDefNodes)
                 {
-                    var title = dimension.Element("qDef")?.Element("qFieldDefs")?.Value ?? "N/A";
-                    var calcCondition = dimension.Element("qCalcCondition")?.Element("qv")?.Value ?? "N/A";
-                    var fontColor = "N/A"; // Set based on your context
-                    var backgroundColor = "N/A"; // Set based on your context
+                    var qDimensions = qHypercubeDefNode.SelectNodes("qDimensions");
 
-                    writer.WriteLine($"{title}\t{dimension.Element("qDef")?.Value}\t{calcCondition}\t{fontColor}\t{backgroundColor}");
+                    foreach (XmlNode dimension in qDimensions)
+                    {
+                        var title = dimension.SelectSingleNode("qDef/qFieldDefs")?.InnerText ?? "N/A";
+                        var calcCondition = dimension.SelectSingleNode("qCalcCondition/qv")?.InnerText ?? "N/A";
+                        var fontColor = "N/A"; // Set based on your context
+                        var backgroundColor = "N/A"; // Set based on your context
+
+                        writer.WriteLine($"{title}\t{dimension.SelectSingleNode("qDef")?.InnerText}\t{calcCondition}\t{fontColor}\t{backgroundColor}");
+                    }
                 }
             }
         }
