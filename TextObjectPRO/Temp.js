@@ -1,10 +1,10 @@
 private static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml, int parentqsaIndex = 0, string parentHierarchicalId = "0")
 {
-    // Create a StringBuilder to collect attributes
-    StringBuilder attributesBuilder = new StringBuilder();
-
     // Update the current path
     currentPath += "/" + element.Name;
+
+    // Create a StringBuilder for collecting attributes
+    StringBuilder attributesBuilder = new StringBuilder();
 
     // Collect attributes
     foreach (var attribute in element.Attributes())
@@ -33,6 +33,7 @@ private static void FlattenXml(XElement element, string hierarchicalId, string c
 
     if (element.HasElements)
     {
+        // Use LINQ to count the existing records for the current path
         qsaIndex = outputXml.Descendants("record")
             .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/'));
 
@@ -52,6 +53,7 @@ private static void FlattenXml(XElement element, string hierarchicalId, string c
         qsaIndex = parentqsaIndex;
         outputElement.Add(new XAttribute("qsaIndex", qsaIndex + 1));
 
+        // Count the text indices for the current path and parent ID
         var qsaTextIndex = outputXml.Descendants("record")
             .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/') && e.Attribute("qsaParentId")?.Value == parentHierarchicalId);
 
