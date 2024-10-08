@@ -1,63 +1,64 @@
 private static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml, int parentqsaIndex = 0, string parentHierarchicalId = "0")
 {
-    // Using StringBuilder for efficient string concatenation
-    var currentPathBuilder = new StringBuilder(currentPath).Append('/').Append(element.Name);
-    string currentElementPath = currentPathBuilder.ToString();
+    // Create a StringBuilder to collect attributes
+    StringBuilder attributesBuilder = new StringBuilder();
 
-    // Collect attributes into a string
-    var attributesBuilder = new StringBuilder();
+    // Update the current path
+    currentPath += "/" + element.Name;
+
+    // Collect attributes
     foreach (var attribute in element.Attributes())
     {
-        attributesBuilder.Append(attribute.Name).Append('=').Append(attribute.Value).Append(' ');
+        attributesBuilder.Append($"{attribute.Name}={attribute.Value} ");
     }
 
+    // Determine the element type
     string elementType = element.HasElements ? "Element" : "Text";
 
-    // Create a new output element with necessary attributes
-    var outputElement = new XElement("record",
+    // Prepare output element
+    XElement outputElement = new XElement("record",
         new XAttribute("qsaId", hierarchicalId),
         new XAttribute("qsaParentId", parentHierarchicalId),
         new XAttribute("qsaElementType", elementType),
-        new XAttribute("qsaPath", currentElementPath.Trim('/'))
-    );
+        new XAttribute("qsaPath", currentPath.Trim('/')));
 
+    // Add attributes if any
     if (attributesBuilder.Length > 0)
     {
         outputElement.Add(new XAttribute("qsaAttribute", attributesBuilder.ToString().TrimEnd()));
     }
 
+    // Calculate the index
+    int qsaIndex;
+
     if (element.HasElements)
     {
-        // Calculate qsaIndex based on element path to minimize repeated LINQ lookups
-        int qsaIndex = outputXml.Elements("record")
-            .Count(e => e.Attribute("qsaPath")?.Value == currentElementPath.Trim('/'));
+        qsaIndex = outputXml.Descendants("record")
+            .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/'));
 
         outputElement.Add(new XAttribute("qsaIndex", qsaIndex + 1));
         outputXml.Add(outputElement);
 
-        // Iterate over child elements
         int childIndex = 1;
         foreach (var child in element.Elements())
         {
-            // Recursively flatten child elements, generating a hierarchical ID
             string childHierarchicalId = $"{hierarchicalId}.{childIndex}";
-            FlattenXml(child, childHierarchicalId, currentElementPath, outputXml, qsaIndex, hierarchicalId);
+            FlattenXml(child, childHierarchicalId, currentPath, outputXml, qsaIndex, hierarchicalId);
             childIndex++;
         }
     }
     else
     {
-        // If element has no children, add a "text" record
-        int qsaTextIndex = outputXml.Elements("record")
-            .Count(e => e.Attribute("qsaPath")?.Value == currentElementPath.Trim('/') 
-                     && e.Attribute("qsaParentId")?.Value == parentHierarchicalId);
+        qsaIndex = parentqsaIndex;
+        outputElement.Add(new XAttribute("qsaIndex", qsaIndex + 1));
 
-        outputElement.Add(new XAttribute("qsaIndex", parentqsaIndex + 1));
+        var qsaTextIndex = outputXml.Descendants("record")
+            .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/') && e.Attribute("qsaParentId")?.Value == parentHierarchicalId);
+
         outputElement.Add(new XAttribute("qsaTextIndex", qsaTextIndex + 1));
 
         if (!string.IsNullOrEmpty(element.Value))
         {
-            // Add the value of the element if it's not empty
             outputElement.Add(new XAttribute("qsaValue", element.Value));
         }
 
