@@ -1,0 +1,223 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json.Linq;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        string jsonFilePath = "path_to_your_file.json";
+        string outputFilePath = "path_to_output_file.txt";
+        var json = File.ReadAllText(jsonFilePath);
+        var qlikObject = JObject.Parse(json);
+
+        var columns = new List<Column>();
+
+        // Extract dimensions
+        foreach (var dimension in qlikObject["qHyperCubeDef"]["qDimensions"])
+        {
+            var column = new Column
+            {
+                Type = "Dimension",
+                Name = (string)dimension["qDef"]["qFieldDefs"][0],
+                Label = (string)dimension["qDef"]["qFieldLabels"][0],
+                CalcCond = (string)dimension["qCalcCond"]?["qv"],
+                BackgroundColor = (string)dimension["qAttrExprInfo"]?[1]?["qExpression"]
+            };
+            columns.Add(column);
+        }
+
+        // Extract measures
+        foreach (var measure in qlikObject["qHyperCubeDef"]["qMeasures"])
+        {
+            var column = new Column
+            {
+                Type = "Measure",
+                Name = (string)measure["qDef"]["qDef"],
+                Label = (string)measure["qDef"]["qLabel"],
+                CalcCond = (string)measure["qCalcCond"]?["qv"],
+                BackgroundColor = (string)measure["qAttrExprInfo"]?[1]?["qExpression"]
+            };
+            columns.Add(column);
+        }
+
+        // Write to file
+        using (StreamWriter writer = new StreamWriter(outputFilePath))
+        {
+            writer.WriteLine("Type\t\tName\t\tLabel\t\tCalculation Condition\t\tBackground Color");
+            writer.WriteLine("-------------------------------------------------------------------------------");
+
+            foreach (var col in columns)
+            {
+                writer.WriteLine($"{col.Type}\t\t{col.Name}\t\t{col.Label}\t\t{col.CalcCond}\t\t{col.BackgroundColor}");
+            }
+        }
+
+        Console.WriteLine($"Data written to {outputFilePath}");
+    }
+}
+
+class Column
+{
+    public string Type { get; set; }
+    public string Name { get; set; }
+    public string Label { get; set; }
+    public string CalcCond { get; set; }
+    public string BackgroundColor { get; set; }
+}
+
+//json
+{
+  "qInfo": {
+    "qId": "example-table",
+    "qType": "table"
+  },
+  "qHyperCubeDef": {
+    "qDimensions": [
+      {
+        "qDef": {
+          "qFieldDefs": ["Dimension1"],
+          "qFieldLabels": ["Dimension 1"]
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Dimension1 > 0, 'green', 'red')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Dimension1 > 0, 'lightgreen', 'pink')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "sum(Measure1) > 1000"
+        }
+      },
+      {
+        "qDef": {
+          "qFieldDefs": ["Dimension2"],
+          "qFieldLabels": ["Dimension 2"]
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Dimension2 > 0, 'blue', 'yellow')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Dimension2 > 0, 'lightblue', 'lightyellow')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "sum(Measure2) > 500"
+        }
+      },
+      {
+        "qDef": {
+          "qFieldDefs": ["Dimension3"],
+          "qFieldLabels": ["Dimension 3"]
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Dimension3 > 0, 'purple', 'orange')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Dimension3 > 0, 'lavender', 'peach')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "sum(Measure1) > 1000"
+        }
+      },
+      {
+        "qDef": {
+          "qFieldDefs": ["Dimension4"],
+          "qFieldLabels": ["Dimension 4"]
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Dimension4 > 0, 'brown', 'grey')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Dimension4 > 0, 'beige', 'lightgrey')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "count(Dimension4) > 10"
+        }
+      },
+      {
+        "qDef": {
+          "qFieldDefs": ["Dimension5"],
+          "qFieldLabels": ["Dimension 5"]
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Dimension5 > 0, 'cyan', 'magenta')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Dimension5 > 0, 'lightcyan', 'lightmagenta')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "sum(Measure2) > 500"
+        }
+      }
+    ],
+    "qMeasures": [
+      {
+        "qDef": {
+          "qDef": "Sum(Measure1)",
+          "qLabel": "Measure 1"
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Sum(Measure1) > 1000, 'green', 'red')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Sum(Measure1) > 1000, 'lightgreen', 'pink')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "Sum(Measure1) > 1000"
+        }
+      },
+      {
+        "qDef": {
+          "qDef": "Sum(Measure2)",
+          "qLabel": "Measure 2"
+        },
+        "qAttrExprInfo": [
+          {
+            "qExpression": "if(Sum(Measure2) > 500, 'blue', 'yellow')",
+            "id": "color"
+          },
+          {
+            "qExpression": "if(Sum(Measure2) > 500, 'lightblue', 'lightyellow')",
+            "id": "background"
+          }
+        ],
+        "qCalcCond": {
+          "qv": "Sum(Measure2) > 500"
+        }
+      }
+    ],
+    "qInitialDataFetch": [
+      {
+        "qTop": 0,
+        "qLeft": 0,
+        "qHeight": 100,
+        "qWidth": 7
+      }
+    ]
+  }
+}
