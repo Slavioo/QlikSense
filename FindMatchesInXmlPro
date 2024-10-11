@@ -1,0 +1,86 @@
+private static void FlattenXml(XElement element, string hierarchicalId, string currentPath, XElement outputXml, List<string> fields, List<string> variables, int parentqsaIndex = 0, string parentHierarchicalId = "0")
+{
+    currentPath += "/" + element.Name;
+
+    string attributes = "";
+    foreach (var attribute in element.Attributes())
+    {
+        attributes += $"{attribute.Name}={attribute.Value} ";
+    }
+
+    string elementType = element.HasElements ? "Element" : "Text";
+
+    XElement outputElement = new XElement("record",
+        new XAttribute("qsaId", hierarchicalId),
+        new XAttribute("qsaParentId", parentHierarchicalId),
+        new XAttribute("qsaElementType", elementType),
+        new XAttribute("qsaPath", currentPath.Trim('/'))
+    );
+
+    if (!string.IsNullOrEmpty(attributes))
+    {
+        outputElement.Add(new XAttribute("qsaAttribute", attributes.TrimEnd()));
+    }
+
+    int qsaIndex;
+
+    if (element.HasElements)
+    {
+        qsaIndex = outputXml.Descendants("record")
+            .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/'));
+
+        outputElement.Add(new XAttribute("qsaIndex", qsaIndex + 1));
+
+        outputXml.Add(outputElement);
+
+        int childIndex = 1;
+        foreach (var child in element.Elements())
+        {
+            string childHierarchicalId = $"{hierarchicalId}.{childIndex}";
+            FlattenXml(child, childHierarchicalId, currentPath, outputXml, fields, variables, qsaIndex, hierarchicalId);
+            childIndex++;
+        }
+    }
+    else
+    {
+        qsaIndex = parentqsaIndex;
+
+        outputElement.Add(new XAttribute("qsaIndex", qsaIndex + 1));
+
+        var qsaTextIndex = outputXml.Descendants("record")
+            .Count(e => e.Attribute("qsaPath")?.Value == currentPath.Trim('/') && e.Attribute("qsaParentId")?.Value == parentHierarchicalId);
+
+        outputElement.Add(new XAttribute("qsaTextIndex", qsaTextIndex + 1));
+
+        if (!string.IsNullOrEmpty(element.Value))
+        {
+            outputElement.Add(new XAttribute("qsaValue", element.Value));
+
+            string fieldMatch = string.Join("|", fields.Where(field => IsExactOrWildMatch(element.Value, field)));
+            string variableMatch = string.Join("|", variables.Where(variable => IsExactOrWildMatch(element.Value, variable)));
+
+            if (!string.IsNullOrEmpty(fieldMatch))
+            {
+                outputElement.Add(new XAttribute("qsaFieldMatch", fieldMatch));
+            }
+
+            if (!string.IsNullOrEmpty(variableMatch))
+            {
+                outputElement.Add(new XAttribute("qsaVariableMatch", variableMatch));
+            }
+        }
+
+        outputXml.Add(outputElement);
+    }
+}
+
+private static bool IsExactOrWildMatch(string xmlValue, string searchValue)
+{
+    if (xmlValue == searchValue)
+    {
+        return true;
+    }
+
+    string pattern = $@"[\[\]{{}}()<>,=]\s*{System.Text.RegularExpressions.Regex.Escape(searchValue)}\s*[\[\]{{}}()<>,=]";
+    return System.Text.RegularExpressions.Regex.IsMatch(xmlValue, pattern);
+}
