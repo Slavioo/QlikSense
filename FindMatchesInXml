@@ -1,0 +1,107 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
+class Program
+{
+    static void Main()
+    {
+        string xmlFilePath = "data.xml";  // Path to your XML file
+        string positionsFilePath = "Positions.txt";  // Path to your tab-delimited file for Titles
+        string projectsFilePath = "Projects.txt";  // Path to your tab-delimited file for Projects
+        string outputFilePath = "MatchesOutput.txt";  // Output file path
+
+        // Load the XML document
+        XDocument xmlDoc = XDocument.Load(xmlFilePath);
+
+        // Read positions (Titles) from the tab-delimited file into a list
+        List<string> titles = File.ReadAllLines(positionsFilePath)
+                                  .Skip(1) // Skip header row
+                                  .Select(line => line.Split('\t')[1]) // Select the 'Title' column
+                                  .ToList();
+
+        // Read projects from the tab-delimited file into a list
+        List<string> projects = File.ReadAllLines(projectsFilePath)
+                                    .Skip(1) // Skip header row
+                                    .Select(line => line.Split('\t')[1]) // Select the 'Project' column
+                                    .ToList();
+
+        using (StreamWriter writer = new StreamWriter(outputFilePath))
+        {
+            // Find matches for titles or projects in XML elements
+            foreach (var element in xmlDoc.Descendants().Where(x => !x.HasElements))
+            {
+                string xmlValue = element.Value;
+                string xmlPath = GetXPath(element);
+
+                // Check for an exact or special-character-bound match for Title and Project
+                string titleMatch = titles.FirstOrDefault(title => IsExactOrWildMatch(xmlValue, title));
+                string projectMatch = projects.FirstOrDefault(project => IsExactOrWildMatch(xmlValue, project));
+
+                // If either Title or Project is matched, write to output
+                if (titleMatch != null || projectMatch != null)
+                {
+                    writer.WriteLine($"XML Path: {xmlPath}");
+                    writer.WriteLine($"XML Value: {xmlValue}");
+                    if (titleMatch != null)
+                        writer.WriteLine($"Title Match: {titleMatch}");
+                    if (projectMatch != null)
+                        writer.WriteLine($"Project Match: {projectMatch}");
+                    writer.WriteLine(new string('-', 50)); // Separator for readability
+                }
+            }
+        }
+
+        Console.WriteLine("Matching results written to file.");
+    }
+
+    // Method to generate the XPath of an XElement
+    static string GetXPath(XElement element)
+    {
+        List<string> path = new List<string>();
+
+        // Traverse the XML tree upwards to build the XPath
+        while (element != null)
+        {
+            string name = element.Name.LocalName;
+            XElement parent = element.Parent;
+
+            if (parent != null)
+            {
+                // Find the position of the element if it appears more than once in the parent
+                int index = parent.Elements(element.Name).ToList().IndexOf(element) + 1;
+                name += $"[{index}]";
+            }
+
+            path.Insert(0, name);
+            element = parent;
+        }
+
+        return "/" + string.Join("/", path);
+    }
+
+    // Method to determine if there is an exact match or special-character-bound wildmatch
+    static bool IsExactOrWildMatch(string xmlValue, string searchValue)
+    {
+        // Exact match
+        if (xmlValue == searchValue)
+        {
+            return true;
+        }
+
+        // Wildmatch logic: allow different special characters before and after the searchValue with optional spaces
+        string specialChars = @"[\[\]\{\}\(\)\<\>\,\=]"; // Set of special characters (without space)
+
+        // The pattern:
+        // 1. One of the special characters followed by an optional space before the search term.
+        // 2. The search term.
+        // 3. An optional space followed by one of the special characters after the search term.
+        string pattern = $@"{specialChars}\s?{Regex.Escape(searchValue)}\s?{specialChars}";
+        
+        // Match the pattern in the XML value
+        return Regex.IsMatch(xmlValue, $@"{specialChars}\s?{Regex.Escape(searchValue)}\s?{specialChars}");
+    }
+}
