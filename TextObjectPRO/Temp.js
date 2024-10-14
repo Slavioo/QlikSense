@@ -1,64 +1,60 @@
-private static void CompareAndSaveToXml(string transformFolderPath, string outputXmlPath, List<string> fields, List<string> variables)
+private static void ProcessXmlFilesInBulk(string transformFolderPath, List<string> fields, List<string> variables, string outputFilePath)
 {
-    XElement rootElement = new XElement("Matches"); // Root for the output XML
+    var xmlFiles = Directory.GetFiles(transformFolderPath, "*.xml");
 
-    // Process each transformed XML file
-    foreach (var filePath in Directory.GetFiles(transformFolderPath, "*.xml"))
-    {
-        // Load the transformed XML file
-        XDocument doc = XDocument.Load(filePath);
+    // Load all XML documents in parallel
+    var loadedXmlDocuments = xmlFiles
+        .AsParallel()
+        .Select(file => new { FilePath = file, Document = XDocument.Load(file) })
+        .ToList();
 
-        // Iterate through each record element
-        foreach (var record in doc.Descendants("record"))
-        {
-            var qsaValue = record.Attribute("qsaValue")?.Value;
-
-            if (!string.IsNullOrEmpty(qsaValue))
+    // Select and flatten all qsaValue records from all loaded documents at once
+    var allRecords = loadedXmlDocuments
+        .SelectMany(xmlData =>
+            xmlData.Document.Descendants("record")
+            .Where(e => e.Attribute("qsaValue") != null)
+            .Select(e => new
             {
-                // Find matches for fields and variables using the wildmatch logic
-                string fieldMatch = string.Join("|", fields.Where(field => IsExactOrWildMatch(qsaValue, field)));
-                string variableMatch = string.Join("|", variables.Where(variable => IsExactOrWildMatch(qsaValue, variable)));
+                FilePath = xmlData.FilePath,
+                Element = e,
+                qsaValue = e.Attribute("qsaValue")?.Value
+            })
+        )
+        .ToList();
 
-                // Only add matched records to the output
-                if (!string.IsNullOrEmpty(fieldMatch) || !string.IsNullOrEmpty(variableMatch))
-                {
-                    // Clone the matched record element
-                    XElement matchedRecord = new XElement(record);
+    // Process all records and match against fields/variables
+    var matchedResults = allRecords
+        .AsParallel()
+        .Select(record =>
+        {
+            string fieldMatch = string.Join("|", fields.Where(field => IsExactOrWildMatch(record.qsaValue, field)));
+            string variableMatch = string.Join("|", variables.Where(variable => IsExactOrWildMatch(record.qsaValue, variable)));
 
-                    // Add file name attribute to the matched record
-                    matchedRecord.Add(new XAttribute("fileName", Path.GetFileName(filePath)));
+            return new XElement("record",
+                new XAttribute("FilePath", Path.GetFileName(record.FilePath)),
+                record.Element.Attributes(), // Retain original attributes
+                new XAttribute("qsaFieldMatch", string.IsNullOrEmpty(fieldMatch) ? "N/A" : fieldMatch),
+                new XAttribute("qsaVariableMatch", string.IsNullOrEmpty(variableMatch) ? "N/A" : variableMatch)
+            );
+        })
+        .ToList();
 
-                    // Add the field and variable matches as attributes if they exist
-                    if (!string.IsNullOrEmpty(fieldMatch))
-                    {
-                        matchedRecord.Add(new XAttribute("qsaFieldMatch", fieldMatch));
-                    }
-                    if (!string.IsNullOrEmpty(variableMatch))
-                    {
-                        matchedRecord.Add(new XAttribute("qsaVariableMatch", variableMatch));
-                    }
+    // Create a new XML output document with all the matched records
+    XDocument outputXml = new XDocument(
+        new XElement("MatchedRecords", matchedResults)
+    );
 
-                    // Add the matched record to the root element
-                    rootElement.Add(matchedRecord);
-                }
-            }
-        }
-    }
-
-    // Save all matched records into a single output XML file
-    XDocument outputDoc = new XDocument(rootElement);
-    outputDoc.Save(outputXmlPath);
-
-    Console.WriteLine("Matching values have been saved to XML successfully.");
+    // Save the output XML document
+    outputXml.Save(outputFilePath);
 }
 
-private static bool IsExactOrWildMatch(string xmlValue, string searchValue)
-{
-    if (xmlValue == searchValue)
-    {
-        return true;
-    }
 
-    string pattern = $@"[\[\]{{}}()<>,=]\s*{System.Text.RegularExpressions.Regex.Escape(searchValue)}\s*[\[\]{{}}()<>,=]";
-    return System.Text.RegularExpressions.Regex.IsMatch(xmlValue, pattern);
-}
+
+
+List<string> fields = LoadFields(fieldsFilePath);
+List<string> variables = LoadVariables(variablesFilePath);
+
+string transformFolderPath = @"path\to\transform\folder";
+string outputFilePath = @"path\to\output\file.xml";
+
+ProcessXmlFilesInBulk(transformFolderPath, fields, variables, outputFilePath);
