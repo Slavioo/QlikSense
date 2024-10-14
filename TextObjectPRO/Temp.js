@@ -1,60 +1,40 @@
-private static void ProcessXmlFilesInBulk(string transformFolderPath, List<string> fields, List<string> variables, string outputFilePath)
+private static void MatchFieldsAndVariables(string transformedXmlFolder, List<string> fields, List<string> variables, string outputFilePath)
 {
-    var xmlFiles = Directory.GetFiles(transformFolderPath, "*.xml");
+    // Get all transformed XML files from the folder
+    var xmlFiles = Directory.GetFiles(transformedXmlFolder, "*.xml");
 
-    // Load all XML documents in parallel
-    var loadedXmlDocuments = xmlFiles
-        .AsParallel()
-        .Select(file => new { FilePath = file, Document = XDocument.Load(file) })
-        .ToList();
+    using (StreamWriter writer = new StreamWriter(outputFilePath))
+    {
+        // Write the header for the output file
+        writer.WriteLine("File Name\tField Matches (qsaId: qsaValue)\tVariable Matches (qsaId: qsaValue)");
 
-    // Select and flatten all qsaValue records from all loaded documents at once
-    var allRecords = loadedXmlDocuments
-        .SelectMany(xmlData =>
-            xmlData.Document.Descendants("record")
-            .Where(e => e.Attribute("qsaValue") != null)
-            .Select(e => new
-            {
-                FilePath = xmlData.FilePath,
-                Element = e,
-                qsaValue = e.Attribute("qsaValue")?.Value
-            })
-        )
-        .ToList();
-
-    // Process all records and match against fields/variables
-    var matchedResults = allRecords
-        .AsParallel()
-        .Select(record =>
+        foreach (var file in xmlFiles)
         {
-            string fieldMatch = string.Join("|", fields.Where(field => IsExactOrWildMatch(record.qsaValue, field)));
-            string variableMatch = string.Join("|", variables.Where(variable => IsExactOrWildMatch(record.qsaValue, variable)));
+            XDocument transformedXml = XDocument.Load(file);
+            
+            // Extract qsaId and qsaValue pairs from the transformed XML
+            var qsaIdValuePairs = transformedXml.Descendants("record")
+                .Select(e => new
+                {
+                    qsaId = e.Attribute("qsaId")?.Value,
+                    qsaValue = e.Attribute("qsaValue")?.Value
+                })
+                .Where(pair => !string.IsNullOrEmpty(pair.qsaValue))
+                .ToList();
 
-            return new XElement("record",
-                new XAttribute("FilePath", Path.GetFileName(record.FilePath)),
-                record.Element.Attributes(), // Retain original attributes
-                new XAttribute("qsaFieldMatch", string.IsNullOrEmpty(fieldMatch) ? "N/A" : fieldMatch),
-                new XAttribute("qsaVariableMatch", string.IsNullOrEmpty(variableMatch) ? "N/A" : variableMatch)
-            );
-        })
-        .ToList();
+            // Use wildmatch logic to compare qsaValues with fields and variables, including corresponding qsaId
+            var fieldMatches = qsaIdValuePairs
+                .Where(pair => fields.Any(field => IsExactOrWildMatch(pair.qsaValue, field)))
+                .Select(match => $"{match.qsaId}: {match.qsaValue}")
+                .ToList();
 
-    // Create a new XML output document with all the matched records
-    XDocument outputXml = new XDocument(
-        new XElement("MatchedRecords", matchedResults)
-    );
+            var variableMatches = qsaIdValuePairs
+                .Where(pair => variables.Any(variable => IsExactOrWildMatch(pair.qsaValue, variable)))
+                .Select(match => $"{match.qsaId}: {match.qsaValue}")
+                .ToList();
 
-    // Save the output XML document
-    outputXml.Save(outputFilePath);
+            // Write matches to the file
+            writer.WriteLine($"{Path.GetFileName(file)}\t{string.Join(", ", fieldMatches)}\t{string.Join(", ", variableMatches)}");
+        }
+    }
 }
-
-
-
-
-List<string> fields = LoadFields(fieldsFilePath);
-List<string> variables = LoadVariables(variablesFilePath);
-
-string transformFolderPath = @"path\to\transform\folder";
-string outputFilePath = @"path\to\output\file.xml";
-
-ProcessXmlFilesInBulk(transformFolderPath, fields, variables, outputFilePath);
