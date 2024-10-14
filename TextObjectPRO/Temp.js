@@ -1,36 +1,49 @@
-private static void MatchFieldsAndVariables(string transformedXmlFolder, List<string> fields, List<string> variables, string outputFilePath)
+private static void AddFieldAndVariableMatchesToXmlFiles(string transformFolder, List<string> fields, List<string> variables)
 {
-    // Get all transformed XML files from the folder
-    var xmlFiles = Directory.GetFiles(transformedXmlFolder, "*.xml");
+    var xmlFiles = Directory.GetFiles(transformFolder, "*.xml");
 
-    using (StreamWriter writer = new StreamWriter(outputFilePath))
+    foreach (var xmlFile in xmlFiles)
     {
-        writer.WriteLine("File Name\tField Matches\tVariable Matches");
-
-        foreach (var file in xmlFiles)
+        // Load the XML document
+        XDocument xmlDoc = XDocument.Load(xmlFile);
+        
+        // Loop through all 'record' elements in the XML
+        foreach (var record in xmlDoc.Descendants("record"))
         {
-            XDocument transformedXml = XDocument.Load(file);
-            
-            // Extract qsaValues from the transformed XML
-            var qsaValues = transformedXml.Descendants("record")
-                .Select(e => e.Attribute("qsaValue")?.Value)
-                .Where(value => !string.IsNullOrEmpty(value))
-                .ToList();
+            var qsaValue = record.Attribute("qsaValue")?.Value;
 
-            // Use wildmatch logic to compare qsaValues with fields and variables
-            var fieldMatches = fields.Where(field => 
-                qsaValues.Any(qsaValue => IsExactOrWildMatch(qsaValue, field))
-            ).ToList();
+            if (!string.IsNullOrEmpty(qsaValue))
+            {
+                // Apply wildmatch logic for fields and variables
+                string fieldMatch = string.Join("|", fields.Where(field => IsExactOrWildMatch(qsaValue, field)));
+                string variableMatch = string.Join("|", variables.Where(variable => IsExactOrWildMatch(qsaValue, variable)));
 
-            var variableMatches = variables.Where(variable => 
-                qsaValues.Any(qsaValue => IsExactOrWildMatch(qsaValue, variable))
-            ).ToList();
+                // Add matches as new attributes if they exist
+                if (!string.IsNullOrEmpty(fieldMatch))
+                {
+                    record.SetAttributeValue("qsaFieldMatch", fieldMatch);
+                }
 
-            // Write matches to the file
-            writer.WriteLine($"{Path.GetFileName(file)}\t{string.Join(", ", fieldMatches)}\t{string.Join(", ", variableMatches)}");
+                if (!string.IsNullOrEmpty(variableMatch))
+                {
+                    record.SetAttributeValue("qsaVariableMatch", variableMatch);
+                }
+            }
         }
+
+        // Save the updated XML document back to the file
+        xmlDoc.Save(xmlFile);
     }
 }
 
+private static bool IsExactOrWildMatch(string xmlValue, string searchValue)
+{
+    if (xmlValue == searchValue)
+    {
+        return true;
+    }
 
-MatchFieldsAndVariables(transformedXmlFolder, fields, variables, "matchedValues.txt");
+    // Adjust the pattern to match wildcards or special characters
+    string pattern = $@"[\[\]{{}}()<>,=]\s*{System.Text.RegularExpressions.Regex.Escape(searchValue)}\s*[\[\]{{}}()<>,=]";
+    return System.Text.RegularExpressions.Regex.IsMatch(xmlValue, pattern);
+}
