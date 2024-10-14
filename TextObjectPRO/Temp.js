@@ -1,39 +1,55 @@
-private static void AddFieldAndVariableMatchesToXmlFiles(string transformFolder, List<string> fields, List<string> variables)
+private static void CompareAndSaveToXml(string transformFolderPath, string outputXmlPath, List<string> fields, List<string> variables)
 {
-    var xmlFiles = Directory.GetFiles(transformFolder, "*.xml");
+    XElement rootElement = new XElement("Matches"); // Root for the output XML
 
-    foreach (var xmlFile in xmlFiles)
+    // Process each transformed XML file
+    foreach (var filePath in Directory.GetFiles(transformFolderPath, "*.xml"))
     {
-        // Load the XML document
-        XDocument xmlDoc = XDocument.Load(xmlFile);
-        
-        // Loop through all 'record' elements in the XML
-        foreach (var record in xmlDoc.Descendants("record"))
+        // Load the transformed XML file
+        XDocument doc = XDocument.Load(filePath);
+
+        // Iterate through each record element
+        foreach (var record in doc.Descendants("record"))
         {
             var qsaValue = record.Attribute("qsaValue")?.Value;
 
             if (!string.IsNullOrEmpty(qsaValue))
             {
-                // Apply wildmatch logic for fields and variables
+                // Find matches for fields and variables using the wildmatch logic
                 string fieldMatch = string.Join("|", fields.Where(field => IsExactOrWildMatch(qsaValue, field)));
                 string variableMatch = string.Join("|", variables.Where(variable => IsExactOrWildMatch(qsaValue, variable)));
 
-                // Add matches as new attributes if they exist
-                if (!string.IsNullOrEmpty(fieldMatch))
+                // Only add matched records to the output
+                if (!string.IsNullOrEmpty(fieldMatch) || !string.IsNullOrEmpty(variableMatch))
                 {
-                    record.SetAttributeValue("qsaFieldMatch", fieldMatch);
-                }
+                    // Clone the matched record element
+                    XElement matchedRecord = new XElement(record);
 
-                if (!string.IsNullOrEmpty(variableMatch))
-                {
-                    record.SetAttributeValue("qsaVariableMatch", variableMatch);
+                    // Add file name attribute to the matched record
+                    matchedRecord.Add(new XAttribute("fileName", Path.GetFileName(filePath)));
+
+                    // Add the field and variable matches as attributes if they exist
+                    if (!string.IsNullOrEmpty(fieldMatch))
+                    {
+                        matchedRecord.Add(new XAttribute("qsaFieldMatch", fieldMatch));
+                    }
+                    if (!string.IsNullOrEmpty(variableMatch))
+                    {
+                        matchedRecord.Add(new XAttribute("qsaVariableMatch", variableMatch));
+                    }
+
+                    // Add the matched record to the root element
+                    rootElement.Add(matchedRecord);
                 }
             }
         }
-
-        // Save the updated XML document back to the file
-        xmlDoc.Save(xmlFile);
     }
+
+    // Save all matched records into a single output XML file
+    XDocument outputDoc = new XDocument(rootElement);
+    outputDoc.Save(outputXmlPath);
+
+    Console.WriteLine("Matching values have been saved to XML successfully.");
 }
 
 private static bool IsExactOrWildMatch(string xmlValue, string searchValue)
@@ -43,7 +59,6 @@ private static bool IsExactOrWildMatch(string xmlValue, string searchValue)
         return true;
     }
 
-    // Adjust the pattern to match wildcards or special characters
     string pattern = $@"[\[\]{{}}()<>,=]\s*{System.Text.RegularExpressions.Regex.Escape(searchValue)}\s*[\[\]{{}}()<>,=]";
     return System.Text.RegularExpressions.Regex.IsMatch(xmlValue, pattern);
 }
