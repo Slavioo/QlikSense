@@ -1,32 +1,36 @@
-private static List<string> LoadFields(string fieldsFilePath)
+private static void MatchFieldsAndVariables(string transformedXmlFolder, List<string> fields, List<string> variables, string outputFilePath)
 {
-    XDocument fieldsDoc = XDocument.Load(fieldsFilePath);
-    return fieldsDoc.Descendants("qFieldList")
-                    .Elements("qItems")
-                    .Elements("qName")
-                    .Select(x => x.Value)
-                    .ToList();
+    // Get all transformed XML files from the folder
+    var xmlFiles = Directory.GetFiles(transformedXmlFolder, "*.xml");
+
+    using (StreamWriter writer = new StreamWriter(outputFilePath))
+    {
+        writer.WriteLine("File Name\tField Matches\tVariable Matches");
+
+        foreach (var file in xmlFiles)
+        {
+            XDocument transformedXml = XDocument.Load(file);
+            
+            // Extract qsaValues from the transformed XML
+            var qsaValues = transformedXml.Descendants("record")
+                .Select(e => e.Attribute("qsaValue")?.Value)
+                .Where(value => !string.IsNullOrEmpty(value))
+                .ToList();
+
+            // Use wildmatch logic to compare qsaValues with fields and variables
+            var fieldMatches = fields.Where(field => 
+                qsaValues.Any(qsaValue => IsExactOrWildMatch(qsaValue, field))
+            ).ToList();
+
+            var variableMatches = variables.Where(variable => 
+                qsaValues.Any(qsaValue => IsExactOrWildMatch(qsaValue, variable))
+            ).ToList();
+
+            // Write matches to the file
+            writer.WriteLine($"{Path.GetFileName(file)}\t{string.Join(", ", fieldMatches)}\t{string.Join(", ", variableMatches)}");
+        }
+    }
 }
 
-private static List<string> LoadVariables(string variablesFilePath)
-{
-    XDocument variablesDoc = XDocument.Load(variablesFilePath);
-    return variablesDoc.Descendants("qVariableList")
-                       .Elements("qItems")
-                       .Elements("qName")
-                       .Select(x => x.Value)
-                       .ToList();
-}
 
-
-            Console.WriteLine($"Flattening XML files for {application}");
-            var dumpFiles = Directory.GetFiles(dumpPath);
-
-            // Load fields and variables
-            var fields = LoadFields("fields.xml");
-            var variables = LoadVariables("variables.xml");
-
-            foreach (var dumpFile in dumpFiles)
-            {
-                var fileName = Path.GetFileName(dumpFile);
-                var extension = Path.GetExtension(dumpFile);
+MatchFieldsAndVariables(transformedXmlFolder, fields, variables, "matchedValues.txt");
