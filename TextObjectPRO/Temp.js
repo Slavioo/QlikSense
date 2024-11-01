@@ -1,40 +1,69 @@
-private static void MatchFieldsAndVariables(string transformedXmlFolder, List<string> fields, List<string> variables, string outputFilePath)
-{
-    // Get all transformed XML files from the folder
-    var xmlFiles = Directory.GetFiles(transformedXmlFolder, "*.xml");
-
-    using (StreamWriter writer = new StreamWriter(outputFilePath))
-    {
-        // Write the header for the output file
-        writer.WriteLine("File Name\tField Matches (qsaId: qsaValue)\tVariable Matches (qsaId: qsaValue)");
-
-        foreach (var file in xmlFiles)
-        {
-            XDocument transformedXml = XDocument.Load(file);
+define(["qlik", "jquery"], function(qlik, $) {
+    return {
+        definition: {
+            type: "items",
+            component: "accordion",
+            items: {
+                settings: {
+                    uses: "settings",
+                    items: {
+                        instanceId: {
+                            type: "string",
+                            ref: "instanceId",
+                            label: "Instance ID",
+                            defaultValue: "instance1",
+                            expression: "optional"
+                        },
+                        visualizations: { /* existing settings here */ },
+                        pageSize: { /* existing settings here */ },
+                        css: { /* existing settings here */ },
+                        valuesToCompare: { /* existing settings here */ }
+                    }
+                }
+            }
+        },
+        paint: async function($element, layout) {
+            const app = qlik.currApp(this);
+            const instanceId = layout.instanceId || "instance1";
+            const css = '<style>' + layout.css + '</style>';
             
-            // Extract qsaId and qsaValue pairs from the transformed XML
-            var qsaIdValuePairs = transformedXml.Descendants("record")
-                .Select(e => new
-                {
-                    qsaId = e.Attribute("qsaId")?.Value,
-                    qsaValue = e.Attribute("qsaValue")?.Value
-                })
-                .Where(pair => !string.IsNullOrEmpty(pair.qsaValue))
-                .ToList();
+            // Use the instanceId in class names
+            const mainContainer = $(`<div class="container ${instanceId}-container"></div>`);
+            $element.empty().append(css).append(mainContainer);
+            
+            const visualizations = layout.visualizations || [];
+            const groupedVisualizations = groupByColumnId(visualizations);
+            
+            for (const columnId in groupedVisualizations) {
+                const columnContainer = $(`<div class="column ${instanceId}-column"></div>`);
+                mainContainer.append(columnContainer);
 
-            // Use wildmatch logic to compare qsaValues with fields and variables, including corresponding qsaId
-            var fieldMatches = qsaIdValuePairs
-                .Where(pair => fields.Any(field => IsExactOrWildMatch(pair.qsaValue, field)))
-                .Select(match => $"{match.qsaId}: {match.qsaValue}")
-                .ToList();
+                for (const viz of groupedVisualizations[columnId]) {
+                    const tableContainer = $(`<div class="table-container ${instanceId}-table"></div>`)
+                        .attr('data-grid-column-id', columnId);
+                    columnContainer.append(tableContainer);
+                    await displayData(app, viz.id, layout.pageSize, tableContainer, layout.prevColumnName, layout.currColumnName);
+                }
+            }
 
-            var variableMatches = qsaIdValuePairs
-                .Where(pair => variables.Any(variable => IsExactOrWildMatch(pair.qsaValue, variable)))
-                .Select(match => $"{match.qsaId}: {match.qsaValue}")
-                .ToList();
-
-            // Write matches to the file
-            writer.WriteLine($"{Path.GetFileName(file)}\t{string.Join(", ", fieldMatches)}\t{string.Join(", ", variableMatches)}");
+            // Event handlers for copy functionality
+            $element.on('click', `.${instanceId}-table .copyable`, function() { /* copy functionality */ });
+            $element.on('click', `.${instanceId}-table th`, function() { /* copy table functionality */ });
         }
+    };
+    
+    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName) {
+        // Your displayData implementation here
     }
-}
+
+    function groupByColumnId(visualizations) {
+        return visualizations.reduce((acc, viz) => {
+            const { columnId } = viz;
+            if (!acc[columnId]) {
+                acc[columnId] = [];
+            }
+            acc[columnId].push(viz);
+            return acc;
+        }, {});
+    }
+});
