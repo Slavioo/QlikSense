@@ -74,6 +74,9 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }
             }
         },
+		support : {
+			exportData : false
+		},
         paint: async function($element, layout) {
             const app = qlik.currApp(this);
             const css = '<style>' + layout.css + '</style>';
