@@ -45,6 +45,13 @@ define(["qlik", "jquery"], function(qlik, $) {
                             defaultValue: "",
                             expression: 'optional'
                         },
+                        identifier: {
+                            type: "string",
+                            ref: "identifier",
+                            label: "Identifier",
+                            expression: "optional",
+                            defaultValue: ""
+                        },
                         valuesToCompare: {
                             type: "items",
                             label: "Values to compare",
@@ -73,20 +80,21 @@ define(["qlik", "jquery"], function(qlik, $) {
             const visualizations = layout.visualizations || [];
             const prevColumnName = layout.prevColumnName || "Prev";
             const currColumnName = layout.currColumnName || "Curr";
+            const identifier = layout.identifier || "";
 
             $element.empty().append(css);
 
             const groupedVisualizations = groupByColumnId(visualizations);
 
-            const mainContainer = $('<div class="container"></div>');
+            const mainContainer = $('<div class="container ' + identifier + '"></div>');
             $element.append(mainContainer);
 
             for (const columnId in groupedVisualizations) {
-                const columnContainer = $('<div class="column"></div>');
+                const columnContainer = $('<div class="column ' + identifier + '"></div>');
                 mainContainer.append(columnContainer);
 
                 for (const viz of groupedVisualizations[columnId]) {
-                    const tableContainer = $('<div class="table-container"></div>')
+                    const tableContainer = $('<div class="table-container ' + identifier + '"></div>')
                         .attr('data-grid-column-id', columnId);
                     columnContainer.append(tableContainer);
                     await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName);
