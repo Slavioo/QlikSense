@@ -1,69 +1,58 @@
-define(["qlik", "jquery"], function(qlik, $) {
-    return {
-        definition: {
-            type: "items",
-            component: "accordion",
-            items: {
-                settings: {
-                    uses: "settings",
-                    items: {
-                        instanceId: {
-                            type: "string",
-                            ref: "instanceId",
-                            label: "Instance ID",
-                            defaultValue: "instance1",
-                            expression: "optional"
-                        },
-                        visualizations: { /* existing settings here */ },
-                        pageSize: { /* existing settings here */ },
-                        css: { /* existing settings here */ },
-                        valuesToCompare: { /* existing settings here */ }
-                    }
-                }
-            }
-        },
-        paint: async function($element, layout) {
-            const app = qlik.currApp(this);
-            const instanceId = layout.instanceId || "instance1";
-            const css = '<style>' + layout.css + '</style>';
-            
-            // Use the instanceId in class names
-            const mainContainer = $(`<div class="container ${instanceId}-container"></div>`);
-            $element.empty().append(css).append(mainContainer);
-            
-            const visualizations = layout.visualizations || [];
-            const groupedVisualizations = groupByColumnId(visualizations);
-            
-            for (const columnId in groupedVisualizations) {
-                const columnContainer = $(`<div class="column ${instanceId}-column"></div>`);
-                mainContainer.append(columnContainer);
+='
+body {
+    font-family: Arial, sans-serif;
+    font-size: 0.8vw; /* Smaller font size for better fit */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
 
-                for (const viz of groupedVisualizations[columnId]) {
-                    const tableContainer = $(`<div class="table-container ${instanceId}-table"></div>`)
-                        .attr('data-grid-column-id', columnId);
-                    columnContainer.append(tableContainer);
-                    await displayData(app, viz.id, layout.pageSize, tableContainer, layout.prevColumnName, layout.currColumnName);
-                }
-            }
+.container.test1 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: 100vh;
+    overflow-y: auto; /* Single vertical scrollbar for the container */
+}
 
-            // Event handlers for copy functionality
-            $element.on('click', `.${instanceId}-table .copyable`, function() { /* copy functionality */ });
-            $element.on('click', `.${instanceId}-table th`, function() { /* copy table functionality */ });
-        }
-    };
-    
-    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName) {
-        // Your displayData implementation here
-    }
+.column.test1 {
+    flex: 1;
+    min-width: 30%;
+    max-width: 32%;
+    box-sizing: border-box;
+    margin: 10px; /* Margin between columns */
+}
 
-    function groupByColumnId(visualizations) {
-        return visualizations.reduce((acc, viz) => {
-            const { columnId } = viz;
-            if (!acc[columnId]) {
-                acc[columnId] = [];
-            }
-            acc[columnId].push(viz);
-            return acc;
-        }, {});
-    }
-});
+.table-container.test1 {
+    margin-bottom: 10px; /* Margin between tables */
+}
+
+.table-preview.test1 {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container.test1 th, .table-container.test1 td {
+    padding: 0.4vw; /* Smaller padding for better fit */
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.table-container.test1 th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.table-container.test1 tr {
+    height: calc(100vh / 55); /* Ensure 50 records fit within the window size */
+}
+
+.table-container.test1 tr:hover {
+    background-color: #f1f1f1; /* Highlight color on hover */
+}
+
+.highlight {
+    background-color: #ffdddd; /* Highlight color for different values */
+}
+'
