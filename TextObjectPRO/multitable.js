@@ -74,9 +74,9 @@ define(["qlik", "jquery"], function(qlik, $) {
                 }
             }
         },
-		support : {
-			exportData : false
-		},
+        support: {
+            exportData: false
+        },
         paint: async function($element, layout) {
             const app = qlik.currApp(this);
             const css = '<style>' + layout.css + '</style>';
@@ -100,11 +100,10 @@ define(["qlik", "jquery"], function(qlik, $) {
                     const tableContainer = $('<div class="table-container ' + identifier + '"></div>')
                         .attr('data-grid-column-id', columnId);
                     columnContainer.append(tableContainer);
-                    await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName);
+                    await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName, identifier);
                 }
             }
 
-            // Event delegation for dynamically created elements
             $element.on('click', '.copyable', function() {
                 const text = $(this).text().trim();
                 copyToClipboard(text);
@@ -114,7 +113,6 @@ define(["qlik", "jquery"], function(qlik, $) {
                 copyTableToClipboard($(this).closest('.table-preview'));
             });
 
-            // Tooltip on hover
             $element.on('mouseenter', '.copyable', function() {
                 $(this).attr('title', 'Click to copy');
             });
@@ -133,7 +131,7 @@ define(["qlik", "jquery"], function(qlik, $) {
         }
     };
 
-    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName) {
+    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName, identifier) {
         try {
             const vis = await app.visualization.get(visualizationId);
             const updateData = async () => {
@@ -151,7 +149,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                 const prevColumnIndex = headers.indexOf(prevColumnName);
                 const currColumnIndex = headers.indexOf(currColumnName);
 
-                const table = $('<table class="table-preview"></table>');
+                const table = $('<table class="table-preview ' + identifier + '"></table>');
                 const headerRow = $('<tr></tr>');
 
                 headers.forEach(header => {
