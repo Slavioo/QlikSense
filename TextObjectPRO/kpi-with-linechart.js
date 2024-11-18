@@ -1,4 +1,4 @@
-define(["qlik", "https://cdn.jsdelivr.net/npm/chart.js"], function (qlik, Chart) {
+define(["qlik", "https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/Chart.min.js"], function (qlik, Chart) {
     return {
         paint: function ($element) {
             // Define KPI data and chart data
