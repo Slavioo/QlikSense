@@ -44,7 +44,10 @@ define(["qlik", "jquery"], function (qlik, $) {
                 return;
             }
 
-            try {
+            let isHovering = false;
+            let isCursorOutside = true;
+
+            const renderKpiCards = async () => {
                 const vis = await app.visualization.get(visualizationId);
                 const layout = await vis.model.getLayout();
 
@@ -121,7 +124,7 @@ define(["qlik", "jquery"], function (qlik, $) {
                         }
 
                         .kpi-description {
-                            font-size: 0.9em;
+                            font-size: 1em;
                             color: #777777;
                         }
                     </style>
@@ -147,17 +150,13 @@ define(["qlik", "jquery"], function (qlik, $) {
 
                     card.hover(
                         function () {
-                            if (!lockedTitle) {
-                                if (selectInField) {
-                                    app.field(selectInField).selectMatch(title, false);
-                                }
+                            if (selectInField && !lockedTitle) {
+                                app.field(selectInField).selectMatch(title, false);
                             }
                         },
                         function () {
-                            if (!lockedTitle) {
-                                if (selectInField) {
-                                    app.field(selectInField).clear();
-                                }
+                            if (selectInField && !lockedTitle) {
+                                app.field(selectInField).clear();
                             }
                         }
                     );
@@ -179,11 +178,39 @@ define(["qlik", "jquery"], function (qlik, $) {
                         }
                     });
                 });
+            };
 
-            } catch (error) {
-                console.error("Error rendering visualization data:", error);
-                $element.html("<p>Error rendering data. Check console for details.</p>");
-            }
+            renderKpiCards();
+
+            const vis = await app.visualization.get(visualizationId);
+            const handleLayoutChange = async () => {
+                if (!isHovering && isCursorOutside) {
+                    renderKpiCards();
+                }
+            };
+
+            vis.model.on('changed', handleLayoutChange);
+
+            $element.on('mouseenter', () => {
+                isHovering = true;
+            });
+
+            $element.on('mouseleave', () => {
+                isHovering = false;
+                setTimeout(() => {
+                    if (isCursorOutside) {
+                        renderKpiCards();
+                    }
+                }, 50);
+            });
+
+            $element.on('mouseenter', () => {
+                isCursorOutside = false;
+            });
+
+            $element.on('mouseleave', () => {
+                isCursorOutside = true;
+            });
         }
     };
 });
