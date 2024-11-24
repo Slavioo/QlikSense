@@ -87,8 +87,8 @@ define(["qlik", "jquery"], function (qlik, $) {
 
                         .kpi-card {
                             background-color: #ffffff;
-                            border-radius: 12px;
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                            border-radius: 4px;
+                            box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
                             padding: 16px;
                             text-align: center;
                             display: flex;
@@ -100,7 +100,7 @@ define(["qlik", "jquery"], function (qlik, $) {
                         }
 
                         .kpi-card:hover {
-                            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                            box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
                         }
 
                         .kpi-card.selected {
