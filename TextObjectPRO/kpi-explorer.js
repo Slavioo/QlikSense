@@ -25,6 +25,13 @@ define(["qlik", "jquery"], function (qlik, $) {
                             ref: "selectInField",
                             label: "Select in Field on hover or click",
                             expression: "optional"
+                        },
+                        numberOfColumns: {
+                            type: "integer",
+                            ref: "numberOfColumns",
+                            label: "Number of Columns",
+                            defaultValue: 6,
+                            expression: "optional"
                         }
                     }
                 }
@@ -38,6 +45,7 @@ define(["qlik", "jquery"], function (qlik, $) {
             const visualizationId = layout.visualizationId;
             const pageSize = layout.pageSize || 50;
             const selectInField = layout.selectInField;
+            const numberOfColumns = layout.numberOfColumns || 6;
 
             if (!visualizationId) {
                 $element.html("<p>Please provide a Visualization ID in the settings panel.</p>");
@@ -79,7 +87,7 @@ define(["qlik", "jquery"], function (qlik, $) {
 
                         .kpi-container {
                             display: grid;
-                            grid-template-columns: repeat(6, 1fr);
+                            grid-template-columns: repeat(${numberOfColumns}, 1fr);
                             grid-gap: 16px;
                             width: 100%;
                             height: 100%;
@@ -197,6 +205,9 @@ define(["qlik", "jquery"], function (qlik, $) {
 
             $element.on('mouseleave', () => {
                 isHovering = false;
+                if (lockedTitle === title) {
+                    card.addClass("selected");
+                }
                 setTimeout(() => {
                     if (isCursorOutside) {
                         renderKpiCards();
