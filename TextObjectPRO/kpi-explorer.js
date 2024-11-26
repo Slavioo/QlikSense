@@ -26,10 +26,10 @@ define(["qlik", "jquery"], function (qlik, $) {
                             label: "Select in Field on hover or click",
                             expression: "optional"
                         },
-                        numberOfColumns: {
+                        numberOfCards: {
                             type: "integer",
-                            ref: "numberOfColumns",
-                            label: "Number of Columns",
+                            ref: "numberOfCards",
+                            label: "Number of Cards",
                             defaultValue: 6,
                             expression: "optional"
                         }
@@ -45,15 +45,11 @@ define(["qlik", "jquery"], function (qlik, $) {
             const visualizationId = layout.visualizationId;
             const pageSize = layout.pageSize || 50;
             const selectInField = layout.selectInField;
-            const numberOfColumns = layout.numberOfColumns || 6;
-
-            if (!visualizationId) {
-                $element.html("<p>Please provide a Visualization ID in the settings panel.</p>");
-                return;
-            }
+            const numberOfCards = layout.numberOfCards || 6;
 
             let isHovering = false;
             let isCursorOutside = true;
+            let lockedTitle = null;
 
             const renderKpiCards = async () => {
                 const vis = await app.visualization.get(visualizationId);
@@ -87,7 +83,7 @@ define(["qlik", "jquery"], function (qlik, $) {
 
                         .kpi-container {
                             display: grid;
-                            grid-template-columns: repeat(${numberOfColumns}, 1fr);
+                            grid-template-columns: repeat(${numberOfCards}, 1fr);
                             grid-gap: 16px;
                             width: 100%;
                             height: 100%;
@@ -150,7 +146,10 @@ define(["qlik", "jquery"], function (qlik, $) {
                 $element.html(html);
 
                 const cards = $element.find(".kpi-card");
-                let lockedTitle = null;
+
+                if (lockedTitle) {
+                    cards.filter(`[data-title="${lockedTitle}"]`).addClass("selected");
+                }
 
                 cards.each(function () {
                     const card = $(this);
@@ -205,9 +204,6 @@ define(["qlik", "jquery"], function (qlik, $) {
 
             $element.on('mouseleave', () => {
                 isHovering = false;
-                if (lockedTitle === title) {
-                    card.addClass("selected");
-                }
                 setTimeout(() => {
                     if (isCursorOutside) {
                         renderKpiCards();
