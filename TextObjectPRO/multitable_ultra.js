@@ -264,3 +264,33 @@ define(["qlik", "jquery"], function (qlik, $) {
         return tableText;
     }
 });
+
+//CSS
+/* Define header colors for specific columnId */
+.container .table-container[data-grid-column-id="1"] .table-preview th {
+    background-color: #f8d7da; /* Light red */
+    color: #721c24; /* Complementary text color for readability */
+}
+
+.container .table-container[data-grid-column-id="2"] .table-preview th {
+    background-color: #fff3cd; /* Light yellow */
+    color: #856404; /* Complementary text color for readability */
+}
+
+.container .table-container[data-grid-column-id="3"] .table-preview th {
+    background-color: #d4edda; /* Light green */
+    color: #155724; /* Complementary text color for readability */
+}
+
+/* Hover effect for rows */
+.container .table-container[data-grid-column-id="1"] .table-preview tr:hover {
+    background-color: rgba(248, 215, 218, 0.5); /* Light red with transparency */
+}
+
+.container .table-container[data-grid-column-id="2"] .table-preview tr:hover {
+    background-color: rgba(255, 243, 205, 0.5); /* Light yellow with transparency */
+}
+
+.container .table-container[data-grid-column-id="3"] .table-preview tr:hover {
+    background-color: rgba(212, 237, 218, 0.5); /* Light green with transparency */
+}
