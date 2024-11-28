@@ -76,6 +76,23 @@ define(["qlik", "jquery"], function (qlik, $) {
                                 },
                             },
                         },
+                        columnsWithDataValue: {
+                            type: "array",
+                            ref: "columnsWithDataValue",
+                            label: "Columns with Data-Value",
+                            itemTitleRef: "columnName",
+                            allowAdd: true,
+                            allowRemove: true,
+                            addTranslation: "Add Column",
+                            items: {
+                                columnName: {
+                                    type: "string",
+                                    ref: "columnName",
+                                    label: "Column Title",
+                                    expression: "optional",
+                                },
+                            },
+                        },
                     },
                 },
             },
@@ -87,6 +104,7 @@ define(["qlik", "jquery"], function (qlik, $) {
             const app = qlik.currApp(this);
             const css = "<style>" + layout.css + "</style>";
             const visualizations = layout.visualizations || [];
+            const columnsWithDataValue = layout.columnsWithDataValue || [];
             const prevColumnName = layout.prevColumnName || "Prev";
             const currColumnName = layout.currColumnName || "Curr";
             const identifier = layout.identifier || "";
@@ -108,7 +126,7 @@ define(["qlik", "jquery"], function (qlik, $) {
                         '<div class="table-container ' + identifier + '"></div>'
                     ).attr("data-grid-column-id", columnId);
                     columnContainer.append(tableContainer);
-                    await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName, identifier, includeHeaders);
+                    await displayData(app, viz.id, layout.pageSize, tableContainer, prevColumnName, currColumnName, columnsWithDataValue, identifier, includeHeaders);
                 }
             }
 
@@ -127,7 +145,7 @@ define(["qlik", "jquery"], function (qlik, $) {
         }, {});
     }
 
-    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName, identifier, includeHeaders) {
+    async function displayData(app, visualizationId, pageSize, $container, prevColumnName, currColumnName, columnsWithDataValue, identifier, includeHeaders) {
         try {
             const vis = await app.visualization.get(visualizationId);
 
@@ -164,6 +182,10 @@ define(["qlik", "jquery"], function (qlik, $) {
                     const tr = $("<tr></tr>");
                     row.forEach((cell, index) => {
                         const td = $('<td class="copyable"></td>').text(cell.qText);
+
+                        if (columnsWithDataValue.some((col) => col.columnName === headers[index])) {
+                            td.attr("data-value", cell.qText);
+                        }
 
                         if (prevColumnIndex !== -1 && currColumnIndex !== -1) {
                             if (index === prevColumnIndex || index === currColumnIndex) {
@@ -266,6 +288,63 @@ define(["qlik", "jquery"], function (qlik, $) {
 });
 
 //CSS
+body {
+    font-family: Arial, sans-serif;
+    font-size: 0.8vw; /* Smaller font size for better fit */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    height: 100vh;
+    overflow-y: auto; /* Single vertical scrollbar for the container */
+}
+
+.column {
+    flex: 1;
+    min-width: 30%;
+    max-width: 32%;
+    box-sizing: border-box;
+    margin: 10px; /* Margin between columns */
+}
+
+.table-container {
+    margin-bottom: 10px; /* Margin between tables */
+}
+
+.table-preview {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 0.4vw; /* Smaller padding for better fit */
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr {
+    height: calc(100vh / 55); /* Ensure 50 records fit within the window size */
+}
+
+tr:hover {
+    background-color: #f1f1f1; /* Highlight color on hover */
+}
+
+.highlight {
+    background-color: #f1f1f1; /* Highlight color for different values */
+}
+
 /* Define header colors for specific columnId */
 .container .table-container[data-grid-column-id="1"] .table-preview th {
     background-color: #f8d7da; /* Light red */
@@ -293,4 +372,38 @@ define(["qlik", "jquery"], function (qlik, $) {
 
 .container .table-container[data-grid-column-id="3"] .table-preview tr:hover {
     background-color: rgba(212, 237, 218, 0.5); /* Light green with transparency */
+}
+
+/* Default styling for all cells with a data-value attribute */
+.table-preview tr[data-value] {
+    background-color: lightgrey; /* Default background color */
+    color: black; /* Default text color */
+    font-weight: bold;
+}
+
+.table-preview td[data-value] {
+    background-color: lightgrey; /* Default background color */
+    color: black; /* Default text color */
+    font-weight: bold;
+}
+
+/* Specific colors for cells with certain values */
+.table-preview td[data-value="Sales"] {
+    background-color: lightblue;
+    color: navy;
+}
+
+.table-preview td[data-value="Growth"] {
+    background-color: lightgreen;
+    color: darkgreen;
+}
+
+.table-preview td[data-value="Efficiency"] {
+    background-color: lightyellow;
+    color: goldenrod;
+}
+
+.table-preview td[data-value="Satisfaction"] {
+    background-color: lightcoral;
+    color: maroon;
 }
