@@ -24,25 +24,37 @@ define(["qlik", "jquery"], function (qlik, $) {
             const app = qlik.currApp(this);
             const visualizationId = layout.visualizationId;
 
+            const fetchAllPages = async (model, pageSize) => {
+                const totalRows = model.layout.qHyperCube.qSize.qcy;
+                const totalCols = model.layout.qHyperCube.qSize.qcx;
+                const allData = [];
+
+                for (let row = 0; row < totalRows; row += pageSize) {
+                    const requestPage = [
+                        {
+                            qTop: row,
+                            qLeft: 0,
+                            qWidth: totalCols,
+                            qHeight: Math.min(pageSize, totalRows - row),
+                        },
+                    ];
+                    const pageData = await model.getHyperCubeData("/qHyperCubeDef", requestPage);
+                    allData.push(...pageData[0].qMatrix);
+                }
+
+                return allData;
+            };
+
             const renderTableTrellis = async () => {
                 const vis = await app.visualization.get(visualizationId);
                 const visLayout = await vis.model.getLayout();
 
-                // Fetch all rows from the hypercube
-                const totalRows = visLayout.qHyperCube.qSize.qcy;
-                const requestPage = [
-                    {
-                        qTop: 0,
-                        qLeft: 0,
-                        qWidth: visLayout.qHyperCube.qSize.qcx,
-                        qHeight: totalRows // Fetch all rows
-                    }
-                ];
-                const dataPage = await vis.model.getHyperCubeData("/qHyperCubeDef", requestPage);
+                const pageSize = 50; // Define the page size
+                const dataMatrix = await fetchAllPages(vis.model, pageSize);
 
                 const headers = visLayout.qHyperCube.qDimensionInfo.slice(1).map(dim => dim.qFallbackTitle)
                     .concat(visLayout.qHyperCube.qMeasureInfo.map(meas => meas.qFallbackTitle));
-                const groupedRows = dataPage[0].qMatrix.reduce((groups, row) => {
+                const groupedRows = dataMatrix.reduce((groups, row) => {
                     const groupKey = row[0].qText; // Use the first column as the group key
                     if (!groups[groupKey]) groups[groupKey] = [];
                     groups[groupKey].push(row.slice(1).map(cell => cell.qText || "-")); // Exclude first column
