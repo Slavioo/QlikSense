@@ -65,40 +65,38 @@ define(["qlik", "jquery"], function (qlik, $) {
                     <style>
                         .trellis-container {
                             display: grid;
-                            grid-template-columns: repeat(2, 1fr);
-                            grid-gap: 16px;
+                            grid-template-columns: repeat(3, 1fr); /* 3 tables per row */
+                            grid-gap: 8px;
                             width: 100%;
                             height: 100%;
-                            padding: 16px;
+                            padding: 8px;
                             overflow-y: auto; /* Vertical scrollbar for the container */
                             font-family: Arial, sans-serif;
                             box-sizing: border-box;
                         }
 
                         .table-card {
-                            border: 1px solid #ddd;
-                            border-radius: 4px;
-                            background-color: #fff;
-                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                            padding: 10px;
+                            border: 1px solid #aaa;
+                            background-color: #f9f9f9;
+                            padding: 5px;
                         }
 
                         table {
                             width: 100%;
                             border-collapse: collapse;
-                            font-size: 14px;
+                            font-size: 12px;
                         }
 
                         table thead th {
                             text-align: left;
-                            background-color: #f4f4f4;
+                            background-color: #e0e0e0;
                             font-weight: bold;
-                            border-bottom: 2px solid #ddd;
-                            padding: 8px;
+                            border-bottom: 1px solid #aaa;
+                            padding: 4px;
                         }
 
                         table tbody td {
-                            padding: 8px;
+                            padding: 4px;
                             border-bottom: 1px solid #ddd;
                         }
 
@@ -107,14 +105,15 @@ define(["qlik", "jquery"], function (qlik, $) {
                         }
 
                         table tbody tr:hover {
-                            background-color: #f9f9f9;
+                            background-color: #f1f1f1;
                         }
 
                         .group-title {
                             font-weight: bold;
-                            font-size: 16px;
-                            margin-bottom: 8px;
-                            color: #0078d4;
+                            font-size: 14px;
+                            margin-bottom: 4px;
+                            color: #333;
+                            text-align: left;
                         }
                     </style>
                     <div class="trellis-container">
@@ -146,7 +145,7 @@ define(["qlik", "jquery"], function (qlik, $) {
             renderTableTrellis();
 
             const vis = await app.visualization.get(visualizationId);
-            vis.model.on('changed', renderTableTrellis);
+            vis.model.on("changed", renderTableTrellis);
         }
     };
 });
