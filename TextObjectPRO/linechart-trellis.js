@@ -1,0 +1,181 @@
+define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (qlik, $, Chart) {
+    return {
+        definition: {
+            type: "items",
+            component: "accordion",
+            items: {
+                settings: {
+                    uses: "settings",
+                    items: {
+                        visualizationId: {
+                            type: "string",
+                            ref: "visualizationId",
+                            label: "Visualization ID",
+                            expression: "optional"
+                        },
+                        css: {
+                            type: "string",
+                            ref: "css",
+                            label: "Custom CSS",
+                            defaultValue: "",
+                            expression: "optional",
+                        },
+                        pageSize: {
+                            type: "integer",
+                            ref: "pageSize",
+                            label: "Page Size (records per page)",
+                            defaultValue: 50,
+                            expression: "optional",
+                        },
+                    },
+                },
+            },
+        },
+        support: {
+            exportData: false,
+        },
+        paint: async function ($element, layout) {
+            const app = qlik.currApp(this);
+            const css = layout.css ? "<style>" + layout.css + "</style>" : ""; // Apply custom CSS from settings
+            const visualizationId = layout.visualizationId;
+
+            $element.empty().append(css); // Inject custom CSS into the DOM
+
+            const fetchAllPages = async (model, pageSize) => {
+                const totalRows = model.layout.qHyperCube.qSize.qcy;
+                const totalCols = model.layout.qHyperCube.qSize.qcx;
+                const allData = [];
+
+                for (let row = 0; row < totalRows; row += pageSize) {
+                    const requestPage = [
+                        {
+                            qTop: row,
+                            qLeft: 0,
+                            qWidth: totalCols,
+                            qHeight: Math.min(pageSize, totalRows - row),
+                        },
+                    ];
+                    const pageData = await model.getHyperCubeData("/qHyperCubeDef", requestPage);
+                    allData.push(...pageData[0].qMatrix);
+                }
+
+                return allData;
+            };
+
+            const renderChartTrellis = async () => {
+                const vis = await app.visualization.get(visualizationId);
+                const visLayout = await vis.model.getLayout();
+
+                const pageSize = layout.pageSize || 50; // Define the page size from the settings panel
+                const dataMatrix = await fetchAllPages(vis.model, pageSize);
+
+                const headers = visLayout.qHyperCube.qDimensionInfo.slice(1).map(dim => dim.qFallbackTitle)
+                    .concat(visLayout.qHyperCube.qMeasureInfo.map(meas => meas.qFallbackTitle));
+                const groupedRows = dataMatrix.reduce((groups, row) => {
+                    const groupKey = row[0].qText; // Use the first column as the group key
+                    if (!groups[groupKey]) groups[groupKey] = [];
+                    groups[groupKey].push(row.slice(1).map(cell => cell.qNum)); // Exclude first column, use numeric values
+                    return groups;
+                }, {});
+
+                $element.append('<div class="trellis-container"></div>');
+                const container = $element.find('.trellis-container');
+
+                Object.keys(groupedRows).forEach(groupKey => {
+                    const groupData = groupedRows[groupKey];
+                    const xAxis = groupData.map(row => row[0]); // First column in the group as X-axis
+                    const datasets = headers.slice(1).map((header, index) => ({
+                        label: header,
+                        data: groupData.map(row => row[index + 1]), // Map subsequent columns as Y-axis datasets
+                        borderColor: `hsl(${(index * 50) % 360}, 70%, 50%)`,
+                        backgroundColor: `hsl(${(index * 50) % 360}, 70%, 70%)`,
+                        tension: 0.4,
+                    }));
+
+                    const chartContainer = $(`<div class="chart-card">
+                        <div class="group-title">${groupKey}</div>
+                        <canvas></canvas>
+                    </div>`);
+
+                    container.append(chartContainer);
+                    const ctx = chartContainer.find('canvas')[0].getContext('2d');
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: xAxis,
+                            datasets: datasets,
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                }
+                            },
+                            interaction: {
+                                mode: 'nearest',
+                                axis: 'x',
+                                intersect: false,
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: headers[0],
+                                    },
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Values',
+                                    },
+                                    beginAtZero: true,
+                                }
+                            }
+                        }
+                    });
+                });
+            };
+
+            renderChartTrellis();
+
+            const vis = await app.visualization.get(visualizationId);
+            vis.model.on('changed', renderChartTrellis); // Update the chart when the visualization changes
+        },
+    };
+});
+
+//css
+.trellis-container {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+grid-gap: 16px;
+width: 100%;
+height: 100%;
+padding: 16px;
+overflow-y: auto;
+font-family: Arial, sans-serif;
+box-sizing: border-box;
+}
+.chart-card {
+border: 1px solid #ddd;
+background-color: #fff;
+border-radius: 6px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+padding: 8px;
+display: flex;
+flex-direction: column;
+}
+.group-title {
+font-weight: bold;
+font-size: 14px;
+margin-bottom: 8px;
+color: #0078d4;
+text-align: left;
+letter-spacing: 0.5px;
+}
