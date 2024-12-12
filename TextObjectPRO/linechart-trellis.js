@@ -74,7 +74,7 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                 const groupedRows = dataMatrix.reduce((groups, row) => {
                     const groupKey = row[0].qText; // Use the first column as the group key
                     if (!groups[groupKey]) groups[groupKey] = [];
-                    groups[groupKey].push(row.slice(1).map(cell => cell.qNum)); // Exclude first column, use numeric values
+                    groups[groupKey].push(row.slice(1).map(cell => cell.qText)); // Exclude first column
                     return groups;
                 }, {});
 
