@@ -152,30 +152,35 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
 
 //css
 .trellis-container {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-grid-gap: 16px;
-width: 100%;
-height: 100%;
-padding: 16px;
-overflow-y: auto;
-font-family: Arial, sans-serif;
-box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Adjust columns as needed */
+    grid-gap: 16px;
+    width: 100%;
+    max-width: 100%; /* Ensure no horizontal overflow */
+    height: 100%;
+    padding: 16px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
 }
+
 .chart-card {
-border: 1px solid #ddd;
-background-color: #fff;
-border-radius: 6px;
-box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-padding: 8px;
-display: flex;
-flex-direction: column;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* Include padding and borders in dimensions */
 }
+
 .group-title {
-font-weight: bold;
-font-size: 14px;
-margin-bottom: 8px;
-color: #0078d4;
-text-align: left;
-letter-spacing: 0.5px;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #34495e;
+    text-align: left;
+    letter-spacing: 0.5px;
 }
