@@ -62,85 +62,101 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                 return allData;
             };
 
-            const renderChartTrellis = async () => {
-                const vis = await app.visualization.get(visualizationId);
-                const visLayout = await vis.model.getLayout();
+			const renderChartTrellis = async () => {
+				const vis = await app.visualization.get(visualizationId);
+				const visLayout = await vis.model.getLayout();
 
-                const pageSize = layout.pageSize || 50; // Define the page size from the settings panel
-                const dataMatrix = await fetchAllPages(vis.model, pageSize);
+				const pageSize = layout.pageSize || 50; // Define the page size from the settings panel
+				const dataMatrix = await fetchAllPages(vis.model, pageSize);
 
-                const headers = visLayout.qHyperCube.qDimensionInfo.slice(1).map(dim => dim.qFallbackTitle)
-                    .concat(visLayout.qHyperCube.qMeasureInfo.map(meas => meas.qFallbackTitle));
-                const groupedRows = dataMatrix.reduce((groups, row) => {
-                    const groupKey = row[0].qText; // Use the first column as the group key
-                    if (!groups[groupKey]) groups[groupKey] = [];
-                    groups[groupKey].push(row.slice(1).map(cell => cell.qText)); // Exclude first column
-                    return groups;
-                }, {});
+				const headers = visLayout.qHyperCube.qDimensionInfo.slice(1).map(dim => dim.qFallbackTitle)
+					.concat(visLayout.qHyperCube.qMeasureInfo.map(meas => meas.qFallbackTitle));
+				const groupedRows = dataMatrix.reduce((groups, row) => {
+					const groupKey = row[0].qText; // Use the first column as the group key
+					if (!groups[groupKey]) groups[groupKey] = [];
+					groups[groupKey].push(row.slice(1).map(cell => cell.qText || null)); // Handle null or undefined values
+					return groups;
+				}, {});
 
-                $element.append('<div class="trellis-container"></div>');
-                const container = $element.find('.trellis-container');
+				// Clear the container before appending new elements
+				$element.find('.trellis-container').remove();
 
-                Object.keys(groupedRows).forEach(groupKey => {
-                    const groupData = groupedRows[groupKey];
-                    const xAxis = groupData.map(row => row[0]); // First column in the group as X-axis
-                    const datasets = headers.slice(1).map((header, index) => ({
-                        label: header,
-                        data: groupData.map(row => row[index + 1]), // Map subsequent columns as Y-axis datasets
-                        borderColor: `hsl(${(index * 50) % 360}, 70%, 50%)`,
-                        backgroundColor: `hsl(${(index * 50) % 360}, 70%, 70%)`,
-                        tension: 0.4,
-                    }));
+				// Prepare all chart elements in memory
+				const chartElements = Object.keys(groupedRows).map(groupKey => {
+					const groupData = groupedRows[groupKey];
+					if (groupData.length === 0) return null; // Skip rendering empty groups
 
-                    const chartContainer = $(`<div class="chart-card">
-                        <div class="group-title">${groupKey}</div>
-                        <canvas></canvas>
-                    </div>`);
+					const xAxis = groupData.map(row => row[0]); // First column in the group as X-axis
+					const datasets = headers.slice(1).map((header, index) => ({
+						label: header,
+						data: groupData.map(row => row[index + 1] || null), // Handle missing data gracefully
+						borderColor: `hsl(${(index * 50) % 360}, 70%, 50%)`,
+						backgroundColor: `hsl(${(index * 50) % 360}, 70%, 70%)`,
+						tension: 0.4,
+					}));
 
-                    container.append(chartContainer);
-                    const ctx = chartContainer.find('canvas')[0].getContext('2d');
+					return {
+						groupKey,
+						xAxis,
+						datasets
+					};
+				}).filter(chart => chart !== null); // Remove null entries for empty groups
 
-                    new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: xAxis,
-                            datasets: datasets,
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                }
-                            },
-                            interaction: {
-                                mode: 'nearest',
-                                axis: 'x',
-                                intersect: false,
-                            },
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: headers[0],
-                                    },
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Values',
-                                    },
-                                    beginAtZero: true,
-                                }
-                            }
-                        }
-                    });
-                });
-            };
+				// Append the container only once all chart elements are ready
+				$element.append('<div class="trellis-container"></div>');
+				const container = $element.find('.trellis-container');
+
+				chartElements.forEach(({ groupKey, xAxis, datasets }) => {
+					const chartContainer = $(`<div class="chart-card">
+						<div class="group-title">${groupKey}</div>
+						<canvas></canvas>
+					</div>`);
+
+					container.append(chartContainer);
+					const ctx = chartContainer.find('canvas')[0].getContext('2d');
+
+					// Render the chart
+					new Chart(ctx, {
+						type: 'line',
+						data: {
+							labels: xAxis,
+							datasets: datasets,
+						},
+						options: {
+							responsive: true,
+							plugins: {
+								legend: {
+									position: 'top',
+								},
+								tooltip: {
+									mode: 'index',
+									intersect: false,
+								}
+							},
+							interaction: {
+								mode: 'nearest',
+								axis: 'x',
+								intersect: false,
+							},
+							scales: {
+								x: {
+									title: {
+										display: true,
+										text: headers[0],
+									},
+								},
+								y: {
+									title: {
+										display: true,
+										text: 'Values',
+									},
+									beginAtZero: true,
+								}
+							}
+						}
+					});
+				});
+			};
 
             renderChartTrellis();
 
