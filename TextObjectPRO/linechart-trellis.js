@@ -175,7 +175,7 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                         };
                     });
 
-                    const chartContainer = $(`<div class="chart-card" style="height: 200px;">  <!-- Adjust the height as needed --> <div class="group-title">${groupKey}</div><canvas></canvas></div>`);
+                    const chartContainer = $(`<div class="chart-card" style="height: 200px; overflow: hidden;"> <!-- Adjust the height as needed --> <div class="group-title">${groupKey}</div><canvas></canvas></div>`);
 
                     container.append(chartContainer);
                     const ctx = chartContainer.find('canvas')[0].getContext('2d');
