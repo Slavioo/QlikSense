@@ -13,6 +13,13 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                             label: "Visualization ID",
                             expression: "optional"
                         },
+						cardHeight: {
+                            type: "integer",
+                            ref: "cardHeight",
+                            label: "Card Height (px)",
+                            defaultValue: 400,
+                            expression: "optional"
+                        },
                         css: {
                             type: "string",
                             ref: "css",
@@ -138,6 +145,7 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                 const visLayout = await vis.model.getLayout();
 
                 const pageSize = layout.pageSize || 50;
+                const cardHeight = layout.cardHeight || 200;
                 const dataMatrix = await fetchAllPages(vis.model, pageSize);
 
                 const headers = visLayout.qHyperCube.qDimensionInfo.slice(1).map(dim => dim.qFallbackTitle)
@@ -151,7 +159,7 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
 
                 $element.find('.trellis-container').remove();
 
-                $element.append('<div class="trellis-container"></div>');
+                $element.append('<div class="trellis-container" style="overflow-y: auto; max-height: 100%;"></div>');
                 const container = $element.find('.trellis-container');
 
                 Object.keys(groupedRows).forEach(groupKey => {
@@ -175,7 +183,10 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                         };
                     });
 
-                    const chartContainer = $(`<div class="chart-card" style="height: 200px; overflow: hidden;"> <!-- Adjust the height as needed --> <div class="group-title">${groupKey}</div><canvas></canvas></div>`);
+                    const chartContainer = $(`<div class="chart-card" style="height: ${cardHeight}px; overflow: hidden;"> 
+                        <div class="group-title">${groupKey}</div>
+                        <canvas></canvas>
+                    </div>`);
 
                     container.append(chartContainer);
                     const ctx = chartContainer.find('canvas')[0].getContext('2d');
