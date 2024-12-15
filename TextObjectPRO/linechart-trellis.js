@@ -1,4 +1,4 @@
-define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (qlik, $, Chart) {
+define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function(qlik, $, Chart) {
     return {
         definition: {
             type: "items",
@@ -13,7 +13,7 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                             label: "Visualization ID",
                             expression: "optional"
                         },
-						cardHeight: {
+                        cardHeight: {
                             type: "integer",
                             ref: "cardHeight",
                             label: "Card Height (px)",
@@ -111,7 +111,7 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                 }
             }
         },
-        paint: async function ($element, layout) {
+        paint: async function($element, layout) {
             const app = qlik.currApp(this);
             const css = layout.css ? `<style>${layout.css}</style>` : "";
             const visualizationId = layout.visualizationId;
@@ -125,14 +125,12 @@ define(["qlik", "jquery", "https://cdn.jsdelivr.net/npm/chart.js"], function (ql
                 const allData = [];
 
                 for (let row = 0; row < totalRows; row += pageSize) {
-                    const requestPage = [
-                        {
-                            qTop: row,
-                            qLeft: 0,
-                            qWidth: totalCols,
-                            qHeight: Math.min(pageSize, totalRows - row)
-                        }
-                    ];
+                    const requestPage = [{
+                        qTop: row,
+                        qLeft: 0,
+                        qWidth: totalCols,
+                        qHeight: Math.min(pageSize, totalRows - row)
+                    }];
                     const pageData = await model.getHyperCubeData("/qHyperCubeDef", requestPage);
                     allData.push(...pageData[0].qMatrix);
                 }
