@@ -235,7 +235,10 @@ define(["qlik", "https://cdn.jsdelivr.net/npm/chart.js@4.4.6"], function (qlik, 
                 // Create charts for each KPI
                 kpiData.forEach((kpi) => {
                     const chartIndices = chartHeaders
-                        .map((header, idx) => (header.replace(/\{.*?\}/g, "").trim() === kpi.Title ? idx : -1))
+                        .map((header, idx) => {
+                            const headerTitle = header.split("{")[0].trim();
+                            return headerTitle === kpi.Title ? idx : -1;
+                        })
                         .filter((idx) => idx !== -1);
 
                     if (chartIndices.length === 0) return;
@@ -252,7 +255,7 @@ define(["qlik", "https://cdn.jsdelivr.net/npm/chart.js@4.4.6"], function (qlik, 
 
                     const ctx = document.getElementById(`chart-${kpi.Title.replace(/\s/g, "")}`).getContext("2d");
                     const datasets = chartValues.map((values, index) => ({
-                        label: chartHeaders[chartIndices[index]].match(/\{([^}]+)\}/)[1],
+                        label: chartHeaders[chartIndices[index]].match(/\{([^}]+)\}/)?.[1] || kpi.Title,
                         data: values,
                         borderColor: colors[index],
                         backgroundColor: `${colors[index]}1A`,
