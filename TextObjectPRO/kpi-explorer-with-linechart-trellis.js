@@ -236,6 +236,7 @@ define(["qlik", "https://cdn.jsdelivr.net/npm/chart.js@4.4.6"], function (qlik, 
                 kpiData.forEach((kpi) => {
                     const chartIndices = chartHeaders
                         .map((header, idx) => {
+                            if (idx === 0) return -1; // Skip the first column
                             const headerTitle = header.split("{")[0].trim();
                             return headerTitle === kpi.Title ? idx : -1;
                         })
@@ -244,7 +245,7 @@ define(["qlik", "https://cdn.jsdelivr.net/npm/chart.js@4.4.6"], function (qlik, 
                     if (chartIndices.length === 0) return;
 
                     const chartValues = chartIndices.map((chartIndex) =>
-                        chartMatrix.map((row) => row[chartIndex + 1]?.qNum || null)
+                        chartMatrix.map((row) => row[chartIndex]?.qNum || null)
                     );
                     const colors = chartIndices.map((_, index) => {
                         const transparency = 1 - index * 0.4;
