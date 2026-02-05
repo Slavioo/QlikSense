@@ -5,12 +5,13 @@ define(["qlik", "jquery"], function(qlik, $) {
             component: "accordion",
             items: {
                 settings: {
+                    uses: "settings",
                     label: "Items",
                     type: "items",
                     items: {
                         cards: {
                             ref: "cards",
-                            label: "Rows",
+                            label: "KPIs",
                             type: "array",
                             allowAdd: true,
                             allowRemove: true,
