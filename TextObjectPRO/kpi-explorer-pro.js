@@ -82,25 +82,33 @@ define(["qlik", "jquery"], function(qlik, $) {
                 const customCss = sourceLayout.customCss || "";
 
                 const html = `
-          <style>
-            ${customCss}
-          </style>
+                    <style>
+                        ${customCss}
+                    </style>
 
-          <div class="kpi-container">
-            ${rows.map(r => `
-              <div class="kpi-card ${lockedTitle === r.title ? "selected" : ""}"
-                   data-title="${r.title || ""}"
-                   data-sheet="${r.navigateSheetId || ""}"
-                   data-filters='${JSON.stringify(r.filters || [])}'
-                   data-variables='${JSON.stringify(r.variables || [])}'
-                   style="color:${r.color || "#0078d4"}">
-                <div class="kpi-title">${r.title || ""}</div>
-                <div class="kpi-value">${r.value || ""}</div>
-                <div class="kpi-description">${r.description || ""}</div>
-              </div>
-            `).join("")}
-          </div>
-        `;
+                    <div class="kpi-container">
+                        ${rows.map(r => `
+                            <div class="kpi-card ${lockedTitle === r.title ? "selected" : ""}"
+                                data-title="${r.title || ""}"
+                                data-sheet="${r.navigateSheetId || ""}"
+                                data-filters='${JSON.stringify(r.filters || [])}'
+                                data-variables='${JSON.stringify(r.variables || [])}'
+                                style="
+                                    background-color: ${r.backgroundColor || "inherit"};
+                                ">
+                                <div class="kpi-title" style="color:${r.titleColor || "inherit"}">
+                                    ${r.title || ""}
+                                </div>
+                                <div class="kpi-value" style="color:${r.valueColor || "inherit"}">
+                                    ${r.value || ""}
+                                </div>
+                                <div class="kpi-description" style="color:${r.descriptionColor || "inherit"}">
+                                    ${r.description || ""}
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>
+                `;
 
                 $element.html(html);
 
