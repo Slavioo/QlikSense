@@ -36,7 +36,6 @@ define(["qlik", "jquery"], function(qlik, $) {
                                     label: "Description",
                                     expression: "optional"
                                 },
-
                                 backgroundColor: {
                                     type: "string",
                                     ref: "backgroundColor",
@@ -61,7 +60,6 @@ define(["qlik", "jquery"], function(qlik, $) {
                                     label: "Description Color",
                                     expression: "optional"
                                 },
-
                                 navigateSheetId: {
                                     type: "string",
                                     ref: "navigateSheetId",
@@ -116,7 +114,6 @@ define(["qlik", "jquery"], function(qlik, $) {
                                 }
                             }
                         },
-
                         customCss: {
                             type: "string",
                             ref: "customCss",
