@@ -128,7 +128,7 @@ define(["qlik", "jquery"], function(qlik, $) {
 
 .kpi-container {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     grid-gap: 16px;
     width: 100%;
     height: 100%;
@@ -138,7 +138,6 @@ define(["qlik", "jquery"], function(qlik, $) {
 }
 
 .kpi-card {
-    background-color: inherit;
     border-radius: 4px;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
     padding: 16px;
@@ -147,14 +146,22 @@ define(["qlik", "jquery"], function(qlik, $) {
     justify-content: space-between;
     cursor: pointer;
     transition: box-shadow 0.3s ease;
+    position: relative;
 }
 
 .kpi-card:hover {
     box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
 }
 
-.kpi-card.selected {
-    background-color: rgba(0, 120, 212, 0.1);
+.kpi-card.selected::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #2ecc71; /* green */
+    border-radius: 0 0 4px 4px;
 }
 
 .kpi-title {
