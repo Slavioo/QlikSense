@@ -128,7 +128,7 @@ define(["qlik", "jquery"], function(qlik, $) {
 
 .kpi-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     grid-gap: 16px;
     width: 100%;
     height: 100%;
@@ -138,6 +138,7 @@ define(["qlik", "jquery"], function(qlik, $) {
 }
 
 .kpi-card {
+	background-color: inherit;
     border-radius: 4px;
     box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
     padding: 16px;
