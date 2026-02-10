@@ -242,7 +242,6 @@ define(["qlik", "jquery"], function(qlik, $) {
                 if (typeof val === "string") return val;
                 if (val.qStringExpression && val.qStringExpression.qExpr) {
                     const expr = val.qStringExpression.qExpr;
-                    // Only add = sign if not already present
                     return expr.startsWith("=") ? expr : "=" + expr;
                 }
                 return "";
