@@ -202,8 +202,18 @@ define(["qlik", "jquery"], function(qlik, $) {
             exportData: false
         },
 
-        paint: function($element, layout) {
-            const rows = layout.cards || [];
+        paint: async function($element, layout) {
+            const objectId = layout.qInfo.qId || "";
+            
+            let properties = null;
+            try {
+                properties = await this.backendApi.model.enigmaModel.getProperties();
+            } catch (err) {
+                $element.html(`<div style="padding: 16px; color: red;">Error getting properties: ${err.message}</div>`);
+                return;
+            }
+
+            const rows = properties.cards || [];
             const columns = [
                 "Title",
                 "Value",
@@ -227,27 +237,44 @@ define(["qlik", "jquery"], function(qlik, $) {
                     .replace(/'/g, "&#39;");
             };
 
-            const getRawValue = (val) => val || "";
+            const extractValue = (val) => {
+                if (!val) return "";
+                if (typeof val === "string") return val;
+                if (val.qStringExpression && val.qStringExpression.qExpr) {
+                    const expr = val.qStringExpression.qExpr;
+                    // Only add = sign if not already present
+                    return expr.startsWith("=") ? expr : "=" + expr;
+                }
+                return "";
+            };
 
             const transposedData = columns.map(col => ({
-                colName: getRawValue(col),
+                colName: col,
                 values: rows.map(row => {
                     switch (col) {
-                        case "Title": return getRawValue(row.title);
-                        case "Value": return getRawValue(row.value);
-                        case "Description": return getRawValue(row.description);
-                        case "Background Color": return getRawValue(row.backgroundColor);
-                        case "Title Color": return getRawValue(row.titleColor);
-                        case "Value Color": return getRawValue(row.valueColor);
-                        case "Description Color": return getRawValue(row.descriptionColor);
-                        case "Navigate Sheet ID": return getRawValue(row.navigateSheetId);
+                        case "Title": 
+                            return extractValue(row.title);
+                        case "Value": 
+                            return extractValue(row.value);
+                        case "Description": 
+                            return extractValue(row.description);
+                        case "Background Color": 
+                            return extractValue(row.backgroundColor);
+                        case "Title Color": 
+                            return extractValue(row.titleColor);
+                        case "Value Color": 
+                            return extractValue(row.valueColor);
+                        case "Description Color": 
+                            return extractValue(row.descriptionColor);
+                        case "Navigate Sheet ID": 
+                            return extractValue(row.navigateSheetId);
                         case "Filters":
                             return Array.isArray(row.filters)
-                                ? row.filters.map(f => `${getRawValue(f.field)}: ${getRawValue(f.value)}`).join(" | ")
+                                ? row.filters.map(f => `${extractValue(f.field)}: ${extractValue(f.value)}`).join(" | ")
                                 : "";
                         case "Variables":
                             return Array.isArray(row.variables)
-                                ? row.variables.map(v => `${getRawValue(v.name)}: ${getRawValue(v.value)}`).join(" | ")
+                                ? row.variables.map(v => `${extractValue(v.name)}: ${extractValue(v.value)}`).join(" | ")
                                 : "";
                         default:
                             return "";
@@ -267,8 +294,17 @@ define(["qlik", "jquery"], function(qlik, $) {
                         border: 1px solid #0078d4;
                         background-color: #f0f8ff;
                         color: #0078d4;
+                        transition: all 0.2s;
                     }
-                    .copy-button:hover { background-color: #0078d4; color: white; }
+                    .copy-button:hover { 
+                        background-color: #0078d4; 
+                        color: white; 
+                    }
+                    .copy-button.success {
+                        background-color: #2ecc71;
+                        color: white;
+                        border-color: #2ecc71;
+                    }
 
                     table.kpi-table {
                         width: 100%;
@@ -296,7 +332,7 @@ define(["qlik", "jquery"], function(qlik, $) {
                 </style>
 
                 <button class="copy-button" id="copyObjectIdBtn">
-                    Copy Object ID: ${escapeHtml(layout.qInfo.qId || "")}
+                    Copy Object ID: ${escapeHtml(objectId)}
                 </button>
 
                 <table class="kpi-table">
@@ -314,13 +350,18 @@ define(["qlik", "jquery"], function(qlik, $) {
             $element.html(html);
 
             $element.find("#copyObjectIdBtn").on("click", function() {
-                const objectId = layout.qInfo.qId || "";
+                const btn = $(this);
                 if (!objectId) return;
-                const tempInput = $("<input>");
+                const tempInput = $("<textarea>");
                 $("body").append(tempInput);
                 tempInput.val(objectId).select();
                 document.execCommand("copy");
                 tempInput.remove();
+                
+                btn.addClass("success").text("Copied!");
+                setTimeout(() => {
+                    btn.removeClass("success").text(`Copy Object ID: ${objectId}`);
+                }, 2000);
             });
         }
     };
