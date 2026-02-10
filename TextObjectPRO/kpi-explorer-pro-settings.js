@@ -128,30 +128,31 @@ define(["qlik", "jquery"], function(qlik, $) {
 
 .kpi-container {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    grid-gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 4px;
     width: 100%;
     height: 100%;
-    padding: 16px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    padding: 4px;
+    overflow: hidden;
 }
 
 .kpi-card {
-	background-color: inherit;
-    border-radius: 4px;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
-    padding: 16px;
+    background-color: inherit;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 4px 6px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     cursor: pointer;
     transition: box-shadow 0.3s ease;
     position: relative;
+    min-height: 0;
+    container-type: size;
 }
 
 .kpi-card:hover {
-    box-shadow: 0 6px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .kpi-card.selected::after {
@@ -161,29 +162,34 @@ define(["qlik", "jquery"], function(qlik, $) {
     bottom: 0;
     width: 100%;
     height: 4px;
-    background-color: #2ecc71; /* green */
-    border-radius: 0 0 4px 4px;
+    background-color: #2ecc71;
+    border-radius: 0 0 2px 2px;
 }
 
 .kpi-title {
-    font-size: 1.2em;
+    font-size: 25cqh;
     font-weight: bold;
     color: inherit;
     text-align: center;
+    line-height: 1;
+    margin-bottom: 8px;
 }
 
 .kpi-value {
-    font-size: 2em;
+    font-size: 40cqh;
     font-weight: bold;
-    margin: 8px 0;
+    margin: 0;
     color: inherit;
     text-align: center;
+    line-height: 1;
 }
 
 .kpi-description {
-    font-size: 1em;
+    font-size: 20cqh;
     color: inherit;
     text-align: center;
+    line-height: 1;
+    margin-top: 8px;
 }
 '`
                         }
