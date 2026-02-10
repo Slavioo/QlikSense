@@ -167,7 +167,7 @@ define(["qlik", "jquery"], function(qlik, $) {
 }
 
 .kpi-title {
-    font-size: 25cqh;
+    font-size: 20cqh;
     font-weight: bold;
     color: inherit;
     text-align: center;
