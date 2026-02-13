@@ -225,7 +225,7 @@ define([
     };
 });
 
-//kpi-tablee.js
+//kpi-table.js
 define(["jquery"], function($) {
     return {
         render: async function($element, layout, backendApi) {
@@ -308,6 +308,12 @@ define(["jquery"], function($) {
 
             const html = `
                 <style>
+                    .kpi-table-container {
+                        width: 100%;
+                        height: 100%;
+                        overflow: auto;
+                    }
+                    
                     table.kpi-table {
                         width: 100%;
                         border-collapse: collapse;
@@ -332,7 +338,14 @@ define(["jquery"], function($) {
                         background-color: #e6f0ff;
                     }
                     
-                    table.kpi-table tbody tr.special-row td:not(:first-child) {
+                    table.kpi-table tbody tr.special-row td:nth-child(2) {
+                        border: none;
+                        background-color: transparent;
+                        font-weight: normal;
+                        padding-left: 6px;
+                    }
+                    
+                    table.kpi-table tbody tr.special-row td:not(:first-child):not(:nth-child(2)) {
                         border: none;
                         padding: 0;
                         background-color: transparent;
@@ -341,30 +354,30 @@ define(["jquery"], function($) {
                     table.kpi-table tbody tr.special-row td:first-child {
                         border: 1px solid #ddd;
                     }
-                    
-                    table.kpi-table tbody tr.special-row td:first-child .value {
-                        font-weight: normal;
-                    }
                 </style>
 
-                <table class="kpi-table">
-                    <tbody>
-                        <tr class="special-row">
-                            <td>Enable Hover (Update Variables): <span class="value">${enableHover ? "Yes" : "No"}</span></td>
-                            ${rows.map(() => `<td></td>`).join("")}
-                        </tr>
-                        <tr class="special-row">
-                            <td>CSS Identifier: <span class="value">${escapeHtml(extractValue(cssIdentifier))}</span></td>
-                            ${rows.map(() => `<td></td>`).join("")}
-                        </tr>
-                        ${transposedData.map(row => `
-                            <tr>
-                                <td>${escapeHtml(row.colName)}</td>
-                                ${row.values.map(val => `<td>${escapeHtml(val)}</td>`).join("")}
+                <div class="kpi-table-container">
+                    <table class="kpi-table">
+                        <tbody>
+                            <tr class="special-row">
+                                <td>Enable Hover (Update Variables):</td>
+                                <td>${enableHover ? "Yes" : "No"}</td>
+                                ${rows.slice(1).map(() => `<td></td>`).join("")}
                             </tr>
-                        `).join("")}
-                    </tbody>
-                </table>
+                            <tr class="special-row">
+                                <td>CSS Identifier:</td>
+                                <td>${escapeHtml(extractValue(cssIdentifier))}</td>
+                                ${rows.slice(1).map(() => `<td></td>`).join("")}
+                            </tr>
+                            ${transposedData.map(row => `
+                                <tr>
+                                    <td>${escapeHtml(row.colName)}</td>
+                                    ${row.values.map(val => `<td>${escapeHtml(val)}</td>`).join("")}
+                                </tr>
+                            `).join("")}
+                        </tbody>
+                    </table>
+                </div>
             `;
 
             $element.html(html);
@@ -374,14 +387,14 @@ define(["jquery"], function($) {
 
 //kpi-cards.js
 define(["qlik", "jquery"], function(qlik, $) {
+    let lockedTitle = null;
+    let hoveredTitle = null;
+    let renderBlocked = false;
+    let rerenderScheduled = false;
+
     return {
         render: async function($element, layout, extensionContext) {
             const app = qlik.currApp(extensionContext);
-
-            let lockedTitle = null;
-            let hoveredTitle = null;
-            let renderBlocked = false;
-            let rerenderScheduled = false;
 
             const scheduleRender = () => {
                 if (rerenderScheduled) return;
