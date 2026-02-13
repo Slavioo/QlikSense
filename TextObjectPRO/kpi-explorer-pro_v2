@@ -1,0 +1,523 @@
+//kpi-explorer-pro.js
+define([
+    "qlik",
+    "jquery",
+    "./kpi-table",
+    "./kpi-cards"
+], function(qlik, $, kpiTable, kpiCards) {
+    return {
+        definition: {
+            type: "items",
+            component: "accordion",
+            items: {
+                settings: {
+                    uses: "settings",
+                    label: "Settings",
+                    type: "items",
+                    items: {
+                        displayMode: {
+                            type: "string",
+                            component: "dropdown",
+                            ref: "displayMode",
+                            label: "Display Mode",
+                            options: [
+                                { value: "cards", label: "KPI Cards" },
+                                { value: "table", label: "Settings Table" }
+                            ],
+                            defaultValue: "cards"
+                        },
+                        cssIdentifier: {
+                            type: "string",
+                            ref: "cssIdentifier",
+                            label: "CSS Identifier",
+                            expression: "optional"
+                        },
+                        enableHover: {
+                            type: "boolean",
+                            ref: "enableHover",
+                            label: "Enable Hover (Update Variables)",
+                            defaultValue: true
+                        },
+                        cards: {
+                            ref: "cards",
+                            label: "KPIs",
+                            type: "array",
+                            allowAdd: true,
+                            allowRemove: true,
+                            addTranslation: "Add KPI",
+                            itemTitleRef: "title",
+                            items: {
+                                cssElementIdentifier: {
+                                    type: "string",
+                                    ref: "cssElementIdentifier",
+                                    label: "CSS Identifier (KPI Elements)",
+                                    expression: "optional"
+                                },
+                                title: {
+                                    type: "string",
+                                    ref: "title",
+                                    label: "Title",
+                                    expression: "optional"
+                                },
+                                value: {
+                                    type: "string",
+                                    ref: "value",
+                                    label: "Value",
+                                    expression: "optional"
+                                },
+                                description: {
+                                    type: "string",
+                                    ref: "description",
+                                    label: "Description",
+                                    expression: "optional"
+                                },
+                                backgroundColor: {
+                                    type: "string",
+                                    ref: "backgroundColor",
+                                    label: "Background Color",
+                                    expression: "optional"
+                                },
+                                titleColor: {
+                                    type: "string",
+                                    ref: "titleColor",
+                                    label: "Title Color",
+                                    expression: "optional"
+                                },
+                                valueColor: {
+                                    type: "string",
+                                    ref: "valueColor",
+                                    label: "Value Color",
+                                    expression: "optional"
+                                },
+                                descriptionColor: {
+                                    type: "string",
+                                    ref: "descriptionColor",
+                                    label: "Description Color",
+                                    expression: "optional"
+                                },
+                                navigateSheetId: {
+                                    type: "string",
+                                    ref: "navigateSheetId",
+                                    label: "Navigate to Sheet ID",
+                                    expression: "optional"
+                                },
+                                variables: {
+                                    type: "array",
+                                    ref: "variables",
+                                    label: "Variables",
+                                    allowAdd: true,
+                                    allowRemove: true,
+                                    addTranslation: "Update Variable",
+                                    itemTitleRef: "name",
+                                    items: {
+                                        name: {
+                                            type: "string",
+                                            ref: "name",
+                                            label: "Variable Name",
+                                            expression: "optional"
+                                        },
+                                        value: {
+                                            type: "string",
+                                            ref: "value",
+                                            label: "Variable Value",
+                                            expression: "optional"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        customCss: {
+                            type: "string",
+                            ref: "customCss",
+                            label: "Custom CSS",
+                            expression: "optional",
+                            defaultValue: `='
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.kpi-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 4px;
+    width: 100%;
+    height: 100%;
+    padding: 4px;
+    overflow: hidden;
+}
+
+.kpi-card {
+    background-color: inherit;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+    min-height: 0;
+    container-type: size;
+    box-sizing: border-box;
+}
+
+.kpi-card:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.kpi-card.selected::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 2px solid black;
+    border-radius: 2px;
+    pointer-events: none;
+}
+
+.kpi-title {
+    font-size: clamp(10px, 20cqh, 26px);
+    font-weight: bold;
+    color: inherit;
+    text-align: center;
+    line-height: 1.05;
+    margin-bottom: 0.8cqh;
+}
+
+.kpi-value {
+    font-size: clamp(18px, 33cqh, 56px);
+    font-weight: bold;
+    margin: 0;
+    color: inherit;
+    text-align: center;
+    line-height: 1.05;
+}
+
+.kpi-description {
+    font-size: clamp(10px, 18cqh, 22px);
+    color: inherit;
+    text-align: center;
+    line-height: 1.05;
+    margin-top: 0.8cqh;
+}
+'`
+                        }
+                    }
+                }
+            }
+        },
+
+        support: {
+            exportData: false
+        },
+
+        paint: async function($element, layout) {
+            const displayMode = layout.displayMode || "cards";
+
+            if (displayMode === "table") {
+                await kpiTable.render($element, layout, this.backendApi);
+            } else {
+                await kpiCards.render($element, layout, this);
+            }
+        }
+    };
+});
+
+//kpi-tablee.js
+define(["jquery"], function($) {
+    return {
+        render: async function($element, layout, backendApi) {
+            let properties = null;
+            try {
+                properties = await backendApi.model.enigmaModel.getProperties();
+            } catch (err) {
+                $element.html(`<div style="padding: 16px; color: red;">Error getting properties: ${err.message}</div>`);
+                return;
+            }
+
+            const rows = properties.cards || [];
+            const enableHover = properties.enableHover !== false;
+            const cssIdentifier = properties.cssIdentifier || "";
+            
+            const columns = [
+                "CSS Identifier (KPI Elements)",
+                "Title",
+                "Value",
+                "Description",
+                "Background Color",
+                "Title Color",
+                "Value Color",
+                "Description Color",
+                "Navigate to Sheet ID",
+                "Update Variables"
+            ];
+
+            const escapeHtml = (str) => {
+                if (str === null || str === undefined) return "";
+                return String(str)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            };
+
+            const extractValue = (val) => {
+                if (!val) return "";
+                if (typeof val === "string") return val;
+                if (val.qStringExpression && val.qStringExpression.qExpr) {
+                    const expr = val.qStringExpression.qExpr;
+                    return expr.startsWith("=") ? expr : "=" + expr;
+                }
+                return "";
+            };
+
+            const transposedData = columns.map(col => ({
+                colName: col,
+                values: rows.map(row => {
+                    switch (col) {
+                        case "CSS Identifier (KPI Elements)":
+                            return extractValue(row.cssElementIdentifier);
+                        case "Title": 
+                            return extractValue(row.title);
+                        case "Value": 
+                            return extractValue(row.value);
+                        case "Description": 
+                            return extractValue(row.description);
+                        case "Background Color": 
+                            return extractValue(row.backgroundColor);
+                        case "Title Color": 
+                            return extractValue(row.titleColor);
+                        case "Value Color": 
+                            return extractValue(row.valueColor);
+                        case "Description Color": 
+                            return extractValue(row.descriptionColor);
+                        case "Navigate to Sheet ID": 
+                            return extractValue(row.navigateSheetId);
+                        case "Update Variables":
+                            return Array.isArray(row.variables)
+                                ? row.variables.map(v => `${extractValue(v.name)}: ${extractValue(v.value)}`).join(" | ")
+                                : "";
+                        default:
+                            return "";
+                    }
+                })
+            }));
+
+            const html = `
+                <style>
+                    table.kpi-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-family: Arial, sans-serif;
+                        font-size: 11px;
+                    }
+                    table.kpi-table td {
+                        border: 1px solid #ddd;
+                        padding: 4px 6px;
+                        text-align: left;
+                        vertical-align: top;
+                        line-height: 1.2;
+                        color: #555;
+                    }
+                    table.kpi-table td:first-child {
+                        background-color: #f0f0f0;
+                        font-weight: bold;
+                        color: #333;
+                        white-space: nowrap;
+                    }
+                    table.kpi-table tbody tr:hover td {
+                        background-color: #e6f0ff;
+                    }
+                    
+                    table.kpi-table tbody tr.special-row td:not(:first-child) {
+                        border: none;
+                        padding: 0;
+                        background-color: transparent;
+                    }
+                    
+                    table.kpi-table tbody tr.special-row td:first-child {
+                        border: 1px solid #ddd;
+                    }
+                    
+                    table.kpi-table tbody tr.special-row td:first-child .value {
+                        font-weight: normal;
+                    }
+                </style>
+
+                <table class="kpi-table">
+                    <tbody>
+                        <tr class="special-row">
+                            <td>Enable Hover (Update Variables): <span class="value">${enableHover ? "Yes" : "No"}</span></td>
+                            ${rows.map(() => `<td></td>`).join("")}
+                        </tr>
+                        <tr class="special-row">
+                            <td>CSS Identifier: <span class="value">${escapeHtml(extractValue(cssIdentifier))}</span></td>
+                            ${rows.map(() => `<td></td>`).join("")}
+                        </tr>
+                        ${transposedData.map(row => `
+                            <tr>
+                                <td>${escapeHtml(row.colName)}</td>
+                                ${row.values.map(val => `<td>${escapeHtml(val)}</td>`).join("")}
+                            </tr>
+                        `).join("")}
+                    </tbody>
+                </table>
+            `;
+
+            $element.html(html);
+        }
+    };
+});
+
+//kpi-cards.js
+define(["qlik", "jquery"], function(qlik, $) {
+    return {
+        render: async function($element, layout, extensionContext) {
+            const app = qlik.currApp(extensionContext);
+
+            let lockedTitle = null;
+            let hoveredTitle = null;
+            let renderBlocked = false;
+            let rerenderScheduled = false;
+
+            const scheduleRender = () => {
+                if (rerenderScheduled) return;
+                rerenderScheduled = true;
+
+                setTimeout(async () => {
+                    rerenderScheduled = false;
+                    await renderCards();
+                }, 0);
+            };
+
+            const applyCard = async (variables) => {
+                for (const v of variables || []) {
+                    if (v.name) {
+                        await app.variable.setContent(v.name, v.value || "");
+                    }
+                }
+            };
+
+            const clearCard = async (variables) => {
+                for (const v of variables || []) {
+                    if (v.name) {
+                        await app.variable.setContent(v.name, "");
+                    }
+                }
+            };
+
+            const renderCards = async () => {
+                if (renderBlocked) return;
+
+                const rows = layout.cards || [];
+                const customCss = layout.customCss || "";
+                const enableHover = layout.enableHover !== false;
+                const cssIdentifier = layout.cssIdentifier || "";
+
+                const html = `
+                    <style>
+                        ${customCss}
+                    </style>
+
+                    <div class="kpi-container${cssIdentifier ? ' ' + cssIdentifier : ''}">
+                        ${rows.map((r, index) => {
+                            const cssElementIdentifier = r.cssElementIdentifier || "";
+                            return `
+                            <div class="kpi-card${cssIdentifier ? ' ' + cssIdentifier : ''}${cssElementIdentifier ? ' ' + cssElementIdentifier : ''} ${lockedTitle === r.title ? "selected" : ""}"
+                                data-title="${r.title || ""}"
+                                data-sheet="${r.navigateSheetId || ""}"
+                                data-variables='${JSON.stringify(r.variables || [])}'
+                                data-card-index="${index}"
+                                style="
+                                    background-color: ${r.backgroundColor || "inherit"};
+                                ">
+                                <div class="kpi-title${cssIdentifier ? ' ' + cssIdentifier : ''}${cssElementIdentifier ? ' ' + cssElementIdentifier : ''}" style="color:${r.titleColor || "inherit"}">
+                                    ${r.title || ""}
+                                </div>
+                                <div class="kpi-value${cssIdentifier ? ' ' + cssIdentifier : ''}${cssElementIdentifier ? ' ' + cssElementIdentifier : ''}" style="color:${r.valueColor || "inherit"}">
+                                    ${r.value || ""}
+                                </div>
+                                <div class="kpi-description${cssIdentifier ? ' ' + cssIdentifier : ''}${cssElementIdentifier ? ' ' + cssElementIdentifier : ''}" style="color:${r.descriptionColor || "inherit"}">
+                                    ${r.description || ""}
+                                </div>
+                            </div>
+                            `;
+                        }).join("")}
+                    </div>
+                `;
+
+                $element.html(html);
+
+                $element.find(".kpi-card").each(function() {
+                    const $card = $(this);
+                    const title = $card.data("title");
+                    const sheetId = $card.data("sheet");
+                    const variables = JSON.parse($card.attr("data-variables") || "[]");
+
+                    // ===== HOVER =====
+                    if (enableHover) {
+                        $card.on("mouseenter", async () => {
+                            if (lockedTitle !== null) return;
+                            if (hoveredTitle === title) return;
+
+                            hoveredTitle = title;
+                            renderBlocked = true;
+
+                            await applyCard(variables);
+
+                            renderBlocked = false;
+                            scheduleRender();
+                        });
+
+                        $card.on("mouseleave", async () => {
+                            if (lockedTitle !== null) return;
+                            if (hoveredTitle !== title) return;
+
+                            hoveredTitle = null;
+                            renderBlocked = true;
+
+                            await clearCard(variables);
+
+                            renderBlocked = false;
+                            scheduleRender();
+                        });
+                    }
+
+                    // ===== CLICK =====
+                    $card.on("click", async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        renderBlocked = true;
+
+                        if (lockedTitle === title) {
+                            lockedTitle = null;
+                            await clearCard(variables);
+                        } else {
+                            if (lockedTitle) {
+                                const prev = rows.find(r => r.title === lockedTitle);
+                                if (prev) {
+                                    await clearCard(prev.variables);
+                                }
+                            }
+                            lockedTitle = title;
+                            await applyCard(variables);
+                        }
+
+                        if (sheetId) {
+                            qlik.navigation.gotoSheet(sheetId);
+                        }
+
+                        renderBlocked = false;
+                        scheduleRender();
+                    });
+                });
+            };
+
+            await renderCards();
+        }
+    };
+});
