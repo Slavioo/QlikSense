@@ -3,7 +3,11 @@ define(["qlik", "jquery"], function (qlik, $) {
 
     return {
         initialProperties: {
-            version: 1.0
+            version: 1.0,
+            props: {
+                objectIds: [],
+                dimensions: []
+            }
         },
         definition: {
             type: "items",
@@ -16,12 +20,16 @@ define(["qlik", "jquery"], function (qlik, $) {
                             type: "array",
                             ref: "props.objectIds",
                             label: "Target Object IDs",
-                            labelKey: "objectIds.label",
+                            itemTitleRef: "id",
+                            allowAdd: true,
+                            allowRemove: true,
+                            addTranslation: "Add Object ID",
                             items: {
                                 id: {
                                     type: "string",
                                     ref: "id",
-                                    label: "Object ID"
+                                    label: "Object ID",
+                                    expression: "optional"
                                 }
                             }
                         },
@@ -29,28 +37,37 @@ define(["qlik", "jquery"], function (qlik, $) {
                             type: "array",
                             ref: "props.dimensions",
                             label: "Dimensions",
-                            labelKey: "label",
+                            itemTitleRef: "label",
+                            allowAdd: true,
+                            allowRemove: true,
+                            addTranslation: "Add Dimension",
                             items: {
                                 label: {
                                     type: "string",
                                     ref: "label",
-                                    label: "Dimension label (table title match)"
+                                    label: "Dimension Label",
+                                    expression: "optional"
                                 },
                                 field: {
                                     type: "string",
                                     ref: "field",
-                                    label: "Field name"
+                                    label: "Field Name",
+                                    expression: "optional"
                                 },
                                 allowedValues: {
                                     type: "array",
                                     ref: "allowedValues",
-                                    label: "Allowed values",
-                                    labelKey: "value",
+                                    label: "Allowed Values",
+                                    itemTitleRef: "value",
+                                    allowAdd: true,
+                                    allowRemove: true,
+                                    addTranslation: "Add Value",
                                     items: {
                                         value: {
                                             type: "string",
                                             ref: "value",
-                                            label: "Value"
+                                            label: "Value",
+                                            expression: "optional"
                                         }
                                     }
                                 }
