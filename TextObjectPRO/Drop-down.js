@@ -1,4 +1,4 @@
-define(["qlik", "jquery"], function (qlik, $) {
+define(["qlik", "jquery", "css!./dimension-selector.css"], function (qlik, $) {
     "use strict";
 
     return {
@@ -45,13 +45,13 @@ define(["qlik", "jquery"], function (qlik, $) {
                                 label: {
                                     type: "string",
                                     ref: "label",
-                                    label: "Dimension Label",
+                                    label: "Column Name (to match)",
                                     expression: "optional"
                                 },
                                 field: {
                                     type: "string",
                                     ref: "field",
-                                    label: "Field Name",
+                                    label: "Target Field Name",
                                     expression: "optional"
                                 },
                                 allowedValues: {
@@ -82,85 +82,126 @@ define(["qlik", "jquery"], function (qlik, $) {
             const objectIds = (layout.props.objectIds || []).map(o => o.id).filter(Boolean);
             const dimensions = layout.props.dimensions || [];
 
-            // Unique container ID
-            const containerId = `dim-selector-${layout.qInfo.qId}`;
-            $element.empty().html(`<div id="${containerId}" style="padding: 16px; font-family: system-ui, sans-serif;"></div>`);
-            const $container = $(`#${containerId}`);
+            $element.empty();
 
-            // Generate dropdown HTML
-            let html = "";
-            dimensions.forEach((dim, idx) => {
-                const dimId = `${containerId}-dim-${idx}`;
-                const values = (dim.allowedValues || []).map(v => v.value).filter(Boolean);
-                html += `
-                    <div class="dim-block" style="margin-bottom: 12px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <label style="display: block; font-weight: 600; margin-bottom: 4px;">${dim.label || dim.field}</label>
-                        <select id="${dimId}" data-field="${dim.field}" data-dim-idx="${idx}" style="width: 100%; padding: 6px; border: 1px solid #ccc; border-radius: 3px;">
-                            <option value="">(Clear selection)</option>
-                            ${values.map(val => `<option value="${$('<div/>').text(val).html()}">${val}</option>`).join("")}
-                        </select>
-                    </div>
-                `;
-            });
-            $container.html(html);
-
-            // Event handlers for dropdown changes
-            dimensions.forEach((dim, idx) => {
-                const dimId = `#${containerId}-dim-${idx}`;
-                $(dimId).on("change", async function () {
-                    const value = $(this).val();
-                    const fieldName = $(this).data("field");
-
-                    if (!fieldName) {
-                        console.warn("No field name configured");
-                        return;
-                    }
-
-                    try {
-                        const field = app.field(fieldName);
-                        if (!value) {
-                            await field.clear();
-                        } else {
-                            await field.selectValues([{ qText: value }], false, false);
-                        }
-                        console.log(`Applied selection in ${fieldName}: ${value || 'cleared'}`);
-                    } catch (err) {
-                        console.error("Selection failed:", err);
-                    }
-                });
+            // Inject dropdowns into target tables
+            objectIds.forEach(objectId => {
+                injectDropdownsIntoTable(app, objectId, dimensions);
             });
 
-            // Optional: Log matching tables (for debugging)
-            if (objectIds.length && dimensions.length) {
-                getMatchingTables(app, objectIds, dimensions).then(matches => {
-                    console.log("Matching tables:", matches);
-                });
-            }
+            return qlik.Promise.resolve();
         }
     };
 
-    // Helper: Find which object IDs match dimension labels (table titles)
-    async function getMatchingTables(app, objectIds, dimensions) {
-        const matches = {};
+    async function injectDropdownsIntoTable(app, objectId, dimensions) {
         try {
-            const promises = objectIds.map(async id => {
-                const obj = await app.getObject(id);
-                const layout = await obj.model.getLayout();
-                return { id, title: layout.title };
-            });
-            const results = await Promise.allSettled(promises);
-            results.forEach(result => {
-                if (result.status === "fulfilled") {
-                    const { id, title } = result.value;
-                    const matchingDim = dimensions.find(dim => dim.label === title);
-                    if (matchingDim) {
-                        matches[matchingDim.field] = id;
+            // Wait for the table to render
+            await waitForElement(`[tid="${objectId}"]`, 5000);
+
+            const $tableContainer = $(`[tid="${objectId}"]`);
+            if (!$tableContainer.length) {
+                console.warn(`Table with ID ${objectId} not found`);
+                return;
+            }
+
+            // Get the table object to access its properties
+            const tableObj = await app.visualization.get(objectId);
+            const tableLayout = await tableObj.model.getLayout();
+
+            dimensions.forEach(dim => {
+                const columnLabel = dim.label;
+                const targetField = dim.field;
+                const values = (dim.allowedValues || []).map(v => v.value).filter(Boolean);
+
+                // Find the column header that matches the dimension label
+                const $headers = $tableContainer.find('thead th');
+                $headers.each(function() {
+                    const headerText = $(this).text().trim();
+                    
+                    if (headerText === columnLabel) {
+                        const $header = $(this);
+                        
+                        // Remove existing dropdown if any
+                        $header.find('.dim-dropdown-injected').remove();
+
+                        // Create dropdown
+                        const dropdownId = `dropdown-${objectId}-${columnLabel.replace(/s+/g, '-')}`;
+                        const $dropdown = $(`
+                            <div class="dim-dropdown-injected" style="margin-top: 4px;">
+                                <select id="${dropdownId}" style="width: 100%; padding: 4px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;">
+                                    <option value="">Select...</option>
+                                    ${values.map(val => `<option value="${$('<div/>').text(val).html()}">${val}</option>`).join("")}
+                                </select>
+                            </div>
+                        `);
+
+                        $header.append($dropdown);
+
+                        // Handle dropdown change - modify the table's dimension
+                        $dropdown.find('select').on('change', async function() {
+                            const selectedValue = $(this).val();
+                            
+                            if (!selectedValue) return;
+
+                            try {
+                                // Get current properties
+                                const props = await tableObj.model.getProperties();
+                                
+                                // Find the dimension index that matches the column
+                                const dimIndex = props.qHyperCubeDef.qDimensions.findIndex(d => {
+                                    const label = d.qDef.qFieldLabels?.[0] || d.qDef.qLabel || d.qDef.qFieldDefs?.[0];
+                                    return label === columnLabel;
+                                });
+
+                                if (dimIndex === -1) {
+                                    console.warn(`Dimension with label "${columnLabel}" not found in table`);
+                                    return;
+                                }
+
+                                // Create patch to change the dimension field
+                                const patches = [{
+                                    qOp: "replace",
+                                    qPath: `/qHyperCubeDef/qDimensions/${dimIndex}/qDef/qFieldDefs/0`,
+                                    qValue: JSON.stringify(selectedValue)
+                                }];
+
+                                await tableObj.model.applyPatches(patches, true);
+                                console.log(`Changed dimension ${columnLabel} to value: ${selectedValue}`);
+                                
+                            } catch (err) {
+                                console.error("Failed to update dimension:", err);
+                            }
+                        });
                     }
-                }
+                });
             });
+
+            // Re-inject when table re-renders
+            tableObj.model.on('changed', () => {
+                setTimeout(() => {
+                    injectDropdownsIntoTable(app, objectId, dimensions);
+                }, 100);
+            });
+
         } catch (err) {
-            console.warn("Could not fetch object layouts:", err);
+            console.error(`Error injecting dropdowns into ${objectId}:`, err);
         }
-        return matches;
+    }
+
+    function waitForElement(selector, timeout = 5000) {
+        return new qlik.Promise((resolve, reject) => {
+            const startTime = Date.now();
+            
+            const checkExist = setInterval(() => {
+                const $el = $(selector);
+                if ($el.length) {
+                    clearInterval(checkExist);
+                    resolve($el);
+                } else if (Date.now() - startTime > timeout) {
+                    clearInterval(checkExist);
+                    reject(new Error(`Element ${selector} not found within ${timeout}ms`));
+                }
+            }, 100);
+        });
     }
 });
